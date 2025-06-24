@@ -1,0 +1,1312 @@
+/* Neumorphic Theme System */
+:root {
+  /* Base Colors - Enhanced visibility and contrast */
+  --neumorphic-bg: #1a1c20;
+  --neumorphic-card: rgba(55, 60, 65, 0.25);
+  --neumorphic-card-end: rgba(5, 8, 12, 0.6);
+  --neumorphic-button: rgba(65, 70, 75, 0.95);
+  --neumorphic-text-primary: #E0E0E0;
+  --neumorphic-text-secondary: #A0A0A0;
+  --neumorphic-accent: #FF9A3E;
+  --neumorphic-border: #8B5CF6;
+
+  /* Background Gradients - Darker and more muted for target design */
+  --neumorphic-gradient-start: #152e2a;
+  --neumorphic-gradient-end: #2d1a2d;
+  
+  /* Shadows - Multi-layer soft system for target design */
+  --neumorphic-shadow-light: rgba(0, 0, 0, 0.1);
+  --neumorphic-shadow-medium: rgba(0, 0, 0, 0.15);
+  --neumorphic-shadow-dark: rgba(0, 0, 0, 0.25);
+
+  /* Multi-layer shadow effects for gentle elevation */
+  --neumorphic-shadow-convex: 
+    2px 2px 4px var(--neumorphic-shadow-light),
+    4px 4px 12px var(--neumorphic-shadow-medium);
+  --neumorphic-shadow-convex-sm: 
+    1px 1px 2px var(--neumorphic-shadow-light),
+    2px 2px 6px var(--neumorphic-shadow-medium);
+  --neumorphic-shadow-convex-lg: 
+    4px 4px 8px var(--neumorphic-shadow-light),
+    8px 8px 24px var(--neumorphic-shadow-medium),
+    16px 16px 48px var(--neumorphic-shadow-dark);
+  --neumorphic-shadow-concave: 
+    -2px -2px 4px rgba(255, 255, 255, 0.05),
+    4px 4px 8px var(--neumorphic-shadow-medium),
+    6px 6px 12px var(--neumorphic-shadow-light);
+  
+  /* Input field shadows - Recessed appearance */
+  --neumorphic-shadow-inset: 
+    inset 2px 2px 4px var(--neumorphic-shadow-medium),
+    inset 4px 4px 8px var(--neumorphic-shadow-light),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  --neumorphic-shadow-inset-focus: 
+    inset 2px 2px 4px var(--neumorphic-shadow-medium),
+    inset 4px 4px 8px var(--neumorphic-shadow-light),
+    0 0 0 2px rgba(139, 92, 246, 0.4),
+    inset 0 0 20px rgba(139, 92, 246, 0.1);
+  
+  /* Input backgrounds - Recessed surfaces */
+  --neumorphic-input-bg: rgba(25, 30, 35, 0.8);
+  --neumorphic-input-bg-focus: rgba(30, 35, 40, 0.9);
+  
+  /* Enhanced button state shadows - High contrast for visibility */
+  --neumorphic-shadow-button-default: 
+    -2px -2px 4px rgba(255, 255, 255, 0.05),
+    4px 4px 8px rgba(0, 0, 0, 0.2),
+    6px 6px 12px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  --neumorphic-shadow-button-hover: 
+    3px 3px 6px rgba(0, 0, 0, 0.35),
+    6px 6px 12px rgba(0, 0, 0, 0.25),
+    8px 8px 16px rgba(0, 0, 0, 0.2),
+    0 0 20px rgba(139, 92, 246, 0.4),
+    0 0 0 1px rgba(139, 92, 246, 0.3);
+  --neumorphic-shadow-button-active: 
+    inset 3px 3px 6px rgba(0, 0, 0, 0.5),
+    inset 5px 5px 10px rgba(0, 0, 0, 0.4),
+    inset 1px 1px 2px rgba(0, 0, 0, 0.6);
+  
+  /* Gradients */
+  --neumorphic-gradient: linear-gradient(135deg, var(--neumorphic-card), var(--neumorphic-card-end));
+  --neumorphic-bg-gradient: linear-gradient(145deg, var(--neumorphic-gradient-start), var(--neumorphic-gradient-end));
+  
+  /* Blur - Enhanced for glassmorphism */
+  --neumorphic-blur: 8px;
+  --neumorphic-blur-strong: 16px;
+  
+  /* Spacing - Ultra-compact dense system */
+  --neumorphic-spacing-xxs: 0.125rem; /* 2px - Ultra tight */
+  --neumorphic-spacing-xs: 0.25rem;   /* 4px - Extra tight */
+  --neumorphic-spacing-sm: 0.375rem;  /* 6px - Tight (was 8px) */
+  --neumorphic-spacing-md: 0.5rem;    /* 8px - Compact (was 12px) */
+  --neumorphic-spacing-lg: 0.75rem;   /* 12px - Normal (was 16px) */
+  --neumorphic-spacing-xl: 1rem;      /* 16px - Spacious (was 24px) */
+  --neumorphic-spacing-2xl: 1.5rem;   /* 24px - Extra spacious (was 32px) */
+  
+  /* Border Radius - Subtle minimal values */
+  --neumorphic-radius-sm: 0.25rem;   /* 4px */
+  --neumorphic-radius-md: 0.46875rem; /* 7.5px */
+  --neumorphic-radius-lg: 0.625rem;  /* 10px */
+  --neumorphic-radius-xl: 0.75rem;   /* 12px */
+}
+
+/* Light Theme Variables */
+.light {
+  /* Base Colors - Light theme optimized */
+  --neumorphic-bg: #f0f2f5;
+  --neumorphic-card: rgba(235, 240, 245, 0.85);
+  --neumorphic-card-end: rgba(220, 225, 235, 0.9);
+  --neumorphic-button: rgba(230, 235, 240, 0.95);
+  --neumorphic-text-primary: #1a1d23;
+  --neumorphic-text-secondary: #4a5568;
+  --neumorphic-accent: #FF9A3E;
+  --neumorphic-border: #8B5CF6;
+
+  /* Background Gradients - Light theme */
+  --neumorphic-gradient-start: #e8f0f5;
+  --neumorphic-gradient-end: #d5e5f0;
+  
+  /* Shadows - Light theme with dark shadows for depth */
+  --neumorphic-shadow-light: rgba(0, 0, 0, 0.08);
+  --neumorphic-shadow-medium: rgba(0, 0, 0, 0.12);
+  --neumorphic-shadow-dark: rgba(0, 0, 0, 0.18);
+
+  /* Multi-layer shadow effects for light surfaces */
+  --neumorphic-shadow-convex: 
+    2px 2px 4px var(--neumorphic-shadow-light),
+    4px 4px 12px var(--neumorphic-shadow-medium);
+  --neumorphic-shadow-convex-sm: 
+    1px 1px 2px var(--neumorphic-shadow-light),
+    2px 2px 6px var(--neumorphic-shadow-medium);
+  --neumorphic-shadow-convex-lg: 
+    4px 4px 8px var(--neumorphic-shadow-light),
+    8px 8px 24px var(--neumorphic-shadow-medium),
+    16px 16px 48px var(--neumorphic-shadow-dark);
+  --neumorphic-shadow-concave: 
+    -2px -2px 4px rgba(255, 255, 255, 0.8),
+    4px 4px 8px var(--neumorphic-shadow-medium),
+    6px 6px 12px var(--neumorphic-shadow-light);
+  
+  /* Light theme input field shadows - Recessed appearance */
+  --neumorphic-shadow-inset: 
+    inset 2px 2px 4px rgba(0, 0, 0, 0.12),
+    inset 4px 4px 8px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(0, 0, 0, 0.08);
+  --neumorphic-shadow-inset-focus: 
+    inset 2px 2px 4px rgba(0, 0, 0, 0.12),
+    inset 4px 4px 8px rgba(0, 0, 0, 0.08),
+    0 0 0 2px rgba(139, 92, 246, 0.3),
+    inset 0 0 20px rgba(139, 92, 246, 0.08);
+  
+  /* Light theme input backgrounds - Recessed surfaces */
+  --neumorphic-input-bg: rgba(220, 225, 235, 0.6);
+  --neumorphic-input-bg-focus: rgba(215, 220, 230, 0.8);
+  
+  /* Light theme button state shadows */
+  --neumorphic-shadow-button-default: 
+    -2px -2px 4px rgba(255, 255, 255, 0.8),
+    4px 4px 8px rgba(0, 0, 0, 0.1),
+    6px 6px 12px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+  --neumorphic-shadow-button-hover: 
+    3px 3px 6px rgba(0, 0, 0, 0.2),
+    6px 6px 12px rgba(0, 0, 0, 0.15),
+    8px 8px 16px rgba(0, 0, 0, 0.1),
+    0 0 20px rgba(139, 92, 246, 0.3),
+    0 0 0 1px rgba(139, 92, 246, 0.2);
+  --neumorphic-shadow-button-active: 
+    inset 3px 3px 6px rgba(0, 0, 0, 0.25),
+    inset 5px 5px 10px rgba(0, 0, 0, 0.2),
+    inset 1px 1px 2px rgba(0, 0, 0, 0.3);
+  
+  /* Light theme gradients */
+  --neumorphic-gradient: linear-gradient(135deg, var(--neumorphic-card), var(--neumorphic-card-end));
+  --neumorphic-bg-gradient: linear-gradient(145deg, var(--neumorphic-gradient-start), var(--neumorphic-gradient-end));
+}
+
+/* Neumorphic Card Gradient Class */
+.neumorphic-card-gradient {
+  background: linear-gradient(180deg, var(--neumorphic-card) 0%, var(--neumorphic-card-end) 100%) !important;
+}
+
+/* Soft multi-layer shadow system for target design */
+.shadow-neumorphic-convex,
+[class*="shadow-neumorphic-convex"] {
+  box-shadow: var(--neumorphic-shadow-convex) !important;
+}
+
+.shadow-neumorphic-convex-sm,
+[class*="shadow-neumorphic-convex-sm"] {
+  box-shadow: var(--neumorphic-shadow-convex-sm) !important;
+}
+
+.shadow-neumorphic-convex-lg,
+[class*="shadow-neumorphic-convex-lg"] {
+  box-shadow: var(--neumorphic-shadow-convex-lg) !important;
+}
+
+.shadow-neumorphic-concave,
+[class*="shadow-neumorphic-concave"] {
+  box-shadow: var(--neumorphic-shadow-concave) !important;
+}
+
+/* Enhanced neumorphic button states with dramatic visual feedback */
+.neumorphic-button-enhanced {
+  transition: all 0.2s ease-out;
+}
+
+.neumorphic-button-enhanced:hover {
+  background: linear-gradient(145deg, 
+    rgba(139, 92, 246, 0.15), 
+    rgba(99, 62, 206, 0.1)
+  ) !important;
+  box-shadow: 
+    0 0 0 2px rgba(139, 92, 246, 0.4),
+    6px 6px 12px rgba(0, 0, 0, 0.3),
+    12px 12px 24px rgba(0, 0, 0, 0.2),
+    0 0 20px rgba(139, 92, 246, 0.2) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+}
+
+.neumorphic-button-enhanced:active {
+  background: linear-gradient(145deg, 
+    rgba(20, 25, 30, 0.9), 
+    rgba(15, 20, 25, 0.95)
+  ) !important;
+  box-shadow: 
+    inset 4px 4px 8px rgba(0, 0, 0, 0.5),
+    inset 8px 8px 16px rgba(0, 0, 0, 0.3),
+    inset 2px 2px 4px rgba(0, 0, 0, 0.6) !important;
+  transform: translateY(2px) scale(0.98) !important;
+}
+
+.neumorphic-button-enhanced:disabled:hover,
+.neumorphic-button-enhanced:disabled:active {
+  transform: none !important;
+  background: var(--neumorphic-button) !important;
+  box-shadow: var(--neumorphic-shadow-button-default) !important;
+}
+
+/* Light theme button states */
+.light .neumorphic-button-enhanced:hover {
+  background: linear-gradient(145deg, 
+    rgba(139, 92, 246, 0.08), 
+    rgba(99, 62, 206, 0.05)
+  ) !important;
+  box-shadow: 
+    0 0 0 2px rgba(139, 92, 246, 0.3),
+    6px 6px 12px rgba(0, 0, 0, 0.15),
+    12px 12px 24px rgba(0, 0, 0, 0.1),
+    0 0 20px rgba(139, 92, 246, 0.25) !important;
+  transform: translateY(-2px) scale(1.02) !important;
+}
+
+.light .neumorphic-button-enhanced:active {
+  background: linear-gradient(145deg, 
+    rgba(200, 205, 210, 0.9), 
+    rgba(190, 195, 200, 0.95)
+  ) !important;
+  box-shadow: 
+    inset 4px 4px 8px rgba(0, 0, 0, 0.2),
+    inset 8px 8px 16px rgba(0, 0, 0, 0.12),
+    inset 2px 2px 4px rgba(0, 0, 0, 0.25) !important;
+  transform: translateY(2px) scale(0.98) !important;
+}
+
+/* Neumorphic Input Field Styling */
+.shadow-neumorphic-inset,
+[class*="shadow-neumorphic-inset"] {
+  box-shadow: var(--neumorphic-shadow-inset) !important;
+}
+
+.neumorphic-input-enhanced {
+  background: var(--neumorphic-input-bg) !important;
+  box-shadow: var(--neumorphic-shadow-inset) !important;
+  transition: all 0.2s ease-out;
+  border: 1px solid transparent;
+}
+
+.neumorphic-input-enhanced:focus {
+  background: var(--neumorphic-input-bg-focus) !important;
+  box-shadow: var(--neumorphic-shadow-inset-focus) !important;
+  outline: none;
+  border-color: rgba(139, 92, 246, 0.5) !important;
+}
+
+/* Fallback styles with explicit values for debugging */
+input.neumorphic-input-enhanced {
+  background: rgba(25, 30, 35, 0.8) !important;
+  box-shadow: 
+    inset 2px 2px 4px rgba(0, 0, 0, 0.15),
+    inset 4px 4px 8px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  transition: all 0.2s ease-out;
+  border: 1px solid transparent;
+}
+
+input.neumorphic-input-enhanced:focus {
+  background: rgba(30, 35, 40, 0.9) !important;
+  box-shadow: 
+    inset 2px 2px 4px rgba(0, 0, 0, 0.15),
+    inset 4px 4px 8px rgba(0, 0, 0, 0.1),
+    0 0 0 2px rgba(139, 92, 246, 0.4),
+    inset 0 0 20px rgba(139, 92, 246, 0.1) !important;
+  outline: none;
+  border-color: rgba(139, 92, 246, 0.5) !important;
+}
+
+/* Light theme fallback */
+.light input.neumorphic-input-enhanced {
+  background: rgba(220, 225, 235, 0.6) !important;
+  box-shadow: 
+    inset 2px 2px 4px rgba(0, 0, 0, 0.12),
+    inset 4px 4px 8px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(0, 0, 0, 0.08) !important;
+}
+
+.light input.neumorphic-input-enhanced:focus {
+  background: rgba(215, 220, 230, 0.8) !important;
+  box-shadow: 
+    inset 2px 2px 4px rgba(0, 0, 0, 0.12),
+    inset 4px 4px 8px rgba(0, 0, 0, 0.08),
+    0 0 0 2px rgba(139, 92, 246, 0.3),
+    inset 0 0 20px rgba(139, 92, 246, 0.08) !important;
+  border-color: rgba(139, 92, 246, 0.4) !important;
+}
+
+.neumorphic-input-enhanced::placeholder {
+  color: var(--neumorphic-text-secondary);
+  opacity: 0.7;
+}
+
+.neumorphic-input-enhanced:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Light theme badge colors - better contrast on light backgrounds */
+.light .bg-green-500\/20 {
+  background-color: rgba(34, 197, 94, 0.15) !important;
+}
+.light .text-green-300 {
+  color: #059669 !important;
+}
+.light .border-green-500\/20 {
+  border-color: rgba(34, 197, 94, 0.2) !important;
+}
+
+.light .bg-yellow-500\/20 {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+}
+.light .text-yellow-300 {
+  color: #d97706 !important;
+}
+.light .border-yellow-500\/20 {
+  border-color: rgba(245, 158, 11, 0.2) !important;
+}
+
+.light .bg-red-500\/20 {
+  background-color: rgba(239, 68, 68, 0.15) !important;
+}
+.light .text-red-300 {
+  color: #dc2626 !important;
+}
+.light .border-red-500\/20 {
+  border-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+.light .bg-blue-500\/20 {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+}
+.light .text-blue-300 {
+  color: #2563eb !important;
+}
+.light .border-blue-500\/20 {
+  border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Light theme progress ring background circles */
+.light svg circle[stroke="rgba(255, 255, 255, 0.1)"] {
+  stroke: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Light theme icon colors in stats cards */
+.light .text-blue-400 {
+  color: #3b82f6 !important;
+}
+.light .text-green-400 {
+  color: #10b981 !important;
+}
+.light .text-yellow-400 {
+  color: #f59e0b !important;
+}
+.light .text-red-400 {
+  color: #ef4444 !important;
+}
+
+/* Override any potential light shadow classes and filters */
+[class*="neumorphic"] * {
+  text-shadow: none !important;
+}
+
+/* Remove ALL filter effects from neumorphic components except progress rings */
+[class*="neumorphic"]:not(.neumorphic-progress-glow),
+.goal-card-enhanced,
+[class*="goal-card"] {
+  filter: none !important;
+}
+
+/* Progress ring glow effects - Subtle and properly contained */
+.progress-ring-glow {
+  /* Additional glow animation */
+  animation: progress-glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes progress-glow-pulse {
+  0%, 100% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Ensure SVG containers don't interfere with glow effects */
+svg {
+  overflow: visible !important;
+}
+
+/* Contain filter effects within goal cards to prevent bleeding */
+.goal-card-enhanced {
+  contain: layout style paint;
+  isolation: isolate;
+}
+
+/* BLOCK all glow box-shadow effects on goal cards - CRITICAL FIX */
+.goal-card-enhanced.glow-blue,
+.goal-card-enhanced.glow-purple,
+.goal-card-enhanced.glow-subtle-blue {
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+/* Block glow effects on any element inside goal cards */
+.goal-card-enhanced *.glow-blue,
+.goal-card-enhanced *.glow-purple,
+.goal-card-enhanced *.glow-subtle-blue {
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+/* Comprehensive block of glow classes on all neumorphic containers */
+[class*="neumorphic"].glow-blue,
+[class*="neumorphic"].glow-purple,
+[class*="neumorphic"].glow-subtle-blue,
+[class*="goal-card"].glow-blue,
+[class*="goal-card"].glow-purple,
+[class*="goal-card"].glow-subtle-blue,
+div.glow-blue,
+div.glow-purple,
+div.glow-subtle-blue {
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+@keyframes progress-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px currentColor) drop-shadow(0 0 12px currentColor);
+  }
+  50% {
+    filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 16px currentColor);
+  }
+}
+
+/* Enhanced goal card backgrounds like target - NO GLOW */
+.goal-card-enhanced {
+  position: relative;
+  overflow: hidden;
+}
+
+.goal-card-enhanced::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    rgba(255, 255, 255, 0.02) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Enhanced glassmorphism for goal cards */
+.neumorphic-goal-card {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Top Menu Bar Neumorphic Theme System - Matches Main Theme */
+
+/* Top Menu Bar Dark Theme (when app is dark) */
+.topbar-neumorphic-container.dark {
+  /* Base Colors - Dark theme for top menu bar */
+  --neumorphic-bg: #1a1c20;
+  --neumorphic-card: rgba(55, 60, 65, 0.25);
+  --neumorphic-card-end: rgba(5, 8, 12, 0.6);
+  --neumorphic-button: rgba(65, 70, 75, 0.95);
+  --neumorphic-text-primary: #E0E0E0;
+  --neumorphic-text-secondary: #A0A0A0;
+  --neumorphic-accent: #FF9A3E;
+  --neumorphic-border: #8B5CF6;
+
+  /* Top menu bar specific background and positioning */
+  background: linear-gradient(180deg, 
+    rgba(30, 35, 40, 0.95), 
+    rgba(20, 25, 30, 0.98)
+  );
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.3),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.05);
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 40;
+}
+
+/* Top Menu Bar Light Theme (when app is light) */
+.topbar-neumorphic-container.light {
+  /* Base Colors - Light theme for top menu bar */
+  --neumorphic-bg: #f0f2f5;
+  --neumorphic-card: rgba(235, 240, 245, 0.85);
+  --neumorphic-card-end: rgba(220, 225, 235, 0.9);
+  --neumorphic-button: rgba(230, 235, 240, 0.95);
+  --neumorphic-text-primary: #1a1d23;
+  --neumorphic-text-secondary: #4a5568;
+  --neumorphic-accent: #FF9A3E;
+  --neumorphic-border: #8B5CF6;
+
+  /* Top menu bar specific background and positioning */
+  background: linear-gradient(180deg, 
+    rgba(240, 245, 250, 0.95), 
+    rgba(235, 240, 245, 0.98)
+  );
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.15),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.8);
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 40;
+}
+
+/* Top Menu Bar Button Styling */
+.topbar-neumorphic-container .neumorphic-topbar-button {
+  background: var(--neumorphic-button) !important;
+  box-shadow: var(--neumorphic-shadow-concave) !important;
+  border-radius: var(--neumorphic-radius-md) !important;
+  color: var(--neumorphic-text-primary) !important;
+  border: 1px solid transparent !important;
+  transition: all 0.2s ease-out;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.topbar-neumorphic-container.dark .neumorphic-topbar-button:hover {
+  background: linear-gradient(145deg, 
+    rgba(139, 92, 246, 0.25), 
+    rgba(99, 62, 206, 0.18)
+  ) !important;
+  box-shadow: var(--neumorphic-shadow-button-hover) !important;
+  transform: translateY(-1px) scale(1.02) !important;
+  border: 1px solid rgba(139, 92, 246, 0.3) !important;
+}
+
+.topbar-neumorphic-container.light .neumorphic-topbar-button:hover {
+  background: linear-gradient(145deg, 
+    rgba(139, 92, 246, 0.35), 
+    rgba(99, 62, 206, 0.25)
+  ) !important;
+  box-shadow: var(--neumorphic-shadow-button-hover) !important;
+  transform: translateY(-1px) scale(1.02) !important;
+  border: 1px solid rgba(139, 92, 246, 0.4) !important;
+}
+
+.topbar-neumorphic-container .neumorphic-topbar-button:active {
+  background: var(--neumorphic-button) !important;
+  box-shadow: var(--neumorphic-shadow-button-active) !important;
+  transform: translateY(1px) scale(0.98) !important;
+}
+
+.topbar-neumorphic-container .neumorphic-topbar-button svg {
+  color: var(--neumorphic-text-primary) !important;
+  width: 20px;
+  height: 20px;
+}
+
+/* Mobile responsive behavior for top menu bar */
+@media (max-width: 768px) {
+  .topbar-neumorphic-container.dark,
+  .topbar-neumorphic-container.light {
+    /* On mobile, always full width regardless of sidebar state */
+    margin-left: 0 !important;
+  }
+  
+  .topbar-neumorphic-container .neumorphic-topbar-button {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .topbar-neumorphic-container .neumorphic-topbar-button svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Sidebar-Specific Neumorphic Theme System - Inverse Theme with Rectangular Shape */
+
+/* Sidebar Dark Theme (when app is light) */
+.sidebar-neumorphic-container.dark {
+  /* Base Colors - Dark theme for sidebar */
+  --neumorphic-bg: #1a1c20;
+  --neumorphic-card: rgba(55, 60, 65, 0.25);
+  --neumorphic-card-end: rgba(5, 8, 12, 0.6);
+  --neumorphic-button: rgba(65, 70, 75, 0.95);
+  --neumorphic-text-primary: #E0E0E0;
+  --neumorphic-text-secondary: #A0A0A0;
+  --neumorphic-accent: #FF9A3E;
+  --neumorphic-border: #8B5CF6;
+
+  /* Sidebar-specific shadows - no rounded corners */
+  --neumorphic-shadow-convex: 
+    2px 2px 4px rgba(0, 0, 0, 0.1),
+    4px 4px 12px rgba(0, 0, 0, 0.15);
+  --neumorphic-shadow-concave: 
+    -2px -2px 4px rgba(255, 255, 255, 0.05),
+    4px 4px 8px rgba(0, 0, 0, 0.15),
+    6px 6px 12px rgba(0, 0, 0, 0.1);
+  
+  /* Input shadows for sidebar */
+  --neumorphic-shadow-inset: 
+    inset 2px 2px 4px rgba(0, 0, 0, 0.15),
+    inset 4px 4px 8px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  --neumorphic-shadow-inset-focus: 
+    inset 2px 2px 4px rgba(0, 0, 0, 0.15),
+    inset 4px 4px 8px rgba(0, 0, 0, 0.1),
+    0 0 0 2px rgba(139, 92, 246, 0.4),
+    inset 0 0 20px rgba(139, 92, 246, 0.1);
+  
+  /* Input backgrounds */
+  --neumorphic-input-bg: rgba(25, 30, 35, 0.8);
+  --neumorphic-input-bg-focus: rgba(30, 35, 40, 0.9);
+
+  /* Enhanced button states */
+  --neumorphic-shadow-button-default: 
+    -2px -2px 4px rgba(255, 255, 255, 0.05),
+    4px 4px 8px rgba(0, 0, 0, 0.2),
+    6px 6px 12px rgba(0, 0, 0, 0.15);
+  --neumorphic-shadow-button-hover: 
+    3px 3px 6px rgba(0, 0, 0, 0.35),
+    6px 6px 12px rgba(0, 0, 0, 0.25),
+    8px 8px 16px rgba(0, 0, 0, 0.2),
+    0 0 20px rgba(139, 92, 246, 0.4);
+  --neumorphic-shadow-button-active: 
+    inset 3px 3px 6px rgba(0, 0, 0, 0.5),
+    inset 5px 5px 10px rgba(0, 0, 0, 0.4),
+    inset 1px 1px 2px rgba(0, 0, 0, 0.6);
+
+  /* Gradients */
+  --neumorphic-gradient: linear-gradient(135deg, var(--neumorphic-card), var(--neumorphic-card-end));
+  
+  /* Sidebar-specific radius - minimal for rectangular appearance */
+  --neumorphic-radius-sidebar: 0px; /* No border radius for rectangular sidebar */
+  --neumorphic-radius-sidebar-item: 4px; /* Minimal radius for nav items */
+}
+
+/* Sidebar Light Theme (when app is dark) */
+.sidebar-neumorphic-container.light {
+  /* Base Colors - Light theme for sidebar */
+  --neumorphic-bg: #f0f2f5;
+  --neumorphic-card: rgba(235, 240, 245, 0.85);
+  --neumorphic-card-end: rgba(220, 225, 235, 0.9);
+  --neumorphic-button: rgba(230, 235, 240, 0.95);
+  --neumorphic-text-primary: #1a1d23;
+  --neumorphic-text-secondary: #4a5568;
+  --neumorphic-accent: #FF9A3E;
+  --neumorphic-border: #8B5CF6;
+
+  /* Light theme shadows for sidebar */
+  --neumorphic-shadow-convex: 
+    2px 2px 4px rgba(0, 0, 0, 0.08),
+    4px 4px 12px rgba(0, 0, 0, 0.12);
+  --neumorphic-shadow-concave: 
+    -2px -2px 4px rgba(255, 255, 255, 0.8),
+    4px 4px 8px rgba(0, 0, 0, 0.12),
+    6px 6px 12px rgba(0, 0, 0, 0.08);
+  
+  /* Light theme input shadows */
+  --neumorphic-shadow-inset: 
+    inset 2px 2px 4px rgba(0, 0, 0, 0.12),
+    inset 4px 4px 8px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(0, 0, 0, 0.08);
+  --neumorphic-shadow-inset-focus: 
+    inset 2px 2px 4px rgba(0, 0, 0, 0.12),
+    inset 4px 4px 8px rgba(0, 0, 0, 0.08),
+    0 0 0 2px rgba(139, 92, 246, 0.3),
+    inset 0 0 20px rgba(139, 92, 246, 0.08);
+  
+  /* Light theme input backgrounds */
+  --neumorphic-input-bg: rgba(220, 225, 235, 0.6);
+  --neumorphic-input-bg-focus: rgba(215, 220, 230, 0.8);
+
+  /* Light theme button states */
+  --neumorphic-shadow-button-default: 
+    -2px -2px 4px rgba(255, 255, 255, 0.8),
+    4px 4px 8px rgba(0, 0, 0, 0.1),
+    6px 6px 12px rgba(0, 0, 0, 0.08);
+  --neumorphic-shadow-button-hover: 
+    3px 3px 6px rgba(0, 0, 0, 0.2),
+    6px 6px 12px rgba(0, 0, 0, 0.15),
+    8px 8px 16px rgba(0, 0, 0, 0.1),
+    0 0 20px rgba(139, 92, 246, 0.3);
+  --neumorphic-shadow-button-active: 
+    inset 3px 3px 6px rgba(0, 0, 0, 0.25),
+    inset 5px 5px 10px rgba(0, 0, 0, 0.2),
+    inset 1px 1px 2px rgba(0, 0, 0, 0.3);
+
+  /* Light theme gradients */
+  --neumorphic-gradient: linear-gradient(135deg, var(--neumorphic-card), var(--neumorphic-card-end));
+  
+  /* Sidebar-specific radius - minimal for rectangular appearance */
+  --neumorphic-radius-sidebar: 0px; /* No border radius for rectangular sidebar */
+  --neumorphic-radius-sidebar-item: 4px; /* Minimal radius for nav items */
+}
+
+/* Sidebar Container Styling - Rectangular Shape */
+.sidebar-neumorphic-container {
+  background: var(--neumorphic-bg) !important;
+  color: var(--neumorphic-text-primary) !important;
+  border-radius: var(--neumorphic-radius-sidebar) !important; /* Rectangular - no rounded corners */
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 30; /* Below top menu bar (z-index: 40) */
+  overflow: hidden;
+}
+
+/* Disable the curved pseudo-element for neumorphic sidebar */
+.sidebar-neumorphic-container::before {
+  display: none !important; /* Remove curved effect */
+}
+
+/* Sidebar Navigation Items */
+.sidebar-neumorphic-container .neumorphic-nav-item {
+  background: var(--neumorphic-button) !important;
+  box-shadow: var(--neumorphic-shadow-concave) !important;
+  border-radius: var(--neumorphic-radius-sidebar-item) !important;
+  color: var(--neumorphic-text-primary) !important;
+  transition: all 0.2s ease-out;
+  border: 1px solid transparent;
+}
+
+/* Dark theme sidebar (when app is light) - More vibrant purple */
+.sidebar-neumorphic-container.dark .neumorphic-nav-item:hover {
+  background: linear-gradient(145deg, 
+    rgba(167, 139, 250, 0.25), 
+    rgba(139, 92, 246, 0.18)
+  ) !important;
+  box-shadow: var(--neumorphic-shadow-button-hover) !important;
+  transform: translateY(-1px) scale(1.01) !important;
+}
+
+.sidebar-neumorphic-container.dark .neumorphic-nav-item.active {
+  background: linear-gradient(145deg, 
+    rgba(167, 139, 250, 0.35), 
+    rgba(139, 92, 246, 0.25)
+  ) !important;
+  box-shadow: var(--neumorphic-shadow-button-hover) !important;
+  color: var(--neumorphic-text-primary) !important;
+  border: 1px solid rgba(167, 139, 250, 0.3) !important;
+}
+
+/* Light theme sidebar (when app is dark) - Stronger purple */
+.sidebar-neumorphic-container.light .neumorphic-nav-item:hover {
+  background: linear-gradient(145deg, 
+    rgba(139, 92, 246, 0.35), 
+    rgba(99, 62, 206, 0.25)
+  ) !important;
+  box-shadow: var(--neumorphic-shadow-button-hover) !important;
+  transform: translateY(-1px) scale(1.01) !important;
+}
+
+.sidebar-neumorphic-container.light .neumorphic-nav-item.active {
+  background: linear-gradient(145deg, 
+    rgba(139, 92, 246, 0.45), 
+    rgba(99, 62, 206, 0.35)
+  ) !important;
+  box-shadow: var(--neumorphic-shadow-button-hover) !important;
+  color: var(--neumorphic-text-primary) !important;
+  border: 1px solid rgba(139, 92, 246, 0.4) !important;
+}
+
+/* Fallback for general states */
+.sidebar-neumorphic-container .neumorphic-nav-item:active {
+  background: var(--neumorphic-button) !important;
+  box-shadow: var(--neumorphic-shadow-button-active) !important;
+  transform: translateY(1px) scale(0.99) !important;
+}
+
+/* Sidebar Text Components */
+.sidebar-neumorphic-container .neumorphic-text {
+  color: var(--neumorphic-text-primary) !important;
+}
+
+.sidebar-neumorphic-container .neumorphic-text-secondary {
+  color: var(--neumorphic-text-secondary) !important;
+}
+
+/* Sidebar Logo/Header Area */
+.sidebar-neumorphic-container .neumorphic-header {
+  background: var(--neumorphic-card) !important;
+  box-shadow: var(--neumorphic-shadow-convex) !important;
+  border-radius: var(--neumorphic-radius-sidebar-item) !important;
+  color: var(--neumorphic-text-primary) !important;
+}
+
+/* Sidebar Toggle Button */
+.sidebar-neumorphic-container .neumorphic-toggle {
+  background: var(--neumorphic-button) !important;
+  box-shadow: var(--neumorphic-shadow-concave) !important;
+  border-radius: 50% !important; /* Keep circular for toggle button */
+  color: var(--neumorphic-text-primary) !important;
+  border: 1px solid rgba(139, 92, 246, 0.2) !important;
+}
+
+/* Dark theme toggle button (when app is light) */
+.sidebar-neumorphic-container.dark .neumorphic-toggle:hover {
+  background: linear-gradient(145deg, 
+    rgba(167, 139, 250, 0.25), 
+    rgba(139, 92, 246, 0.18)
+  ) !important;
+  box-shadow: var(--neumorphic-shadow-button-hover) !important;
+  transform: scale(1.05) !important;
+  border: 1px solid rgba(167, 139, 250, 0.4) !important;
+}
+
+/* Light theme toggle button (when app is dark) */
+.sidebar-neumorphic-container.light .neumorphic-toggle:hover {
+  background: linear-gradient(145deg, 
+    rgba(139, 92, 246, 0.35), 
+    rgba(99, 62, 206, 0.25)
+  ) !important;
+  box-shadow: var(--neumorphic-shadow-button-hover) !important;
+  transform: scale(1.05) !important;
+  border: 1px solid rgba(139, 92, 246, 0.4) !important;
+}
+
+/* Sidebar Matching Theme Mode - When sidebar matches app theme instead of inverse */
+/* This is activated when data-sidebar-theme-mode="match" */
+/* NOTE: Sidebar keeps its own neumorphic backgrounds, NOT the main app's complex gradients */
+
+/* Dark app with dark sidebar (matching mode) - Keep sidebar's own dark background */
+[data-sidebar-theme-mode="match"] .sidebar-neumorphic-container.dark {
+  /* Use sidebar's own dark neumorphic background, not main app gradient */
+  background: var(--neumorphic-bg) !important;
+  /* Override any inherited gradients */
+  background-image: none !important;
+}
+
+/* Light app with light sidebar (matching mode) - Keep sidebar's own light background */
+[data-sidebar-theme-mode="match"] .sidebar-neumorphic-container.light {
+  /* Use sidebar's own light neumorphic background, not main app gradient */
+  background: var(--neumorphic-bg) !important;
+  /* Override any inherited gradients */
+  background-image: none !important;
+}
+
+/* Dark theme overrides if needed */
+.dark {
+  --neumorphic-bg: #1a1c20;
+  --neumorphic-card: rgba(55, 60, 65, 0.8);
+  --neumorphic-card-end: rgba(30, 35, 40, 0.8);
+  --neumorphic-button: rgba(45, 50, 55, 0.9);
+  --neumorphic-text-primary: #E0E0E0;
+  --neumorphic-text-secondary: #A0A0A0;
+}
+
+/* Custom Scrollbar for DatePicker */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.6);
+  border-radius: 4px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.8);
+}
+
+.light .scrollbar-thin::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.light .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.5);
+}
+
+.light .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.7);
+}
+
+/* ===== APEXCHARTS THEME INTEGRATION ===== */
+/* 
+ * CRITICAL: Direct CSS targeting of ApexCharts elements for proper neumorphic theme integration
+ * ApexCharts generates its own DOM elements that don't automatically inherit theme styles
+ * All colors MUST reference neumorphic CSS custom properties for theme consistency
+ */
+
+/* ApexCharts text elements - Light theme */
+.light .apexcharts-text,
+.light .apexcharts-xaxis-label,
+.light .apexcharts-yaxis-label,
+.light .apexcharts-legend-text,
+.light .apexcharts-title-text,
+.light .apexcharts-subtitle-text,
+.light .apexcharts-datalabel,
+.light .apexcharts-tooltip-text,
+.light .apexcharts-menu-item,
+.light .apexcharts-xaxis-title,
+.light .apexcharts-yaxis-title,
+.light .apexcharts-datalabel-value,
+.light .apexcharts-datalabels text,
+.light .apexcharts-bar-goals-markers text,
+.light .apexcharts-annotations-label,
+.light .apexcharts-point-annotations text,
+.light .apexcharts-annotations text {
+  fill: var(--neumorphic-text-primary) !important;
+  color: var(--neumorphic-text-primary) !important;
+  font-family: inherit !important;
+}
+
+/* ApexCharts secondary text elements - Light theme */
+.light .apexcharts-legend-text,
+.light .apexcharts-datalabel-label {
+  fill: var(--neumorphic-text-secondary) !important;
+  color: var(--neumorphic-text-secondary) !important;
+}
+
+/* ApexCharts toolbar elements - Light theme */
+.light .apexcharts-toolbar svg,
+.light .apexcharts-zoom-icon svg,
+.light .apexcharts-pan-icon svg,
+.light .apexcharts-reset-icon svg,
+.light .apexcharts-download-icon svg,
+.light .apexcharts-selection-icon svg,
+.light .apexcharts-menu-icon svg {
+  fill: var(--neumorphic-text-primary) !important;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.light .apexcharts-toolbar svg:hover {
+  opacity: 1;
+  fill: var(--neumorphic-border) !important;
+}
+
+/* ApexCharts grid lines - Light theme */
+.light .apexcharts-gridlines-horizontal line,
+.light .apexcharts-gridlines-vertical line {
+  stroke: var(--neumorphic-text-secondary) !important;
+  stroke-opacity: 0.2 !important;
+}
+
+/* ApexCharts axis lines and ticks - Light theme */
+.light .apexcharts-xaxis-tick,
+.light .apexcharts-yaxis-tick,
+.light .apexcharts-xaxis line,
+.light .apexcharts-yaxis line {
+  stroke: var(--neumorphic-text-secondary) !important;
+  stroke-opacity: 0.4 !important;
+}
+
+/* ApexCharts text elements - Dark theme */
+.dark .apexcharts-text,
+.dark .apexcharts-xaxis-label,
+.dark .apexcharts-yaxis-label,
+.dark .apexcharts-legend-text,
+.dark .apexcharts-title-text,
+.dark .apexcharts-subtitle-text,
+.dark .apexcharts-datalabel,
+.dark .apexcharts-tooltip-text,
+.dark .apexcharts-menu-item,
+.dark .apexcharts-xaxis-title,
+.dark .apexcharts-yaxis-title,
+.dark .apexcharts-datalabel-value,
+.dark .apexcharts-datalabels text,
+.dark .apexcharts-bar-goals-markers text,
+.dark .apexcharts-annotations-label,
+.dark .apexcharts-point-annotations text,
+.dark .apexcharts-annotations text {
+  fill: var(--neumorphic-text-primary) !important;
+  color: var(--neumorphic-text-primary) !important;
+  font-family: inherit !important;
+}
+
+/* ApexCharts secondary text elements - Dark theme */
+.dark .apexcharts-legend-text,
+.dark .apexcharts-datalabel-label {
+  fill: var(--neumorphic-text-secondary) !important;
+  color: var(--neumorphic-text-secondary) !important;
+}
+
+/* ApexCharts toolbar elements - Dark theme */
+.dark .apexcharts-toolbar svg,
+.dark .apexcharts-zoom-icon svg,
+.dark .apexcharts-pan-icon svg,
+.dark .apexcharts-reset-icon svg,
+.dark .apexcharts-download-icon svg,
+.dark .apexcharts-selection-icon svg,
+.dark .apexcharts-menu-icon svg {
+  fill: var(--neumorphic-text-primary) !important;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.dark .apexcharts-toolbar svg:hover {
+  opacity: 1;
+  fill: var(--neumorphic-border) !important;
+}
+
+/* ApexCharts grid lines - Dark theme */
+.dark .apexcharts-gridlines-horizontal line,
+.dark .apexcharts-gridlines-vertical line {
+  stroke: var(--neumorphic-text-secondary) !important;
+  stroke-opacity: 0.2 !important;
+}
+
+/* ApexCharts axis lines and ticks - Dark theme */
+.dark .apexcharts-xaxis-tick,
+.dark .apexcharts-yaxis-tick,
+.dark .apexcharts-xaxis line,
+.dark .apexcharts-yaxis line {
+  stroke: var(--neumorphic-text-secondary) !important;
+  stroke-opacity: 0.4 !important;
+}
+
+/* ApexCharts tooltip styling - Uses neumorphic card styling */
+.apexcharts-tooltip {
+  background: var(--neumorphic-card) !important;
+  border: 1px solid var(--neumorphic-border) !important;
+  box-shadow: var(--neumorphic-shadow-convex) !important;
+  border-radius: var(--neumorphic-radius-md) !important;
+  backdrop-filter: blur(8px);
+}
+
+.apexcharts-tooltip-title {
+  background: transparent !important;
+  border-bottom: 1px solid var(--neumorphic-border) !important;
+  color: var(--neumorphic-text-primary) !important;
+  font-weight: 600;
+  padding: var(--neumorphic-spacing-sm) var(--neumorphic-spacing-md);
+}
+
+.apexcharts-tooltip-text-y-value,
+.apexcharts-tooltip-text-z-value {
+  color: var(--neumorphic-text-primary) !important;
+  font-weight: 600;
+}
+
+.apexcharts-tooltip-text-y-label,
+.apexcharts-tooltip-text-z-label {
+  color: var(--neumorphic-text-secondary) !important;
+}
+
+/* ApexCharts menu styling - Uses neumorphic styling */
+.apexcharts-menu {
+  background: var(--neumorphic-card) !important;
+  border: 1px solid var(--neumorphic-border) !important;
+  box-shadow: var(--neumorphic-shadow-convex) !important;
+  border-radius: var(--neumorphic-radius-md) !important;
+  backdrop-filter: blur(8px);
+  padding: var(--neumorphic-spacing-xs);
+}
+
+.apexcharts-menu-item {
+  border-radius: var(--neumorphic-radius-sm) !important;
+  padding: var(--neumorphic-spacing-sm) var(--neumorphic-spacing-md) !important;
+  margin: var(--neumorphic-spacing-xs) 0 !important;
+  transition: all 0.2s ease;
+}
+
+.apexcharts-menu-item:hover {
+  background: var(--neumorphic-button) !important;
+  color: var(--neumorphic-text-primary) !important;
+  box-shadow: var(--neumorphic-shadow-convex-sm) !important;
+}
+
+/* ApexCharts legend styling */
+.apexcharts-legend {
+  padding: var(--neumorphic-spacing-md) !important;
+}
+
+.apexcharts-legend-series {
+  margin: var(--neumorphic-spacing-xs) var(--neumorphic-spacing-sm) !important;
+}
+
+/* ApexCharts data labels */
+.apexcharts-datalabel {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Additional ApexCharts text element targeting for better coverage */
+.dark .apexcharts-svg text,
+.dark .apexcharts-bar-series text,
+.dark .apexcharts-series text,
+.dark tspan {
+  fill: var(--neumorphic-text-primary) !important;
+  color: var(--neumorphic-text-primary) !important;
+}
+
+.light .apexcharts-svg text,
+.light .apexcharts-bar-series text,
+.light .apexcharts-series text,
+.light tspan {
+  fill: var(--neumorphic-text-primary) !important;
+  color: var(--neumorphic-text-primary) !important;
+}
+
+/* High specificity rules for stubborn data labels */
+.dark .apexcharts-canvas .apexcharts-svg .apexcharts-datalabels text,
+.dark .apexcharts-canvas .apexcharts-svg .apexcharts-datalabel,
+.dark .apexcharts-canvas .apexcharts-svg .apexcharts-bar-series .apexcharts-datalabels text {
+  fill: var(--neumorphic-text-primary) !important;
+  color: var(--neumorphic-text-primary) !important;
+}
+
+.light .apexcharts-canvas .apexcharts-svg .apexcharts-datalabels text,
+.light .apexcharts-canvas .apexcharts-svg .apexcharts-datalabel,
+.light .apexcharts-canvas .apexcharts-svg .apexcharts-bar-series .apexcharts-datalabels text {
+  fill: var(--neumorphic-text-primary) !important;
+  color: var(--neumorphic-text-primary) !important;
+}
+
+/* ApexCharts zoom/pan selection area */
+.apexcharts-selection-rect {
+  fill: var(--neumorphic-border) !important;
+  fill-opacity: 0.1 !important;
+  stroke: var(--neumorphic-border) !important;
+  stroke-width: 1px !important;
+  stroke-dasharray: 3,3 !important;
+}
+
+/* ApexCharts crosshair */
+.apexcharts-xcrosshairs,
+.apexcharts-ycrosshairs {
+  stroke: var(--neumorphic-border) !important;
+  stroke-opacity: 0.6 !important;
+  stroke-width: 1px !important;
+  stroke-dasharray: 3,3 !important;
+}
+
+/* ApexCharts radial/pie chart labels */
+.apexcharts-pie-label,
+.apexcharts-radialbar-label {
+  fill: var(--neumorphic-text-primary) !important;
+  font-weight: 600 !important;
+}
+
+/* Ensure ApexCharts respects neumorphic theme transitions */
+.apexcharts-text,
+.apexcharts-xaxis-label,
+.apexcharts-yaxis-label,
+.apexcharts-legend-text,
+.apexcharts-title-text,
+.apexcharts-subtitle-text,
+.apexcharts-datalabel {
+  transition: fill 0.3s ease, color 0.3s ease !important;
+}
+
+.apexcharts-toolbar svg {
+  transition: fill 0.3s ease, opacity 0.2s ease !important;
+}
+
+.apexcharts-gridlines-horizontal line,
+.apexcharts-gridlines-vertical line,
+.apexcharts-xaxis-tick,
+.apexcharts-yaxis-tick {
+  transition: stroke 0.3s ease !important;
+}
+
+/* ApexCharts container alignment with neumorphic design */
+.apexcharts-canvas {
+  border-radius: var(--neumorphic-radius-md);
+}
+
+/* Ensure toolbar buttons align with neumorphic button styling */
+.apexcharts-toolbar {
+  background: transparent !important;
+  border-radius: var(--neumorphic-radius-sm);
+  padding: var(--neumorphic-spacing-xs);
+}
+
+.apexcharts-toolbar > div {
+  margin: 0 var(--neumorphic-spacing-xs) !important;
+}
+
+/* ApexCharts loading state alignment */
+.apexcharts-loading {
+  color: var(--neumorphic-text-secondary) !important;
+  font-family: inherit !important;
+}
+
+/* TARGETED FIX: Override ApexCharts inline fill attributes in dark theme */
+/* ApexCharts sets fill="#color" directly on SVG elements - need to override with CSS */
+.dark .apexcharts-text[fill],
+.dark .apexcharts-xaxis-label[fill],
+.dark .apexcharts-yaxis-label[fill], 
+.dark .apexcharts-datalabel[fill],
+.dark .apexcharts-yaxis-annotation-label[fill] {
+  fill: #E0E0E0 !important;
+}
+
+/* Also target by class for elements without fill attributes */
+.dark .apexcharts-text,
+.dark .apexcharts-xaxis-label,
+.dark .apexcharts-yaxis-label,
+.dark .apexcharts-datalabel,
+.dark .apexcharts-yaxis-annotation-label {
+  fill: #E0E0E0 !important;
+  color: #E0E0E0 !important;
+}
+
+/* COMPREHENSIVE: Target any text within ApexCharts that has inline fill in dark theme */
+.dark svg text[fill]:not([fill="none"]) {
+  fill: #E0E0E0 !important;
+}
+
+/* FIX THE ROOT ISSUE: White background rectangles behind text in dark theme */
+/* ApexCharts creates white rect backgrounds that hide text in dark theme */
+.dark .apexcharts-yaxis-annotations rect[fill="#fff"],
+.dark .apexcharts-yaxis-annotations rect[fill="white"],
+.dark .apexcharts-yaxis-annotations rect[fill="#ffffff"] {
+  fill: rgba(26, 28, 32, 0.9) !important; /* Dark background with slight transparency */
+  stroke: #4a5568 !important; /* Dark border */
+}
+
+/* Target any white rectangles in ApexCharts annotations in dark theme */
+.dark svg rect[fill="#fff"],
+.dark svg rect[fill="white"],
+.dark svg rect[fill="#ffffff"] {
+  fill: rgba(26, 28, 32, 0.9) !important;
+  stroke: #4a5568 !important;
+}
+
+/* CRITICAL: Catch-all rules for ANY text within ApexCharts containers */
+/* These rules have the highest specificity to override ApexCharts defaults */
+.dark .apexcharts-canvas text,
+.dark .apexcharts-canvas tspan,
+.dark [class*="apexcharts"] text,
+.dark [class*="apexcharts"] tspan {
+  fill: var(--neumorphic-text-primary) !important;
+  color: var(--neumorphic-text-primary) !important;
+}
+
+.light .apexcharts-canvas text,
+.light .apexcharts-canvas tspan,
+.light [class*="apexcharts"] text,
+.light [class*="apexcharts"] tspan {
+  fill: var(--neumorphic-text-primary) !important;
+  color: var(--neumorphic-text-primary) !important;
+}
+
+/* SIMPLE & ELEGANT - Direct hardcoded fix for dark theme text visibility */
+/* Use exact same pattern that worked for light theme */
+
+/* Force text contrast for data labels specifically */
+.dark .apexcharts-datalabels text,
+.dark .apexcharts-datalabel text,
+.dark .apexcharts-bar-series .apexcharts-datalabels text {
+  fill: #FFFFFF !important;
+  color: #FFFFFF !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+}
+
+.light .apexcharts-datalabels text,
+.light .apexcharts-datalabel text,
+.light .apexcharts-bar-series .apexcharts-datalabels text {
+  fill: #000000 !important;
+  color: #000000 !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.5) !important;
+} 

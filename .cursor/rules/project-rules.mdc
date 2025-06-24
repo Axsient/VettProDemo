@@ -1,0 +1,53 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+{
+  "rules": [
+    {
+      "name": "General Project Adherence",
+      "instruction": "All generated code, components, and UI elements MUST strictly adhere to the principles, technology stack, architecture, design system, and methodologies detailed in the 'VETTPRO Dashboard - Complete Project Documentation' (project-doc.md). This document is the single source of truth. Pay close attention to versioning specified (e.g., Next.js 15.3.4, React 19, Tailwind CSS 4, TypeScript 5)."
+    },
+    {
+      "name": "Data Handling: Sample Data First, API Ready",
+      "instruction": "For all new components or features requiring data, initially implement using **structured sample data**. \n\n1.  **Sample Data Structure**: Create realistic sample data that precisely mirrors the expected structure of future API responses. Store this sample data typically within the component's `examples/` directory or a dedicated `lib/sample-data/` directory, typed according to interfaces defined in `types/` or component-specific `types/`.\n    *Example from doc:* \n    ```typescript\n    // Sample data follows API response structure\n    export const supplierRiskTrendsData: ChartData[] = [\n      { x: '2024-01', y: 6.8 },\n      { x: '2024-02', y: 6.2 },\n      // ... realistic vetting data\n    ];\n    ```\n2.  **Data Fetching Abstraction**: If creating functions to 'fetch' this data, design them so the data source can be easily swapped later. For now, these functions will import and return the sample data. \n    *Example approach:*\n    ```typescript\n    // In lib/dataService/supplierService.ts (or similar)\n    import { supplierRiskTrendsData } from '@/lib/sample-data/supplierSamples';\n    import { ChartData } from '@/types'; // Assuming ChartData is defined\n\n    export async function getSupplierRiskTrends(): Promise<ChartData[]> {\n      // Simulate API delay for realism in demo\n      await new Promise(resolve => setTimeout(resolve, 500));\n      return supplierRiskTrendsData;\n    }\n    ```\n3.  **Component Consumption**: Components should consume data via these abstracted service functions or directly import sample data for simpler cases, preparing for asynchronous data fetching (e.g., using `async/await` in Server Components or `useEffect` with state for Client Components if interaction is needed before data is ready).\n4.  **No Hardcoded API Endpoints Yet**: Do not implement actual `fetch` calls to non-existent APIs. Focus on the data structure and consumption pattern."
+    },
+    {
+      "name": "Neumorphic Design System Implementation",
+      "instruction": "All UI elements MUST be built using the established Neumorphic Design System.\n1.  **Core Philosophy**: Adhere to soft UI aesthetics, multi-layer DARK shadows only (no light shadows), glass-morphism integration where specified, and the ultra-compact spacing system.\n2.  **CSS Variables**: Utilize CSS custom properties defined in `styles/themes/neumorphic.css` and theme-specific files (`dark.css`, `light.css`). Example: `var(--neumorphic-spacing-xs)`, `var(--neumorphic-shadow-convex)`, `var(--neumorphic-card)`.\n3.  **Component Hierarchy**: Follow the defined hierarchy: `NeumorphicBackground`, `NeumorphicCard`, `NeumorphicButton`, `NeumorphicInput`, `NeumorphicTable` as base building blocks.\n4.  **shadcn/ui Variants**: When using shadcn/ui components, ensure they are the 'enhanced with neumorphic variants' versions, or apply neumorphic styling to them directly using Tailwind and CSS variables."
+    },
+    {
+      "name": "Component Architecture and Development Workflow",
+      "instruction": "Follow the defined Component Architecture Patterns and Development Workflow:\n1.  **Composition over Inheritance**: Prefer composition for building complex components.\n2.  **Prop Drilling Avoidance**: Use context (like `next-themes` for theme) or state management within layout/page components.\n3.  **TypeScript First**: Define TypeScript interfaces for props, state, and data structures *before* component implementation. Use generic interfaces for flexibility where appropriate (e.g., `TableColumn<T>`).\n4.  **Directory Structure**: Adhere to the `src/components/` structure, including subdirectories for `charts`, `forms`, `layout`, `sidebar`, `ui/neumorphic`, etc. For component libraries: `[Component Category]/README.md`, `index.ts`, `components/`, `examples/`, `types/`, `utils/`.\n5.  **Responsive Design**: Implement mobile-first (base styles <768px), then tablet (`md:`), desktop (`lg:`), and large desktop (`xl:`). Ensure sidebar transformation and responsive grid systems.\n6.  **Accessibility (WCAG)**: Implement ARIA labels, full keyboard navigation, logical focus management, and WCAG AA compliant color contrast.\n7.  **Example Components**: Create production-ready demo components in `examples/` subdirectories for each component library. These serve as implementation guides and integration tests."
+    },
+    {
+      "name": "Styling and Theming",
+      "instruction": "1.  **Tailwind CSS 4**: Utilize Tailwind CSS 4 for all styling, leveraging the extended theme in `tailwind.config.ts` (e.g., `colors.neumorphic`, `boxShadow['neumorphic-convex']`).\n2.  **Theme Management**: Use `next-themes` for light/dark mode. Ensure seamless switching. The `CurvedSidebar` should have inverse theming as specified.\n3.  **CSS Files**: Global styles in `globals.css`. Theme variables in `styles/themes/dark.css`, `light.css`. The complete neumorphic system is in `styles/themes/neumorphic.css` (1312 lines). Custom animations in `styles/animations.css`.\n4.  **Icons**: Use `Lucide React 0.518.0` for all iconography."
+    },
+    {
+      "name": "Data Visualization (ApexCharts & Recharts)",
+      "instruction": "1.  **Primary Charts**: Use ApexCharts 4.7.0 with React ApexCharts 1.7.0 for data visualization. Implement the 15+ specialized chart types as needed (5 line, 6 bar, pie/donut, mixed).\n2.  **ApexCharts Theme Integration**: Crucially, ensure ApexCharts respect the neumorphic theme using the CSS Bridge Pattern. This involves 300-400+ lines of CSS overrides in `styles/themes/neumorphic.css` targeting ApexCharts DOM elements (e.g., `.apexcharts-text`, `.apexcharts-tooltip`) to apply CSS custom properties. No JS for chart theming.\n    *Example from doc:*\n    ```css\n    /* ApexCharts Theme Integration */\n    .dark .apexcharts-text { color: var(--neumorphic-text-primary) !important; }\n    .light .apexcharts-text { color: var(--neumorphic-text-secondary) !important; }\n    .apexcharts-tooltip {\n      background: var(--neumorphic-card) !important;\n      border: 1px solid var(--neumorphic-border) !important;\n      backdrop-filter: blur(var(--neumorphic-blur)) !important;\n    }\n    ```\n3.  **Secondary Charts**: Recharts 2.15.4 can be used for fallback scenarios or where its specific strengths are beneficial.\n4.  **Chart Components**: Store chart implementations in `src/components/charts/apex/components/` with corresponding types and utils."
+    },
+    {
+      "name": "Form Components and South African Localization",
+      "instruction": "1.  **Specialized Forms**: Implement form components under `src/components/forms/`, categorized into `advanced/`, `business/`, `identity/`, `selection/`.\n2.  **SA Business Focus**: Prioritize South African specific validation and formatting:\n    *   **SA ID**: Luhn algorithm, demographic extraction.\n    *   **Phone Number**: Mobile/landline detection, proper SA formatting.\n    *   **Address**: All 9 provinces, postal code validation.\n    *   **Business Registration**: CC/Pty Ltd/Ltd format validation, type detection.\n    *   **VAT Numbers**: 10-digit validation, SARS compliance.\n3.  **Real-time Validation**: Provide detailed feedback. Use Radix UI primitives for underlying form control structure where appropriate.\n4.  **Notifications**: Use Sonner 2.0.5 with neumorphic variants for user feedback."
+    },
+    {
+      "name": "Data Tables",
+      "instruction": "Implement comprehensive data tables with features like sorting, filtering, pagination, search, column resizing, row expansion, and bulk operations. Ensure full keyboard navigation and ARIA support. Refer to `SimpleDataTableDemo` and `DataTableDemo` as implementation guides for different complexity needs."
+    },
+    {
+      "name": "Performance Optimizations",
+      "instruction": "1.  **Lazy Loading**: Use the `<LazyLoad fallback={<NeumorphicCard className=\"animate-pulse h-64\" />}>` pattern for expensive components like charts.\n2.  **Bundle Optimization**: Ensure tree shaking and use dynamic imports for charts and complex components.\n3.  **CSS Variables for Theme**: Leverage CSS custom properties for instant theme transitions without JS recalculation.\n4.  **Hydration Optimization**: Prevent hydration mismatches, especially with responsive layouts. If `!mounted`, return a server-side layout placeholder."
+    },
+    {
+      "name": "File and Directory Structure",
+      "instruction": "Strictly follow the directory organization outlined in `project-doc.md` under 'Project Structure Analysis'. This includes the `app/` router structure, `components/` organization, `lib/`, `styles/`, and `types/`."
+    },
+    {
+      "name": "Code Quality and Documentation",
+      "instruction": "1.  **TypeScript**: Maintain full type safety. Use generic interfaces where appropriate.\n2.  **ESLint**: Adhere to ESLint 9 rules with Next.js configuration.\n3.  **Component READMEs**: For any new component *library* (e.g., a new set of specialized charts or forms), create a `README.md` detailing usage, props, and examples, as per the 'File Organization Strategy'."
+    }
+  ]
+}

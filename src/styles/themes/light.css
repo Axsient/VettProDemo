@@ -1,0 +1,75 @@
+/* VETTPRO Dashboard Custom Theme */
+/* Based on Consilio-style_dashboard.png and Recehtok-style_dashboard.png */
+
+:root {
+  /* Light Theme (Default) - Consilio-style */
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222.2 84% 4.9%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222.2 84% 4.9%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 222.2 84% 4.9%;
+  --radius: 0.5rem;
+  
+  /* Chart colors for light theme */
+  --chart-1: 12 76% 61%;
+  --chart-2: 173 58% 39%;
+  --chart-3: 197 37% 24%;
+  --chart-4: 43 74% 66%;
+  --chart-5: 27 87% 67%;
+
+  /* VETTPRO Custom Variables - Light Theme */
+  --dashboard-bg: 210 40% 98%;
+  --dashboard-foreground: 222.2 84% 4.9%;
+  --dashboard-card: 0 0% 100%;
+  --dashboard-card-foreground: 222.2 84% 4.9%;
+  --dashboard-muted: 215.4 16.3% 46.9%;
+  
+  /* Sidebar - Always Dark */
+  --sidebar-bg: 224 71% 4%;
+  --sidebar-foreground: 210 40% 98%;
+  --sidebar-border: 215 27.9% 16.9%;
+  --sidebar-active: 210 40% 98%;
+  --sidebar-active-foreground: 224 71% 4%;
+
+  /* Glassmorphism variables */
+  --glass-bg: rgba(255, 255, 255, 0.25);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --glass-blur: 16px;
+  --shadow-color: 220 3% 15%;
+
+  /* Glow effect variables */
+  --glow-blue: #3b82f6;
+  --glow-purple: #8b5cf6;
+  --glow-cyan: #06b6d4;
+  --glow-pink: #ec4899;
+
+  /* Neumorphic theme additions - V11 (Purple Border) */
+  --color-page-bg-neo: #212428;
+  --color-card-bg-neo: #2D3135;
+  --color-card-bg-neo-end: #15171a;
+  --color-button-bg-neo: #222528;
+  /* Removed --color-light-shadow-neo to eliminate light shadows */
+  --color-dark-shadow-neo: rgba(0, 0, 0, 0.5);
+  --color-button-border-neo: #8B5CF6;
+  --color-text-primary-neo: #E0E0E0;
+  --color-text-secondary-neo: #A0A0A0;
+  --color-accent-glow-neo: #FF9A3E;
+
+  /* Removed legacy neumorphic shadow definitions - now handled in neumorphic.css */
+
+  --shadow-button-glow: 0 0 20px 0px var(--color-button-glow-neo);
+} 
