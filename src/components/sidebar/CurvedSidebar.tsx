@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronDown } from 'lucide-react';
 import Icon from '@/components/ui/Icon';
 import Link from 'next/link';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useInverseTheme } from '@/lib/hooks/useInverseTheme';
 import { useTheme } from 'next-themes';
@@ -151,14 +152,25 @@ const CurvedSidebar: React.FC<CurvedSidebarProps> = ({
       >
         <div className="p-4 flex flex-col h-full">
           <div className={cn('neumorphic-header flex items-center mb-8 p-3', isOpen ? 'justify-between' : 'justify-center')}>
-            <h1 className={cn('text-2xl font-bold transition-all duration-300 neumorphic-text', isOpen ? 'opacity-100' : 'hidden')}>
-              VETTPRO
-            </h1>
+            {isOpen && (
+              <div className="flex items-center gap-1 transition-all duration-300">
+                <Image 
+                  src="/vettpro-logo.svg" 
+                  alt="VettPro Logo" 
+                  width={60} 
+                  height={60}
+                  className="flex-shrink-0"
+                />
+                <h1 className="text-2xl font-bold neumorphic-text">
+                  VettPro
+                </h1>
+              </div>
+            )}
             <Button 
               variant="ghost" 
               size="icon" 
               onClick={onToggle} 
-              className="neumorphic-toggle"
+              className="neumorphic-toggle flex-shrink-0"
             >
               <ChevronLeft className={cn('transition-transform duration-300 w-4 h-4', !isMobile && !isOpen && 'rotate-180')} />
             </Button>

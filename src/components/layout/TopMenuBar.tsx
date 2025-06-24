@@ -6,6 +6,7 @@ import { useTheme } from 'next-themes';
 import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
 import { FullScreenToggle } from '@/components/ui/FullScreenToggle';
 import SidebarThemeToggle from '@/components/ui/SidebarThemeToggle';
+import DynamicBreadcrumb from '@/components/layout/DynamicBreadcrumb';
 
 interface TopMenuBarProps {
   isSidebarOpen: boolean;
@@ -24,7 +25,7 @@ const TopMenuBar: React.FC<TopMenuBarProps> = ({ isSidebarOpen, isMobile }) => {
   return (
     <div 
       className={cn(
-        'topbar-neumorphic-container h-16 flex items-center justify-end px-6',
+        'topbar-neumorphic-container h-16 flex items-center justify-between px-6',
         // Only apply theme class after client mount to prevent hydration mismatch
         mounted && theme,
         // Adjust positioning based on sidebar state
@@ -33,7 +34,13 @@ const TopMenuBar: React.FC<TopMenuBarProps> = ({ isSidebarOpen, isMobile }) => {
         isMobile && 'ml-0'
       )}
     >
-      <div className="flex items-center gap-4">
+      {/* Left side - Breadcrumb */}
+      <div className="flex items-center flex-1 min-w-0">
+        <DynamicBreadcrumb />
+      </div>
+
+      {/* Right side - Controls */}
+      <div className="flex items-center gap-4 flex-shrink-0">
         <SidebarThemeToggle />
         <ThemeSwitcher />
         <FullScreenToggle />

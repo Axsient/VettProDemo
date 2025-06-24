@@ -1309,4 +1309,113 @@ div.glow-subtle-blue {
   color: #000000 !important;
   font-weight: 600 !important;
   text-shadow: 0 1px 3px rgba(255, 255, 255, 0.5) !important;
+}
+
+/* ====================================================================== */
+/* NEUMORPHIC BREADCRUMB SYSTEM                                          */
+/* ====================================================================== */
+
+/* Breadcrumb Container */
+.neumorphic-breadcrumb-container {
+  padding: var(--neumorphic-spacing-sm) var(--neumorphic-spacing-md);
+  border-radius: var(--neumorphic-radius-md);
+  background: var(--neumorphic-card);
+  backdrop-filter: blur(var(--neumorphic-blur));
+  border: 1px solid var(--neumorphic-border);
+  box-shadow: var(--neumorphic-shadow-convex);
+  transition: all 0.3s ease;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* Dark Theme Breadcrumb Container */
+.dark .neumorphic-breadcrumb-container {
+  background: rgba(45, 49, 53, 0.7);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  box-shadow: 
+    2px 2px 6px rgba(0, 0, 0, 0.25),
+    4px 4px 12px rgba(0, 0, 0, 0.15),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.05);
+}
+
+/* Light Theme Breadcrumb Container */
+.light .neumorphic-breadcrumb-container {
+  background: rgba(240, 242, 245, 0.9);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  box-shadow: 
+    2px 2px 6px rgba(0, 0, 0, 0.08),
+    4px 4px 12px rgba(0, 0, 0, 0.05),
+    inset -1px -1px 2px rgba(255, 255, 255, 0.7);
+}
+
+/* Breadcrumb Hover Enhancement */
+.neumorphic-breadcrumb-container:hover {
+  transform: translateY(-1px);
+  box-shadow: 
+    3px 3px 8px rgba(0, 0, 0, 0.2),
+    6px 6px 16px rgba(0, 0, 0, 0.1),
+    0 0 15px rgba(139, 92, 246, 0.1),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.08);
+}
+
+/* Dark Theme Breadcrumb Hover */
+.dark .neumorphic-breadcrumb-container:hover {
+  box-shadow: 
+    3px 3px 8px rgba(0, 0, 0, 0.3),
+    6px 6px 16px rgba(0, 0, 0, 0.2),
+    0 0 20px rgba(139, 92, 246, 0.15),
+    inset 1px 1px 2px rgba(255, 255, 255, 0.08);
+}
+
+/* Light Theme Breadcrumb Hover */
+.light .neumorphic-breadcrumb-container:hover {
+  box-shadow: 
+    3px 3px 8px rgba(0, 0, 0, 0.12),
+    6px 6px 16px rgba(0, 0, 0, 0.08),
+    0 0 15px rgba(139, 92, 246, 0.2),
+    inset -1px -1px 2px rgba(255, 255, 255, 0.8);
+}
+
+/* Breadcrumb Item Styling */
+.neumorphic-breadcrumb-container .text-neumorphic-text-secondary {
+  font-size: 0.875rem; /* 14px */
+  font-weight: 500;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+}
+
+.neumorphic-breadcrumb-container .text-neumorphic-text-primary {
+  font-size: 0.875rem; /* 14px */
+  font-weight: 600;
+  opacity: 1;
+}
+
+/* Breadcrumb Link Hover Effects */
+.neumorphic-breadcrumb-container a:hover {
+  text-shadow: 0 0 8px var(--neumorphic-accent);
+  transform: scale(1.02);
+  transition: all 0.2s ease;
+}
+
+/* Breadcrumb Separator Styling */
+.neumorphic-breadcrumb-container [data-slot="breadcrumb-separator"] svg {
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.neumorphic-breadcrumb-container:hover [data-slot="breadcrumb-separator"] svg {
+  opacity: 0.8;
+}
+
+/* Responsive Breadcrumb Adjustments */
+@media (max-width: 768px) {
+  .neumorphic-breadcrumb-container {
+    padding: var(--neumorphic-spacing-xs) var(--neumorphic-spacing-sm);
+    border-radius: var(--neumorphic-radius-sm);
+  }
+  
+  .neumorphic-breadcrumb-container .text-neumorphic-text-secondary,
+  .neumorphic-breadcrumb-container .text-neumorphic-text-primary {
+    font-size: 0.8125rem; /* 13px */
+  }
 } 
