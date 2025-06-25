@@ -428,17 +428,17 @@ export function NeumorphicDataTable<T extends Record<string, unknown>>({
           <table ref={tableRef} className="w-full">
             {/* Header */}
             <thead>
-              <tr className="border-b border-border/50">
+              <tr key="header-row" className="border-b border-border/50">
                 {/* Row Expansion Header */}
                 {features.rowExpansion && (
-                  <th className="w-12 p-3 text-center">
+                  <th key="expansion-header" className="w-12 p-3 text-center">
                     <span className="sr-only">Expand</span>
                   </th>
                 )}
 
                 {/* Selection Header */}
                 {table.selection.mode === 'multiple' && (
-                  <th className="w-12 p-3 text-left">
+                  <th key="selection-header" className="w-12 p-3 text-left">
                     <input
                       type="checkbox"
                       checked={table.data.length > 0 && table.data.every(row => table.selection.isRowSelected(row))}
@@ -563,7 +563,7 @@ export function NeumorphicDataTable<T extends Record<string, unknown>>({
 
                 {/* Actions Header */}
                 {features.rowActions && rowActions.length > 0 && (
-                  <th className="w-16 p-3 text-center">Actions</th>
+                  <th key="actions-header" className="w-16 p-3 text-center">Actions</th>
                 )}
               </tr>
             </thead>
@@ -577,6 +577,7 @@ export function NeumorphicDataTable<T extends Record<string, unknown>>({
                 return (
                   <React.Fragment key={rowId}>
                     <tr
+                      key={`row-${rowId}`}
                       className={`
                         border-b border-border/30 hover:bg-purple-500/5 transition-colors cursor-pointer
                         ${table.selection.isRowSelected(row) ? 'bg-purple-500/10' : ''}
@@ -682,7 +683,7 @@ export function NeumorphicDataTable<T extends Record<string, unknown>>({
 
                     {/* Expanded Row Content */}
                     {features.rowExpansion && isExpanded && rowDetails && (
-                      <tr className="border-b border-border/30">
+                      <tr key={`expanded-${rowId}`} className="border-b border-border/30">
                         <td 
                           colSpan={
                             table.columns.length + 

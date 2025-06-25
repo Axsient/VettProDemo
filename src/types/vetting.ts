@@ -234,3 +234,199 @@ export interface ConsentRequest {
   ipAddress?: string;
   deviceInfo?: string;
 }
+
+// Extended interfaces for Active Vetting Cases
+export enum IndividualCheckStatus {
+  PENDING = 'Pending',
+  IN_PROGRESS = 'In Progress',
+  AWAITING_SUBJECT_INFO = 'Awaiting Subject Info',
+  SUBMITTED_TO_PROVIDER = 'Submitted to Provider',
+  RESULTS_RECEIVED = 'Results Received',
+  COMPLETE_CLEAR = 'Complete - Clear',
+  COMPLETE_ADVERSE = 'Complete - Adverse Finding',
+  COMPLETE_NEUTRAL = 'Complete - Neutral/Info Only',
+  CANCELLED = 'Cancelled',
+  ERROR = 'Error',
+}
+
+export interface ActiveVettingCheck extends CheckResult {
+  checkDefinition: VettingCheckDefinition;
+  estimatedCompletionDate?: string;
+  actualStartDate?: string;
+  actualCompletionDate?: string;
+  statusUpdatedDate?: string;
+  statusUpdatedBy?: string;
+  blockerReason?: string;
+  providerReference?: string;
+  urgentFlag?: boolean;
+  internalNotes?: string;
+}
+
+export interface ActiveVettingCase extends VettingCase {
+  // Progress tracking
+  overallProgress: number; // 0-100 percentage
+  completedChecks: number;
+  totalChecks: number;
+  
+  // Enhanced status tracking
+  lastStatusUpdate: string;
+  lastStatusUpdateBy?: string;
+  estimatedCompletionDate?: string;
+  isOverdue: boolean;
+  daysSinceInitiated: number;
+  
+  // Individual check details
+  individualChecks: ActiveVettingCheck[];
+  
+  // Assignment and responsibility
+  assignedVettingOfficer?: string;
+  assignedDate?: string;
+  
+  // Flags and alerts
+  flaggedForReview?: boolean;
+  flaggedReason?: string;
+  hasBlockers?: boolean;
+  blockerCount?: number;
+  
+  // Related entities
+  relatedAdminTaskId?: string;
+  projectId?: string;
+  projectName?: string;
+  
+  // Audit trail
+  auditTrail?: VettingAuditEntry[];
+  
+  // Additional metadata for table display
+  entityName: string; // Computed display name
+  entityIdentifier: string; // ID/Registration number for display
+}
+
+export interface VettingAuditEntry {
+  id: string;
+  caseId: string;
+  timestamp: string;
+  userId: string;
+  userName: string;
+  action: string;
+  previousValue?: string;
+  newValue?: string;
+  checkId?: string;
+  notes?: string;
+  ipAddress?: string;
+}
+
+// Table-specific interfaces
+export interface ActiveVettingCaseTableRow {
+  id: string;
+  caseNumber: string;
+  entityName: string;
+  entityType: VettingEntityType;
+  entityIdentifier: string;
+  status: VettingStatus;
+  priority: 'Low' | 'Medium' | 'High' | 'Urgent';
+  progress: number;
+  initiatedDate: string;
+  estimatedCompletionDate?: string;
+  assignedVettingOfficer?: string;
+  isOverdue: boolean;
+  flaggedForReview?: boolean;
+  completedChecks: number;
+  totalChecks: number;
+  daysSinceInitiated: number;
+  lastStatusUpdate: string;
+  consentStatus: ConsentStatus;
+  projectName?: string;
+}
+
+// Bulk actions for Active Vetting Cases
+export interface VettingBulkAction {
+  id: string;
+  label: string;
+  description: string;
+  icon?: string;
+  requiresConfirmation: boolean;
+  confirmationMessage?: string;
+  allowedStatuses?: VettingStatus[];
+  minimumSelection?: number;
+  maximumSelection?: number;
+}
+
+// Enhanced filtering for Active Cases
+export interface ActiveVettingFilters extends VettingFilters {
+  assignedOfficer?: string;
+  progressRange?: {
+    min: number;
+    max: number;
+  };
+  overdueOnly?: boolean;
+  flaggedOnly?: boolean;
+  hasBlockers?: boolean;
+  checkStatus?: IndividualCheckStatus;
+  projectId?: string;
+  daysSinceInitiated?: {
+    min?: number;
+    max?: number;
+  };
+}
+
+// Case details modal data
+export interface VettingCaseDetails extends ActiveVettingCase {
+  // Additional data loaded for detailed view
+  fullAuditTrail: VettingAuditEntry[];
+  relatedDocuments?: VettingDocument[];
+  communicationHistory?: VettingCommunication[];
+  costBreakdown?: VettingCostBreakdown;
+}
+
+export interface VettingDocument {
+  id: string;
+  caseId: string;
+  checkId?: string;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  uploadedDate: string;
+  uploadedBy: string;
+  category: 'Consent' | 'Supporting Document' | 'Result' | 'Internal Note';
+  isRequired: boolean;
+  isReceived: boolean;
+  expiryDate?: string;
+}
+
+export interface VettingCommunication {
+  id: string;
+  caseId: string;
+  type: 'SMS' | 'Email' | 'Phone Call' | 'System Notification';
+  direction: 'Outbound' | 'Inbound';
+  recipient?: string;
+  sender?: string;
+  subject?: string;
+  content: string;
+  timestamp: string;
+  status: 'Sent' | 'Delivered' | 'Read' | 'Failed' | 'Bounce';
+  relatedCheckId?: string;
+}
+
+export interface VettingCostBreakdown {
+  caseId: string;
+  estimatedTotal: number;
+  actualTotal?: number;
+  checkCosts: Array<{
+    checkId: string;
+    checkName: string;
+    estimatedCost: number;
+    actualCost?: number;
+    provider: string;
+    invoiceReference?: string;
+  }>;
+  additionalCosts?: Array<{
+    description: string;
+    amount: number;
+    category: string;
+  }>;
+  discountsApplied?: Array<{
+    description: string;
+    amount: number;
+    type: 'Percentage' | 'Fixed';
+  }>;
+}
