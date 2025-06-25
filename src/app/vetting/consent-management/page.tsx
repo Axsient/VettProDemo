@@ -1,9 +1,10 @@
-import React from 'react';
+import { getConsentRequests } from '@/lib/sample-data/consentRequestsSample';
+import { ConsentManagementClient } from './ConsentManagementClient';
 
-export default function ConsentManagement() {
+export default async function ConsentManagementPage() {
+  const consentRequests = await getConsentRequests();
+
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold">Consent Management</h1>
-    </div>
+    <ConsentManagementClient initialData={consentRequests} />
   );
 } 

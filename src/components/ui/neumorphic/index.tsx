@@ -508,4 +508,7 @@ export const NeumorphicStatsCard = React.forwardRef<
     </div>
   </div>
 ));
-NeumorphicStatsCard.displayName = "NeumorphicStatsCard"; 
+NeumorphicStatsCard.displayName = "NeumorphicStatsCard";
+
+// Export NeumorphicTextarea
+export { NeumorphicTextarea } from './NeumorphicTextarea'; 
