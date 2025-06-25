@@ -865,3 +865,6 @@ import { NeumorphicCard } from '@/components/ui/neumorphic';
 ---
 
 This guide should be referenced whenever creating new UI components or modifying existing ones. Always prioritize reusing existing components over creating new ones, and ensure all components follow the established neumorphic design system and architectural patterns.
+
+
+Notes: check for the correct import paths

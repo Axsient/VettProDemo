@@ -511,4 +511,11 @@ export const NeumorphicStatsCard = React.forwardRef<
 NeumorphicStatsCard.displayName = "NeumorphicStatsCard"; 
 
 // Export NeumorphicTextarea
-export { NeumorphicTextarea } from './NeumorphicTextarea'; 
+export { NeumorphicTextarea } from './NeumorphicTextarea';
+
+// Export NeumorphicCalendar
+export { NeumorphicCalendar } from './NeumorphicCalendar';
+export type { NeumorphicCalendarProps } from './NeumorphicCalendar';
+
+// Export NeumorphicTabs
+export { NeumorphicTabs, NeumorphicTabsList, NeumorphicTabsTrigger, NeumorphicTabsContent } from './NeumorphicTabs'; 

@@ -9,6 +9,7 @@ import { BasicDemo } from '@/components/charts/apex/examples/BasicDemo';
 import { VettingLineChartsDemo } from '@/components/charts/apex/examples/VettingLineChartsDemo';
 import { VettingBarChartsDemo } from '@/components/charts/apex/examples/VettingBarChartsDemo';
 import { PieDonutChartsDemo } from '@/components/charts/apex/examples/PieDonutChartsDemo';
+import dynamic from 'next/dynamic';
 import {
   Dialog,
   DialogContent,
@@ -23,7 +24,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { toast } from "sonner";
 import PlaceholderLineChart from "@/components/charts/PlaceholderLineChart";
 import { Input } from "@/components/ui/input";
-import { 
+import {
   NeumorphicBackground,
   NeumorphicCard,
   NeumorphicText,
@@ -37,8 +38,17 @@ import {
   NeumorphicTableHead,
   NeumorphicTableCell,
   NeumorphicButton,
+  NeumorphicTabs,
 } from "@/components/ui/neumorphic";
 import { ActivityIcon, AlertCircleIcon, CheckCircleIcon, ClockIcon, FileText, TrendingUp, Award } from "lucide-react";
+
+// Dynamic import for InteractiveMap to handle SSR
+const InteractiveMap = dynamic(() => import('@/components/maps/InteractiveMap'), {
+  ssr: false,
+  loading: () => <NeumorphicCard className="animate-pulse h-96 flex items-center justify-center">
+    <NeumorphicText variant="secondary">Loading map...</NeumorphicText>
+  </NeumorphicCard>
+});
 
 export default function UIElementsPage() {
   return (
@@ -427,6 +437,304 @@ export default function UIElementsPage() {
               </NeumorphicText>
             </div>
             <SelectionComponentsDemo />
+          </NeumorphicCard>
+        </LazyLoad>
+
+        {/* Neumorphic Tabs Demo */}
+        <LazyLoad fallback={<NeumorphicCard className="animate-pulse h-96" />}>
+          <NeumorphicCard>
+            <div className="mb-4">
+              <NeumorphicText size="lg" className="font-semibold">📑 Neumorphic Tabs</NeumorphicText>
+              <NeumorphicText variant="secondary" size="sm" className="mt-1">
+                Tab navigation with neumorphic styling, elevated active states, and smooth transitions.
+              </NeumorphicText>
+            </div>
+
+            {/* Basic Tabs Example */}
+            <div className="space-y-6">
+              <div>
+                <NeumorphicText className="font-medium mb-3">Community Canvassing Example</NeumorphicText>
+                <NeumorphicTabs defaultValue="database">
+                  <NeumorphicTabs.List>
+                    <NeumorphicTabs.Trigger value="database">Community Database</NeumorphicTabs.Trigger>
+                    <NeumorphicTabs.Trigger value="onboard">Onboard New Member</NeumorphicTabs.Trigger>
+                    <NeumorphicTabs.Trigger value="review">Review Submissions</NeumorphicTabs.Trigger>
+                  </NeumorphicTabs.List>
+                  
+                  <NeumorphicTabs.Content value="database">
+                    <NeumorphicCard className="p-6">
+                      <NeumorphicText size="lg" className="font-semibold mb-2">Community Members Database</NeumorphicText>
+                      <NeumorphicText variant="secondary" className="mb-4">
+                        View and manage community members, their verification status, and contact information.
+                      </NeumorphicText>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <NeumorphicStatsCard
+                          title="Total Members"
+                          value="1,247"
+                          icon={<ActivityIcon className="w-5 h-5 text-blue-400" />}
+                        />
+                        <NeumorphicStatsCard
+                          title="Verified"
+                          value="1,089"
+                          icon={<CheckCircleIcon className="w-5 h-5 text-green-400" />}
+                        />
+                        <NeumorphicStatsCard
+                          title="Pending"
+                          value="158"
+                          icon={<ClockIcon className="w-5 h-5 text-yellow-400" />}
+                        />
+                      </div>
+                    </NeumorphicCard>
+                  </NeumorphicTabs.Content>
+                  
+                  <NeumorphicTabs.Content value="onboard">
+                    <NeumorphicCard className="p-6">
+                      <NeumorphicText size="lg" className="font-semibold mb-2">Onboard New Member</NeumorphicText>
+                      <NeumorphicText variant="secondary" className="mb-4">
+                        Register new community members and initiate their vetting process.
+                      </NeumorphicText>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <NeumorphicText size="sm" className="mb-2 font-medium">Full Name</NeumorphicText>
+                            <Input placeholder="Enter full name" />
+                          </div>
+                          <div>
+                            <NeumorphicText size="sm" className="mb-2 font-medium">ID Number</NeumorphicText>
+                            <Input placeholder="SA ID Number" />
+                          </div>
+                        </div>
+                        <div>
+                          <NeumorphicText size="sm" className="mb-2 font-medium">Address</NeumorphicText>
+                          <Input placeholder="Physical address" />
+                        </div>
+                        <Button variant="neumorphic-outline" className="w-full">
+                          Begin Onboarding Process
+                        </Button>
+                      </div>
+                    </NeumorphicCard>
+                  </NeumorphicTabs.Content>
+                  
+                  <NeumorphicTabs.Content value="review">
+                    <NeumorphicCard className="p-6">
+                      <NeumorphicText size="lg" className="font-semibold mb-2">Review Submissions</NeumorphicText>
+                      <NeumorphicText variant="secondary" className="mb-4">
+                        Review and approve pending member applications and documentation.
+                      </NeumorphicText>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 bg-[var(--neumorphic-button)] bg-opacity-30 rounded-[var(--neumorphic-radius-md)]">
+                          <div>
+                            <NeumorphicText className="font-medium">John Doe</NeumorphicText>
+                            <NeumorphicText variant="secondary" size="sm">ID: 8901234567890</NeumorphicText>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button variant="neumorphic-outline" size="sm">Review</Button>
+                            <NeumorphicBadge variant="warning">Pending</NeumorphicBadge>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between p-3 bg-[var(--neumorphic-button)] bg-opacity-30 rounded-[var(--neumorphic-radius-md)]">
+                          <div>
+                            <NeumorphicText className="font-medium">Jane Smith</NeumorphicText>
+                            <NeumorphicText variant="secondary" size="sm">ID: 8912345678901</NeumorphicText>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button variant="neumorphic-outline" size="sm">Review</Button>
+                            <NeumorphicBadge variant="info">Documents Received</NeumorphicBadge>
+                          </div>
+                        </div>
+                      </div>
+                    </NeumorphicCard>
+                  </NeumorphicTabs.Content>
+                </NeumorphicTabs>
+              </div>
+
+              {/* Business Location Verification Example */}
+              <div>
+                <NeumorphicText className="font-medium mb-3">Business Location Verification Example</NeumorphicText>
+                <NeumorphicTabs defaultValue="overview">
+                  <NeumorphicTabs.List>
+                    <NeumorphicTabs.Trigger value="overview">Overview</NeumorphicTabs.Trigger>
+                    <NeumorphicTabs.Trigger value="field-checks">Field Checks</NeumorphicTabs.Trigger>
+                    <NeumorphicTabs.Trigger value="documentation">Documentation</NeumorphicTabs.Trigger>
+                    <NeumorphicTabs.Trigger value="reports" disabled>Reports</NeumorphicTabs.Trigger>
+                  </NeumorphicTabs.List>
+                  
+                  <NeumorphicTabs.Content value="overview">
+                    <NeumorphicCard className="p-6">
+                      <NeumorphicText size="lg" className="font-semibold mb-2">Verification Overview</NeumorphicText>
+                      <NeumorphicText variant="secondary" className="mb-4">
+                        Comprehensive business location verification dashboard with real-time status updates.
+                      </NeumorphicText>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <NeumorphicStatsCard
+                          title="Active Verifications"
+                          value="34"
+                          icon={<ActivityIcon className="w-5 h-5 text-blue-400" />}
+                        />
+                        <NeumorphicStatsCard
+                          title="Completed Today"
+                          value="12"
+                          icon={<CheckCircleIcon className="w-5 h-5 text-green-400" />}
+                        />
+                        <NeumorphicStatsCard
+                          title="Field Visits"
+                          value="8"
+                          icon={<ClockIcon className="w-5 h-5 text-purple-400" />}
+                        />
+                        <NeumorphicStatsCard
+                          title="Risk Flags"
+                          value="2"
+                          icon={<AlertCircleIcon className="w-5 h-5 text-red-400" />}
+                        />
+                      </div>
+                    </NeumorphicCard>
+                  </NeumorphicTabs.Content>
+                  
+                  <NeumorphicTabs.Content value="field-checks">
+                    <NeumorphicCard className="p-6">
+                      <NeumorphicText size="lg" className="font-semibold mb-2">Field Verification Checks</NeumorphicText>
+                      <NeumorphicText variant="secondary" className="mb-4">
+                        Schedule and manage physical location verification visits.
+                      </NeumorphicText>
+                      <div className="space-y-4">
+                        <Button variant="neumorphic-outline" className="w-full">
+                          Schedule New Field Visit
+                        </Button>
+                        <div className="space-y-2">
+                          <NeumorphicText size="sm" className="font-medium">Upcoming Visits</NeumorphicText>
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between p-3 bg-[var(--neumorphic-button)] bg-opacity-30 rounded-[var(--neumorphic-radius-md)]">
+                              <div>
+                                <NeumorphicText className="font-medium">ABC Manufacturing</NeumorphicText>
+                                <NeumorphicText variant="secondary" size="sm">Tomorrow, 10:00 AM</NeumorphicText>
+                              </div>
+                              <NeumorphicBadge variant="info">Scheduled</NeumorphicBadge>
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-[var(--neumorphic-button)] bg-opacity-30 rounded-[var(--neumorphic-radius-md)]">
+                              <div>
+                                <NeumorphicText className="font-medium">XYZ Services</NeumorphicText>
+                                <NeumorphicText variant="secondary" size="sm">Friday, 2:00 PM</NeumorphicText>
+                              </div>
+                              <NeumorphicBadge variant="warning">Pending Confirmation</NeumorphicBadge>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </NeumorphicCard>
+                  </NeumorphicTabs.Content>
+                  
+                  <NeumorphicTabs.Content value="documentation">
+                    <NeumorphicCard className="p-6">
+                      <NeumorphicText size="lg" className="font-semibold mb-2">Documentation Management</NeumorphicText>
+                      <NeumorphicText variant="secondary" className="mb-4">
+                        Upload, review, and manage verification documentation and evidence.
+                      </NeumorphicText>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <Button variant="neumorphic-outline">Upload Documents</Button>
+                          <Button variant="neumorphic-outline">Generate Report</Button>
+                        </div>
+                        <div>
+                          <NeumorphicText size="sm" className="font-medium mb-2">Recent Documents</NeumorphicText>
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-3 p-2">
+                              <FileText className="w-4 h-4 text-[var(--neumorphic-text-secondary)]" />
+                              <NeumorphicText size="sm">Business Registration Certificate.pdf</NeumorphicText>
+                            </div>
+                            <div className="flex items-center gap-3 p-2">
+                              <FileText className="w-4 h-4 text-[var(--neumorphic-text-secondary)]" />
+                              <NeumorphicText size="sm">Location Photos.zip</NeumorphicText>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </NeumorphicCard>
+                  </NeumorphicTabs.Content>
+                  
+                  <NeumorphicTabs.Content value="reports">
+                    <NeumorphicCard className="p-6">
+                      <NeumorphicText size="lg" className="font-semibold mb-2">Verification Reports</NeumorphicText>
+                      <NeumorphicText variant="secondary">
+                        This section is currently disabled for demonstration purposes.
+                      </NeumorphicText>
+                    </NeumorphicCard>
+                  </NeumorphicTabs.Content>
+                </NeumorphicTabs>
+              </div>
+            </div>
+          </NeumorphicCard>
+        </LazyLoad>
+
+        {/* Interactive Map Demo */}
+        <LazyLoad fallback={<NeumorphicCard className="animate-pulse h-96" />}>
+          <NeumorphicCard>
+            <div className="mb-4">
+              <NeumorphicText size="lg" className="font-semibold">🗺️ Interactive Map</NeumorphicText>
+              <NeumorphicText variant="secondary" size="sm" className="mt-1">
+                Field operations map with animated markers, geofences, and real-time verification status.
+              </NeumorphicText>
+            </div>
+
+            {/* Interactive Map Component */}
+            <div className="space-y-6">
+              <div>
+                <NeumorphicText className="font-medium mb-3">Field Operations Dashboard</NeumorphicText>
+                <InteractiveMap 
+                  height="400px"
+                  showControls={true}
+                  showGeofences={true}
+                  onMarkerClick={(marker) => {
+                    console.log('Marker clicked:', marker);
+                    toast(`Selected: ${marker.title}`, {
+                      description: marker.description
+                    });
+                  }}
+                />
+              </div>
+
+              {/* Map Features Overview */}
+              <NeumorphicCard className="p-4">
+                <NeumorphicText size="lg" className="font-semibold mb-3">Map Features</NeumorphicText>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <NeumorphicText className="font-medium">🎯 Animated Markers</NeumorphicText>
+                    <NeumorphicText variant="secondary" size="sm">
+                      Pulsing and glowing markers with status-based colors and animations
+                    </NeumorphicText>
+                  </div>
+                  <div className="space-y-2">
+                    <NeumorphicText className="font-medium">🛡️ Geofences</NeumorphicText>
+                    <NeumorphicText variant="secondary" size="sm">
+                      Visual boundary areas for enhanced monitoring and alerts
+                    </NeumorphicText>
+                  </div>
+                  <div className="space-y-2">
+                    <NeumorphicText className="font-medium">📊 Live Stats</NeumorphicText>
+                    <NeumorphicText variant="secondary" size="sm">
+                      Real-time counters and status indicators for active operations
+                    </NeumorphicText>
+                  </div>
+                  <div className="space-y-2">
+                    <NeumorphicText className="font-medium">💬 Rich Popups</NeumorphicText>
+                    <NeumorphicText variant="secondary" size="sm">
+                      Detailed information cards with neumorphic styling and actions
+                    </NeumorphicText>
+                  </div>
+                  <div className="space-y-2">
+                    <NeumorphicText className="font-medium">🎨 Theme Integration</NeumorphicText>
+                    <NeumorphicText variant="secondary" size="sm">
+                      Full neumorphic theme support with dark/light mode compatibility
+                    </NeumorphicText>
+                  </div>
+                  <div className="space-y-2">
+                    <NeumorphicText className="font-medium">⚡ Performance</NeumorphicText>
+                    <NeumorphicText variant="secondary" size="sm">
+                      Optimized rendering with SSR support and lazy loading
+                    </NeumorphicText>
+                  </div>
+                </div>
+              </NeumorphicCard>
+            </div>
           </NeumorphicCard>
         </LazyLoad>
 

@@ -5,8 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, RefreshCw, Download, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { toast } from 'sonner';
-import { ActiveVettingCase } from '@/types/vetting';
-import { activeVettingCases, getActiveVettingCasesStats } from '@/lib/sample-data/activeVettingCasesSample';
+import { getActiveVettingCasesStats } from '@/lib/sample-data/activeVettingCasesSample';
 import { 
   NeumorphicBackground,
   NeumorphicCard,
@@ -17,7 +16,6 @@ import {
 import { ActiveVettingCasesDemo } from '@/components/vetting/ActiveVettingCasesDemo';
 
 export default function ActiveVettingCases() {
-  const [cases, setCases] = useState<ActiveVettingCase[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<ReturnType<typeof getActiveVettingCasesStats> | null>(null);
 
@@ -28,7 +26,6 @@ export default function ActiveVettingCases() {
       try {
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 500));
-        setCases(activeVettingCases);
         setStats(getActiveVettingCasesStats());
       } catch {
         toast.error('Failed to load active vetting cases');
@@ -40,37 +37,10 @@ export default function ActiveVettingCases() {
     loadData();
   }, []);
 
-  // Event handlers
-  const handleViewCase = (caseId: string) => {
-    toast.info(`Viewing case: ${caseId}`);
-    // TODO: Navigate to case details page or open modal
-  };
-
-  const handleEditCase = (caseId: string) => {
-    toast.info(`Editing case: ${caseId}`);
-    // TODO: Navigate to edit page or open edit modal
-  };
-
-  const handleApproveCase = (caseId: string) => {
-    toast.success(`Case ${caseId} approved`);
-    // TODO: Update case status
-  };
-
-  const handleRejectCase = (caseId: string) => {
-    toast.error(`Case ${caseId} rejected`);
-    // TODO: Update case status
-  };
-
-  const handleBulkAction = (action: string, selectedIds: string[]) => {
-    toast.info(`Bulk action '${action}' on ${selectedIds.length} cases`);
-    // TODO: Implement bulk actions
-  };
-
   const handleRefresh = async () => {
     setLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 300));
-      setCases([...activeVettingCases]);
       setStats(getActiveVettingCasesStats());
       toast.success('Data refreshed');
     } catch {

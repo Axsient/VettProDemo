@@ -1,9 +1,23 @@
-import React from 'react';
+import { Metadata } from 'next';
+import { ScheduledChecksClient } from '@/components/vetting/ScheduledChecksClient';
+import { getScheduledChecks, getScheduledChecksStats } from '@/lib/sample-data/scheduledChecksSample';
 
-export default function ScheduledChecks() {
+export const metadata: Metadata = {
+  title: 'Scheduled & Recurring Checks | VETTPRO Dashboard',
+  description: 'Manage and monitor automated recurring vetting checks and schedules.',
+};
+
+export default async function ScheduledChecksPage() {
+  // Load initial data on the server
+  const [scheduledChecks, stats] = await Promise.all([
+    getScheduledChecks(),
+    getScheduledChecksStats(),
+  ]);
+
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold">Scheduled & Recurring Checks</h1>
-    </div>
+    <ScheduledChecksClient
+      initialScheduledChecks={scheduledChecks}
+      initialStats={stats}
+    />
   );
 } 

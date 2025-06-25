@@ -187,6 +187,50 @@ src/
 </NeumorphicTable>
 ```
 
+**NeumorphicCalendar**
+```tsx
+<NeumorphicCalendar
+  events={calendarEvents}
+  onEventClick={handleEventClick}
+  height="600px"
+  initialDate={new Date('2025-06-05')}
+/>
+```
+- Full FullCalendar integration with neumorphic theme styling
+- Comprehensive CSS overrides for all calendar elements
+- Theme-aware styling with automatic dark/light mode support
+- Responsive design with mobile-friendly breakpoints
+- Event handling for click interactions
+- Customizable height and initial view date
+- Color-coded events based on status or category
+
+**NeumorphicTabs**
+```tsx
+<NeumorphicTabs defaultValue="database">
+  <NeumorphicTabs.List>
+    <NeumorphicTabs.Trigger value="database">Community Database</NeumorphicTabs.Trigger>
+    <NeumorphicTabs.Trigger value="onboard">Onboard New Member</NeumorphicTabs.Trigger>
+    <NeumorphicTabs.Trigger value="review">Review Submissions</NeumorphicTabs.Trigger>
+  </NeumorphicTabs.List>
+  
+  <NeumorphicTabs.Content value="database">
+    <NeumorphicCard className="p-6">
+      {/* Tab content */}
+    </NeumorphicCard>
+  </NeumorphicTabs.Content>
+  {/* Additional content sections */}
+</NeumorphicTabs>
+```
+- Built on Radix UI Tabs primitives with full accessibility support
+- **Tabs.List**: Recessed container with subtle border and card-like background
+- **Tabs.Trigger (Inactive)**: Flat appearance with secondary text color and hover effects
+- **Tabs.Trigger (Active)**: Elevated appearance with convex shadows, primary text color, and slight lift animation
+- **Tabs.Content**: Smooth fade-in and slide-up animation when switching between tabs
+- Disabled state support with reduced opacity and no interaction
+- Keyboard navigation and focus management
+- Compound component pattern for clean API (`NeumorphicTabs.List`, `NeumorphicTabs.Trigger`, etc.)
+- Perfect for organizing complex features like Community Canvassing and Business Location Verification
+
 ### Enhanced Shadcn Components
 
 **Button Component (Recommended Approach)**
@@ -229,6 +273,80 @@ src/
   </DialogContent>
 </Dialog>
 ```
+
+## Advanced Component Implementation
+
+### NeumorphicTabs Implementation Details
+
+The NeumorphicTabs component demonstrates advanced neumorphic design principles with sophisticated state management and visual hierarchy:
+
+**Visual State System**
+```css
+/* Inactive Tab (Flat Appearance) */
+.neumorphic-tabs-trigger {
+  text-color: var(--neumorphic-text-secondary);
+  background: transparent;
+  box-shadow: none; /* No elevation */
+  
+  /* Hover state with subtle feedback */
+  &:hover {
+    text-color: var(--neumorphic-text-primary);
+    background: var(--neumorphic-button) with 30% opacity;
+  }
+}
+
+/* Active Tab (Elevated Appearance) */
+.neumorphic-tabs-trigger[data-state='active'] {
+  text-color: var(--neumorphic-text-primary);
+  background: var(--neumorphic-button);
+  box-shadow: var(--neumorphic-shadow-convex); /* Creates elevation */
+  border-bottom: 2px solid var(--neumorphic-border);
+  transform: translateY(-1px); /* Subtle lift animation */
+}
+
+/* Tabs Container (Recessed Appearance) */
+.neumorphic-tabs-list {
+  background: var(--neumorphic-card);
+  border-bottom: 1px solid var(--neumorphic-border) with 20% opacity;
+  box-shadow: inset 2px 2px 4px rgba(0,0,0,0.1); /* Recessed look */
+}
+```
+
+**Key Design Decisions**
+1. **Visual Hierarchy**: Active tabs appear "elevated" above the inactive ones using convex shadows
+2. **State Communication**: Inactive tabs are flat to show they're "pressable", active tabs are raised to show they're "pressed"
+3. **Smooth Transitions**: 200ms ease-out transitions for all state changes
+4. **Focus Management**: Proper keyboard navigation with visible focus rings
+5. **Accessibility**: Full ARIA support through Radix UI primitives
+
+**Component Architecture**
+```tsx
+// Compound component pattern for clean API
+const NeumorphicTabs = Object.assign(NeumorphicTabsRoot, {
+  List: NeumorphicTabsList,
+  Trigger: NeumorphicTabsTrigger,
+  Content: NeumorphicTabsContent,
+});
+
+// Usage patterns
+<NeumorphicTabs defaultValue="tab1" onValueChange={handleTabChange}>
+  <NeumorphicTabs.List>
+    <NeumorphicTabs.Trigger value="tab1">Tab 1</NeumorphicTabs.Trigger>
+    <NeumorphicTabs.Trigger value="tab2" disabled>Tab 2</NeumorphicTabs.Trigger>
+  </NeumorphicTabs.List>
+  
+  <NeumorphicTabs.Content value="tab1">
+    {/* Content with automatic animations */}
+  </NeumorphicTabs.Content>
+</NeumorphicTabs>
+```
+
+**Integration Benefits**
+- **Performance**: Uses Radix UI's optimized state management
+- **Accessibility**: Full keyboard navigation and screen reader support
+- **Flexibility**: Supports controlled and uncontrolled modes
+- **Theming**: Automatic dark/light theme adaptation
+- **Animation**: Built-in content switching animations
 
 ## Implementation Guidelines
 
@@ -686,12 +804,241 @@ const Sidebar = () => {
 }
 ```
 
+## InteractiveMap Component Implementation
+
+### Overview
+The InteractiveMap component provides a comprehensive mapping solution with animated markers, geofences, and full neumorphic theme integration for field operations and location verification.
+
+### Core Features
+
+**Dynamic SSR Handling**
+```tsx
+import dynamic from 'next/dynamic';
+
+// Required: Dynamic import to handle SSR issues with Leaflet
+const InteractiveMap = dynamic(() => import('@/components/maps/InteractiveMap'), {
+  ssr: false,
+  loading: () => <NeumorphicCard className="animate-pulse h-96 flex items-center justify-center">
+    <NeumorphicText variant="secondary">Loading map...</NeumorphicText>
+  </NeumorphicCard>
+});
+```
+
+**Basic Usage**
+```tsx
+<InteractiveMap 
+  height="400px"
+  showControls={true}
+  showGeofences={true}
+  center={[-26.2041, 28.0473]} // Johannesburg
+  zoom={10}
+  onMarkerClick={(marker) => {
+    console.log('Marker clicked:', marker);
+    toast(`Selected: ${marker.title}`, {
+      description: marker.description
+    });
+  }}
+/>
+```
+
+### Advanced Animation System
+
+**Animated SVG Markers**
+- **Pulsing Ring Effect**: Outer ring expands/contracts with opacity changes
+- **Status-Based Colors**: Dynamic colors based on verification status
+- **Hover Glow Effect**: Enhanced glow animation on mouse hover
+- **Performance Optimized**: SVG-based icons with CSS animations
+
+**Marker Types & States**
+```tsx
+interface MarkerData {
+  type: 'verification' | 'community' | 'geofence' | 'risk' | 'completed';
+  status: 'pending' | 'active' | 'completed' | 'risk' | 'scheduled';
+  priority?: 'high' | 'medium' | 'low';
+}
+```
+
+**CSS Animation Implementation**
+```css
+/* Pulsing marker animation */
+@keyframes markerPulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Hover glow effect */
+@keyframes markerGlow {
+  0% { filter: drop-shadow(0 0 5px currentColor); }
+  50% { filter: drop-shadow(0 0 15px currentColor); }
+  100% { filter: drop-shadow(0 0 5px currentColor); }
+}
+
+/* Applied to markers */
+.leaflet-marker-icon {
+  animation: markerPulse 3s ease-in-out infinite;
+}
+
+.leaflet-marker-icon:hover {
+  animation: markerGlow 1s ease-in-out infinite;
+  z-index: 1000 !important;
+}
+```
+
+### Neumorphic Integration
+
+**Popup Styling**
+```css
+.neumorphic-map-popup .leaflet-popup-content-wrapper {
+  background: transparent !important;
+  border-radius: var(--neumorphic-radius-lg) !important;
+  box-shadow: none !important;
+}
+
+.neumorphic-map-popup .leaflet-popup-tip {
+  background: var(--neumorphic-card) !important;
+  border: 1px solid var(--neumorphic-border) !important;
+}
+
+.neumorphic-map-popup .leaflet-popup-close-button {
+  background: var(--neumorphic-button) !important;
+  box-shadow: var(--neumorphic-shadow-convex) !important;
+  border-radius: 50% !important;
+}
+```
+
+**Control Panel Styling**
+- **Map Legend**: Neumorphic cards with status indicators
+- **Live Statistics**: Real-time counters with neumorphic styling
+- **Zoom Controls**: Custom neumorphic button styling
+- **Theme Integration**: Full support for dark/light mode switching
+
+### Geofence System
+
+**Visual Implementation**
+```tsx
+// Geofence areas with dashed borders
+<Circle
+  center={[-26.1367, 28.0884]}
+  radius={2000}
+  pathOptions={{
+    color: '#8B5CF6',
+    fillColor: '#8B5CF6',
+    fillOpacity: 0.1,
+    weight: 2,
+    dashArray: '5, 5'
+  }}
+/>
+```
+
+**Status-Based Visualization**
+- **Active Areas**: Purple dashed borders with low opacity fill
+- **Monitoring Zones**: Green borders for completed verification areas
+- **Risk Zones**: Red highlighting for high-risk areas
+
+### Component Architecture
+
+**Props Interface**
+```tsx
+interface InteractiveMapProps {
+  className?: string;
+  height?: string | number;
+  markers?: MarkerData[];
+  center?: LatLngExpression;
+  zoom?: number;
+  showControls?: boolean;
+  showGeofences?: boolean;
+  onMarkerClick?: (marker: MarkerData) => void;
+}
+```
+
+**Sample Data Structure**
+```tsx
+const sampleMarkers: MarkerData[] = [
+  {
+    id: '1',
+    position: [-26.2041, 28.0473],
+    type: 'verification',
+    title: 'ABC Manufacturing',
+    description: 'Business location verification in progress',
+    status: 'active',
+    timestamp: '2024-01-15 10:30',
+    assignee: 'John Smith',
+    priority: 'high'
+  }
+];
+```
+
+### Performance Optimizations
+
+**Lazy Loading Strategy**
+- **Component Level**: Wrapped in LazyLoad with fallback
+- **SSR Handling**: Dynamic import prevents server-side rendering issues
+- **Loading States**: Animated skeleton while map initializes
+
+**Memory Management**
+- **Efficient Re-renders**: UseEffect hooks prevent unnecessary updates
+- **Marker Optimization**: SVG icons cached and reused
+- **Event Handling**: Proper cleanup and event listener management
+
+### Dependencies
+
+**Required Packages**
+```bash
+npm install react-leaflet leaflet @types/leaflet
+```
+
+**CSS Imports**
+```tsx
+import 'leaflet/dist/leaflet.css';
+```
+
+### Integration Examples
+
+**Field Operations Dashboard**
+```tsx
+<InteractiveMap 
+  height="500px"
+  showControls={true}
+  showGeofences={true}
+  markers={fieldOperationsData}
+  onMarkerClick={handleFieldVerification}
+/>
+```
+
+**Community Canvassing Map**
+```tsx
+<InteractiveMap 
+  height="350px"
+  showControls={false}
+  showGeofences={false}
+  markers={communityPoints}
+  center={communityCenter}
+  zoom={12}
+/>
+```
+
+### Troubleshooting
+
+**SSR Issues**
+- **Problem**: "Window is not defined" errors
+- **Solution**: Always use dynamic import with `ssr: false`
+
+**Marker Not Showing**
+- **Problem**: Markers don't appear on map
+- **Solution**: Verify position format `[lat, lng]` and icon creation
+
+**Theme Not Applied**
+- **Problem**: Map elements don't follow neumorphic theme
+- **Solution**: Check CSS variable inheritance and popup styling
+
 ## Future Enhancements
 
 - **Animation Library**: Micro-interactions and transitions
 - **Form Components**: Enhanced form controls with neumorphic styling
 - **Navigation Components**: Sidebar and navigation enhancements
 - **Data Visualization**: Charts and graphs with neumorphic styling
+- **Map Enhancements**: Clustering, heatmaps, and advanced marker animations
 - **Shadow System Refactor**: Consider renaming `shadow-concave` to `shadow-elevated` for clarity
 
 ---

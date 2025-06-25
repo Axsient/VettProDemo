@@ -11,10 +11,15 @@ import {
   NeumorphicHeading,
   NeumorphicBadge,
   NeumorphicStatsCard,
-  NeumorphicTextarea
+  NeumorphicTextarea,
+  NeumorphicTable,
+  NeumorphicTableHeader,
+  NeumorphicTableBody,
+  NeumorphicTableRow,
+  NeumorphicTableHead,
+  NeumorphicTableCell
 } from '@/components/ui/neumorphic';
-import { NeumorphicDataTable } from '@/components/ui/NeumorphicDataTable';
-import { TableColumn, TableAction } from '@/types/table';
+
 import {
   Dialog,
   DialogContent,
@@ -43,7 +48,6 @@ import {
   ConsentChannel,
   ConsentRequestTableRow,
   ConsentFilters,
-  ConsentVerificationForm,
   ManualConsentForm
 } from '@/types/consent';
 import { VettingEntityType } from '@/types/vetting';
@@ -130,168 +134,7 @@ export function ConsentManagementClient({ initialData }: ConsentManagementClient
     });
   }, [data]);
 
-  // Define table columns for NeumorphicDataTable - with restored visual formatting
-  const columns: TableColumn<ConsentRequestTableRow>[] = [
-    {
-      id: 'consentId',
-      header: 'Consent ID',
-      accessorKey: 'consentId',
-      sortable: true,
-      filterable: true,
-      width: 150,
-      cell: (value, row) => (
-        <Dialog>
-          <DialogTrigger asChild>
-            <button className="text-blue-600 hover:text-blue-800 font-medium underline">
-              {String(value)}
-            </button>
-          </DialogTrigger>
-          <DialogContent variant="neumorphic" className="max-w-2xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Consent Request Details</DialogTitle>
-            </DialogHeader>
-            <ViewDetailsContent data={row.originalData as ConsentRequestItem} />
-          </DialogContent>
-        </Dialog>
-      ),
-    },
-    {
-      id: 'subjectName',
-      header: 'Subject Name',
-      accessorKey: 'subjectName',
-      sortable: true,
-      filterable: true,
-      width: 200,
-    },
-    {
-      id: 'subjectId',
-      header: 'Subject ID',
-      accessorKey: 'subjectId',
-      sortable: true,
-      filterable: true,
-      width: 150,
-    },
-    {
-      id: 'entityType',
-      header: 'Type',
-      accessorKey: 'entityType',
-      sortable: true,
-      filterable: true,
-      width: 120,
-      cell: (value) => (
-        <Badge variant="outline" className="text-xs">
-          {String(value)}
-        </Badge>
-      ),
-    },
-    {
-      id: 'checksCount',
-      header: 'Checks',
-      accessorKey: 'checksCount',
-      sortable: true,
-      width: 100,
-      cell: (value, row) => (
-        <div title={String(row.checksTooltip)} className="cursor-help">
-          <Badge variant="secondary" className="text-xs">
-            {String(value)} check{Number(value) !== 1 ? 's' : ''}
-          </Badge>
-        </div>
-      ),
-    },
-    {
-      id: 'status',
-      header: 'Status',
-      accessorKey: 'status',
-      sortable: true,
-      filterable: true,
-      width: 180,
-      cell: (value, row) => (
-        <div className="flex items-center gap-2">
-          {getStatusIcon(value as ConsentRequestStatus)}
-          <NeumorphicBadge variant={getStatusVariant(value as ConsentRequestStatus)} className="text-xs">
-            {String(value)}
-          </NeumorphicBadge>
-        </div>
-      ),
-    },
-    {
-      id: 'channel',
-      header: 'Channel',
-      accessorKey: 'channel',
-      sortable: true,
-      filterable: true,
-      width: 120,
-      cell: (value) => (
-        <Badge variant="outline" className="text-xs">
-          {String(value)}
-        </Badge>
-      ),
-    },
-    {
-      id: 'requestSentDate',
-      header: 'Sent',
-      accessorKey: 'requestSentDate',
-      sortable: true,
-      width: 140,
-      cell: (value) => (
-        <NeumorphicText variant="secondary" size="sm">
-          {formatDate(String(value))}
-        </NeumorphicText>
-      ),
-    },
-    {
-      id: 'expiryDate',
-      header: 'Expiry',
-      accessorKey: 'expiryDate',
-      sortable: true,
-      width: 140,
-      cell: (value, row) => (
-        value ? (
-          <NeumorphicText 
-            variant="secondary" 
-            size="sm"
-            className={row.isExpired ? 'text-red-600 font-medium' : row.isNearExpiry ? 'text-yellow-600 font-medium' : ''}
-          >
-            {formatDate(String(value))}
-            {row.isExpired && <AlertTriangle className="w-3 h-3 inline ml-1" />}
-          </NeumorphicText>
-        ) : (
-          <NeumorphicText variant="secondary" size="sm">N/A</NeumorphicText>
-        )
-      ),
-    },
-  ];
 
-  // Define row actions for NeumorphicDataTable - with conditional visibility restored
-  const rowActions: TableAction<ConsentRequestTableRow>[] = [
-    {
-      id: 'resend',
-      label: 'Resend',
-      icon: Send,
-      onClick: (row) => {
-        toast.success(`Consent request resent to ${row.subjectName as string}`);
-      },
-      condition: (row) => [ConsentRequestStatus.PENDING_SENT, ConsentRequestStatus.EXPIRED, ConsentRequestStatus.ERROR_SENDING].includes(row.status as ConsentRequestStatus),
-    },
-    {
-      id: 'verify',
-      label: 'Verify',
-      icon: CheckCircle,
-      onClick: (row) => {
-        console.log('Verify clicked for', row.consentId);
-        // The actual verify modal would be implemented here
-      },
-      condition: (row) => row.status === ConsentRequestStatus.SUBMITTED_AWAITING_VERIFICATION,
-    },
-    {
-      id: 'viewCase',
-      label: 'View Case',
-      icon: ExternalLink,
-      onClick: (row) => {
-        toast.info(`Navigating to vetting case ${row.vettingCaseId as string}`);
-      },
-    },
-  ];
 
   // Apply filters
   const filteredRows = useMemo(() => {
@@ -561,29 +404,134 @@ export function ConsentManagementClient({ initialData }: ConsentManagementClient
         </div>
       </div>
 
-      {/* Data Table with Built-in Pagination */}
-      <NeumorphicDataTable
-        data={filteredRows}
-        columns={columns}
-        features={{
-          search: false, // We have custom search above
-          sorting: true,
-          filtering: false, // We have custom filters above
-          pagination: true, // This is the key feature we were missing!
-          selection: 'none',
-          columnVisibility: true,
-          export: true,
-          density: true,
-          bulkActions: false,
-          rowActions: true,
-        }}
-        rowActions={rowActions}
-        onRowClick={() => {
-          // Handle row click if needed
-        }}
-        className="w-full"
-        loading={isLoading}
-      />
+          {/* Consent Requests Table */}
+          <NeumorphicTable>
+            <NeumorphicTableHeader>
+              <NeumorphicTableRow>
+                <NeumorphicTableHead className="text-xs font-medium">Consent ID</NeumorphicTableHead>
+                <NeumorphicTableHead className="text-xs font-medium">Subject Name</NeumorphicTableHead>
+                <NeumorphicTableHead className="text-xs font-medium">Subject ID</NeumorphicTableHead>
+                <NeumorphicTableHead className="text-xs font-medium">Type</NeumorphicTableHead>
+                <NeumorphicTableHead className="text-xs font-medium">Checks</NeumorphicTableHead>
+                <NeumorphicTableHead className="text-xs font-medium">Status</NeumorphicTableHead>
+                <NeumorphicTableHead className="text-xs font-medium">Channel</NeumorphicTableHead>
+                <NeumorphicTableHead className="text-xs font-medium">Sent</NeumorphicTableHead>
+                <NeumorphicTableHead className="text-xs font-medium">Expiry</NeumorphicTableHead>
+                <NeumorphicTableHead className="text-xs font-medium">Actions</NeumorphicTableHead>
+              </NeumorphicTableRow>
+            </NeumorphicTableHeader>
+            <NeumorphicTableBody>
+              {filteredRows.map((consent) => (
+                <NeumorphicTableRow key={consent.consentId}>
+                  <NeumorphicTableCell>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button className="text-blue-600 hover:text-blue-800 font-mono text-xs underline">
+                          {consent.consentId}
+                        </button>
+                      </DialogTrigger>
+                      <DialogContent variant="neumorphic" className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>Consent Request Details</DialogTitle>
+                        </DialogHeader>
+                        <ViewDetailsContent data={consent.originalData as ConsentRequestItem} />
+                      </DialogContent>
+                    </Dialog>
+                  </NeumorphicTableCell>
+                  
+                  <NeumorphicTableCell className="text-sm font-medium">
+                    {consent.subjectName}
+                  </NeumorphicTableCell>
+                  
+                  <NeumorphicTableCell className="text-xs font-mono">
+                    {consent.subjectId}
+                  </NeumorphicTableCell>
+                  
+                  <NeumorphicTableCell>
+                    <NeumorphicBadge variant="info" className="text-xs">
+                      {consent.entityType.replace('_', ' ')}
+                    </NeumorphicBadge>
+                  </NeumorphicTableCell>
+                  
+                  <NeumorphicTableCell>
+                    <div title={consent.checksTooltip} className="cursor-help">
+                      <NeumorphicBadge variant="default" className="text-xs">
+                        {consent.checksCount} check{consent.checksCount !== 1 ? 's' : ''}
+                      </NeumorphicBadge>
+                    </div>
+                  </NeumorphicTableCell>
+                  
+                  <NeumorphicTableCell>
+                    <div className="flex items-center gap-1">
+                      {getStatusIcon(consent.status)}
+                      <NeumorphicBadge 
+                        variant={getStatusVariant(consent.status)} 
+                        className="text-xs"
+                      >
+                        {consent.status.replace(/_/g, ' ')}
+                      </NeumorphicBadge>
+                    </div>
+                  </NeumorphicTableCell>
+                  
+                  <NeumorphicTableCell>
+                    <NeumorphicBadge variant="default" className="text-xs">
+                      {consent.channel.replace('_', ' ')}
+                    </NeumorphicBadge>
+                  </NeumorphicTableCell>
+                  
+                  <NeumorphicTableCell className="text-xs">
+                    {formatDate(consent.requestSentDate)}
+                  </NeumorphicTableCell>
+                  
+                  <NeumorphicTableCell className="text-xs">
+                    {consent.expiryDate ? (
+                      <span className={consent.isExpired ? 'text-red-500' : consent.isNearExpiry ? 'text-yellow-500' : ''}>
+                        {formatDate(consent.expiryDate)}
+                      </span>
+                    ) : (
+                      <span className="text-neumorphic-text-secondary">N/A</span>
+                    )}
+                  </NeumorphicTableCell>
+                  
+                  <NeumorphicTableCell>
+                    <div className="flex items-center gap-1">
+                      {/* Conditional action buttons based on status */}
+                      {[ConsentRequestStatus.PENDING_SENT, ConsentRequestStatus.EXPIRED, ConsentRequestStatus.ERROR_SENDING].includes(consent.status) && (
+                        <Button 
+                          variant="neumorphic-outline" 
+                          className="h-7 w-7 p-0"
+                          onClick={() => toast.success(`Consent request resent to ${consent.subjectName}`)}
+                          title="Resend"
+                        >
+                          <Send className="w-3 h-3" />
+                        </Button>
+                      )}
+                      
+                      {consent.status === ConsentRequestStatus.SUBMITTED_AWAITING_VERIFICATION && (
+                        <Button 
+                          variant="neumorphic-outline" 
+                          className="h-7 w-7 p-0"
+                          onClick={() => console.log('Verify clicked for', consent.consentId)}
+                          title="Verify"
+                        >
+                          <CheckCircle className="w-3 h-3" />
+                        </Button>
+                      )}
+                      
+                      <Button 
+                        variant="neumorphic-outline" 
+                        className="h-7 w-7 p-0"
+                        onClick={() => toast.info(`Navigating to vetting case ${consent.vettingCaseId}`)}
+                        title="View Case"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </NeumorphicTableCell>
+                </NeumorphicTableRow>
+              ))}
+            </NeumorphicTableBody>
+          </NeumorphicTable>
         </NeumorphicCard>
       </div>
     </NeumorphicBackground>
