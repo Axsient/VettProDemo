@@ -16,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -35,8 +36,9 @@ import {
   NeumorphicTableRow,
   NeumorphicTableHead,
   NeumorphicTableCell,
+  NeumorphicButton,
 } from "@/components/ui/neumorphic";
-import { ActivityIcon, AlertCircleIcon, CheckCircleIcon, ClockIcon } from "lucide-react";
+import { ActivityIcon, AlertCircleIcon, CheckCircleIcon, ClockIcon, FileText, TrendingUp, Award } from "lucide-react";
 
 export default function UIElementsPage() {
   return (
@@ -53,17 +55,105 @@ export default function UIElementsPage() {
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
               <Button variant="neumorphic-outline">New Vetting Request</Button>
-              <Dialog>
+                                            <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="neumorphic-outline">Test Dialog</Button>
                 </DialogTrigger>
-                <DialogContent variant="neumorphic">
-                  <DialogHeader>
-                    <DialogTitle>Neumorphic Dialog</DialogTitle>
-                    <DialogDescription>
-                      This is a test of the neumorphic effect on a dialog.
+                <DialogContent variant="neumorphic" className="sm:max-w-[600px]">
+                  <DialogHeader variant="neumorphic">
+                    <DialogTitle variant="neumorphic">Enhanced Neumorphic Dialog</DialogTitle>
+                    <DialogDescription variant="neumorphic">
+                      This is an example of the improved neumorphic dialog with better readability and visual appeal.
                     </DialogDescription>
                   </DialogHeader>
+                  
+                  <div className="grid gap-6 py-4">
+                    {/* Sample Form Content */}
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <label htmlFor="name" className="text-right text-neumorphic-text-primary font-medium">
+                        Name
+                      </label>
+                      <input
+                        id="name"
+                        defaultValue="John Doe"
+                        className="col-span-3 px-3 py-2 rounded-md"
+                        placeholder="Enter your name"
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <label htmlFor="email" className="text-right text-neumorphic-text-primary font-medium">
+                        Email
+                      </label>
+                      <input
+                        id="email"
+                        type="email"
+                        defaultValue="john@example.com"
+                        className="col-span-3 px-3 py-2 rounded-md"
+                        placeholder="Enter your email"
+                      />
+                    </div>
+
+                    {/* Sample Card Content */}
+                    <NeumorphicCard className="p-4">
+                      <h4 className="text-neumorphic-text-primary font-semibold mb-2">Sample Information</h4>
+                      <p className="text-neumorphic-text-secondary text-sm mb-3">
+                        This card demonstrates how nested content appears within the enhanced modal background.
+                      </p>
+                      <div className="flex gap-2">
+                        <NeumorphicBadge variant="success">Active</NeumorphicBadge>
+                        <NeumorphicBadge variant="info">Verified</NeumorphicBadge>
+                      </div>
+                    </NeumorphicCard>
+
+                    {/* Sample Textarea */}
+                    <div className="grid grid-cols-4 items-start gap-4">
+                      <label htmlFor="message" className="text-right text-neumorphic-text-primary font-medium pt-2">
+                        Message
+                      </label>
+                      <textarea
+                        id="message"
+                        rows={4}
+                        className="col-span-3 px-3 py-2 rounded-md resize-none"
+                        placeholder="Enter your message here..."
+                        defaultValue="This is a sample message to demonstrate how text areas appear in the enhanced neumorphic dialog."
+                      />
+                    </div>
+
+                                         {/* Sample Stats */}
+                     <div className="grid grid-cols-3 gap-4">
+                       <NeumorphicStatsCard
+                         title="Tasks"
+                         value="24"
+                         icon={<FileText className="w-5 h-5" />}
+                         trend="up"
+                         trendValue="+12%"
+                       />
+                       <NeumorphicStatsCard
+                         title="Progress"
+                         value="87%"
+                         icon={<TrendingUp className="w-5 h-5" />}
+                         trend="up"
+                         trendValue="+5%"
+                       />
+                       <NeumorphicStatsCard
+                         title="Score"
+                         value="9.2"
+                         icon={<Award className="w-5 h-5" />}
+                         trend="up"
+                         trendValue="+0.3"
+                       />
+                     </div>
+                  </div>
+
+                                     <DialogFooter variant="neumorphic">
+                     <NeumorphicButton className="mr-2" onClick={() => {}}>
+                       Cancel
+                     </NeumorphicButton>
+                     <NeumorphicButton className="bg-purple-600 hover:bg-purple-700" onClick={() => {}}>
+                       Save Changes
+                     </NeumorphicButton>
+                   </DialogFooter>
                 </DialogContent>
               </Dialog>
               <Popover>

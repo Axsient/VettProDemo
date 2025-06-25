@@ -1418,4 +1418,191 @@ div.glow-subtle-blue {
   .neumorphic-breadcrumb-container .text-neumorphic-text-primary {
     font-size: 0.8125rem; /* 13px */
   }
+}
+
+
+
+/* ====================================================================== */
+/* NEUMORPHIC DIALOG/MODAL SYSTEM                                        */
+/* ====================================================================== */
+
+/* Enhanced Dialog Overlay - Better backdrop for readability */
+.neumorphic-dialog-overlay {
+  background: rgba(0, 0, 0, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+  transition: all 0.3s ease !important;
+}
+
+.light .neumorphic-dialog-overlay {
+  background: rgba(0, 0, 0, 0.65) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+/* Enhanced Dialog Content - Improved contrast and visibility */
+.neumorphic-dialog-content {
+  /* Dark Theme - More opaque background for better readability */
+  background: linear-gradient(135deg, 
+    rgba(45, 50, 55, 0.95), 
+    rgba(35, 40, 45, 0.98)
+  ) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(139, 92, 246, 0.3) !important;
+  box-shadow: 
+    0 25px 50px rgba(0, 0, 0, 0.5),
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.1),
+    0 0 0 1px rgba(139, 92, 246, 0.2) !important;
+  
+  /* Enhanced text contrast */
+  color: var(--neumorphic-text-primary) !important;
+}
+
+.light .neumorphic-dialog-content {
+  /* Light Theme - Solid background with subtle transparency */
+  background: linear-gradient(135deg, 
+    rgba(250, 252, 255, 0.98), 
+    rgba(240, 245, 250, 0.95)
+  ) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(139, 92, 246, 0.4) !important;
+  box-shadow: 
+    0 25px 50px rgba(0, 0, 0, 0.25),
+    0 10px 30px rgba(0, 0, 0, 0.15),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8),
+    0 0 0 1px rgba(139, 92, 246, 0.3) !important;
+}
+
+/* Dialog Header Enhancement */
+.neumorphic-dialog-header {
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2) !important;
+  padding-bottom: var(--neumorphic-spacing-md) !important;
+  margin-bottom: var(--neumorphic-spacing-lg) !important;
+}
+
+.light .neumorphic-dialog-header {
+  border-bottom: 1px solid rgba(139, 92, 246, 0.3) !important;
+}
+
+/* Dialog Title Enhancement */
+.neumorphic-dialog-title {
+  color: var(--neumorphic-text-primary) !important;
+  font-weight: 600 !important;
+  font-size: 1.25rem !important;
+  line-height: 1.5 !important;
+}
+
+/* Dialog Description Enhancement */
+.neumorphic-dialog-description {
+  color: var(--neumorphic-text-secondary) !important;
+  font-size: 0.875rem !important;
+  line-height: 1.6 !important;
+  margin-top: var(--neumorphic-spacing-sm) !important;
+}
+
+/* Dialog Close Button Enhancement */
+.neumorphic-dialog-close {
+  background: var(--neumorphic-button) !important;
+  border-radius: 50% !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: var(--neumorphic-shadow-convex-sm) !important;
+  transition: all 0.2s ease !important;
+  border: 1px solid rgba(139, 92, 246, 0.2) !important;
+}
+
+.neumorphic-dialog-close:hover {
+  background: linear-gradient(145deg, 
+    rgba(139, 92, 246, 0.25), 
+    rgba(99, 62, 206, 0.18)
+  ) !important;
+  box-shadow: var(--neumorphic-shadow-button-hover) !important;
+  transform: scale(1.05) !important;
+  border: 1px solid rgba(139, 92, 246, 0.4) !important;
+}
+
+.light .neumorphic-dialog-close:hover {
+  background: linear-gradient(145deg, 
+    rgba(139, 92, 246, 0.35), 
+    rgba(99, 62, 206, 0.25)
+  ) !important;
+}
+
+/* Dialog Footer Enhancement */
+.neumorphic-dialog-footer {
+  border-top: 1px solid rgba(139, 92, 246, 0.2) !important;
+  padding-top: var(--neumorphic-spacing-lg) !important;
+  margin-top: var(--neumorphic-spacing-lg) !important;
+}
+
+.light .neumorphic-dialog-footer {
+  border-top: 1px solid rgba(139, 92, 246, 0.3) !important;
+}
+
+/* Dialog Animation Enhancement - Override Radix animations */
+.neumorphic-dialog-content[data-state="open"] {
+  animation: neumorphic-dialog-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+.neumorphic-dialog-content[data-state="closed"] {
+  animation: neumorphic-dialog-out 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+}
+
+@keyframes neumorphic-dialog-in {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes neumorphic-dialog-out {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+}
+
+/* Dialog Content Areas */
+.neumorphic-dialog-content .neumorphic-card {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.light .neumorphic-dialog-content .neumorphic-card {
+  background: rgba(0, 0, 0, 0.03) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Dialog Input Fields */
+.neumorphic-dialog-content input,
+.neumorphic-dialog-content textarea,
+.neumorphic-dialog-content select {
+  background: rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(139, 92, 246, 0.3) !important;
+  color: var(--neumorphic-text-primary) !important;
+}
+
+.light .neumorphic-dialog-content input,
+.light .neumorphic-dialog-content textarea,
+.light .neumorphic-dialog-content select {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(139, 92, 246, 0.4) !important;
+}
+
+.neumorphic-dialog-content input:focus,
+.neumorphic-dialog-content textarea:focus,
+.neumorphic-dialog-content select:focus {
+  border-color: var(--neumorphic-border) !important;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3) !important;
+  outline: none !important;
 } 
