@@ -233,8 +233,8 @@ export const activeVettingCases: ActiveVettingCase[] = [
       },
       {
         checkId: 'physical_loc_verify',
-        status: 'Error',
-        result: 'Failed',
+        status: 'Failed',
+        result: 'Fail',
         completedDate: undefined,
         cost: 800,
         provider: 'Field Verification Agents',

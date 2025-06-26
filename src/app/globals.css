@@ -7,6 +7,26 @@
 @import "../styles/animations.css";
 @import "../styles/custom.css";
 
+/* Prevent layout shift during hydration */
+.main-content-tight {
+  /* Ensure consistent initial positioning */
+  margin-left: 0;
+  /* Account for fixed top menu bar */
+  padding-top: 4rem; /* 64px - matches h-16 */
+}
+
+@media (min-width: 768px) {
+  .main-content-tight {
+    /* Desktop default - will be overridden by dynamic classes after mount */
+    margin-left: 18rem; /* ml-72 equivalent */
+  }
+}
+
+/* Disable transitions during page load to prevent flash */
+.preload * {
+  transition: none !important;
+}
+
 /* Neumorphic Map Popup Styling - Match Dialog Theme */
 .neumorphic-map-popup .leaflet-popup-content-wrapper {
   background: hsl(var(--background)) !important;

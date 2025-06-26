@@ -581,6 +581,206 @@ The neumorphic theme uses a refined compact spacing system for better informatio
 
 ## Troubleshooting & Common Issues
 
+### Data Table Component Interface Issues
+
+**Problem**: `NeumorphicDataTable` components throwing TypeScript errors about missing interface properties.
+
+**Root Cause**: Incorrect usage of the `NeumorphicDataTable` interface requirements and data structure constraints.
+
+**Common Symptoms**:
+- TypeScript error: "Property 'id' is missing in type"
+- Error: "Type 'SomeDataType' is not assignable to type 'Record<string, unknown>'"
+- Properties like `sortable` or `filterable` causing interface conflicts
+- Invalid `show` property in `TableAction` interfaces
+
+**Critical Requirements for NeumorphicDataTable**:
+1. **Data Interface**: Must extend `Record<string, unknown>`
+2. **Column Structure**: Each column requires an `id` property
+3. **Column Properties**: `sortable` and `filterable` go at top level, NOT in `meta` object
+4. **Table Actions**: Use `disabled` property, NOT `show` (which doesn't exist)
+
+**Working Example** (Based on SimpleDataTableDemo):
+```tsx
+// ✅ Correct data interface
+interface TableRowData extends Record<string, unknown> {
+  id: string;
+  title: string;
+  status: string;
+  // ... other properties
+}
+
+// ✅ Correct column structure
+const columns: TableColumn<TableRowData>[] = [
+  {
+    id: 'title',           // ✅ Required id property
+    accessorKey: 'title',
+    header: 'Title',
+    sortable: true,        // ✅ Top level, not in meta
+    filterable: true       // ✅ Top level, not in meta
+  },
+  {
+    id: 'status',
+    accessorKey: 'status',
+    header: 'Status',
+    cell: ({ row }) => (
+      <Badge variant={getStatusVariant(row.getValue('status'))}>
+        {row.getValue('status')}
+      </Badge>
+    )
+  }
+];
+
+// ✅ Correct table actions
+const actions: TableAction<TableRowData>[] = [
+  {
+    label: 'View Details',
+    icon: Eye,
+    onClick: (row) => handleView(row),
+    disabled: (row) => row.status === 'archived' // ✅ Use disabled, not show
+  }
+];
+```
+
+**Migration Steps**:
+1. **Extend Data Interface**: Add `extends Record<string, unknown>` to your data type
+2. **Add Column IDs**: Ensure every column has a unique `id` property
+3. **Move Column Properties**: Move `sortable`, `filterable` from `meta` to top level
+4. **Fix Table Actions**: Replace `show` with `disabled` function
+5. **Reference Working Examples**: Use `SimpleDataTableDemo` as the definitive pattern
+
+### Build Process TypeScript Errors
+
+**Problem**: Build failing with various TypeScript and linting errors across multiple files.
+
+**Common Error Categories**:
+
+**1. Unused Variables/Imports**
+```typescript
+// ❌ Error: 'Clock' is defined but never used
+import { Eye, Edit2, Clock } from 'lucide-react';
+
+// ✅ Solution: Remove unused imports
+import { Eye, Edit2 } from 'lucide-react';
+
+// ❌ Error: 'loading' is assigned a value but never used
+const MyComponent = ({ loading, data }) => { ... }
+
+// ✅ Solution: Add eslint disable comment
+const MyComponent = ({ 
+  loading, // eslint-disable-line @typescript-eslint/no-unused-vars
+  data 
+}) => { ... }
+```
+
+**2. Type Safety Issues**
+```typescript
+// ❌ Error: Parameter 'data' implicitly has an 'any' type
+const handlePolygonCreated = (data: any) => { ... }
+
+// ✅ Solution: Define proper interface
+interface GeoJsonData {
+  type: string;
+  coordinates: number[][][];
+  properties?: Record<string, unknown>;
+}
+const handlePolygonCreated = (data: GeoJsonData) => { ... }
+```
+
+**3. Component Prop Mismatches**
+```typescript
+// ❌ Error: Property 'size' does not exist on type
+<NeumorphicHeading size="lg">Title</NeumorphicHeading>
+
+// ✅ Solution: Remove unsupported props
+<NeumorphicHeading>Title</NeumorphicHeading>
+```
+
+**4. Sample Data Enum Validation**
+```typescript
+// ❌ Error: Type '"Error"' is not assignable to type 'CheckStatus'
+status: 'Error'
+
+// ✅ Solution: Use valid enum values
+status: 'Failed' // or whatever the correct enum value is
+```
+
+### macOS System Files Build Issues
+
+**Problem**: Build failing with parsing errors due to hidden macOS system files.
+
+**Error Symptoms**:
+```bash
+./src/components/vetting/._ActiveCasesTable.tsx
+Module parse failed: Unexpected character '' (1:0)
+```
+
+**Root Cause**: macOS creates hidden `._*` files that Next.js tries to parse as source files.
+
+**Solution Commands**:
+```bash
+# Remove all macOS system files
+find . -name "._*" -delete
+find . -name ".DS_Store" -delete
+
+# Add to .gitignore to prevent future issues
+echo "._*" >> .gitignore
+echo ".DS_Store" >> .gitignore
+```
+
+**Prevention**: 
+- Add system file patterns to `.gitignore`
+- Run cleanup commands before important builds
+- Consider pre-commit hooks to automatically clean system files
+
+### Server-Side Rendering (SSR) Issues with Maps
+
+**Problem**: Map components causing "window is not defined" errors during build.
+
+**Error Example**:
+```bash
+ReferenceError: window is not defined
+    at Object.eval (./node_modules/leaflet/dist/leaflet.js)
+```
+
+**Root Cause**: Leaflet and other browser-specific libraries access `window` object during SSR.
+
+**Solutions Applied**:
+
+**1. Dynamic Import with SSR Disabled**:
+```tsx
+import dynamic from 'next/dynamic';
+
+const InteractiveMap = dynamic(() => import('@/components/maps/InteractiveMap'), {
+  ssr: false, // ✅ Critical: Disables server-side rendering
+  loading: () => (
+    <div className="flex items-center justify-center h-[600px]">
+      <NeumorphicText>Loading Interactive Map...</NeumorphicText>
+    </div>
+  )
+});
+```
+
+**2. Client-Side Only Components**:
+```tsx
+'use client'; // For App Router
+
+import { useEffect, useState } from 'react';
+
+const MapComponent = () => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return <div>Loading map...</div>;
+  }
+
+  return <InteractiveMapImplementation />;
+};
+```
+
 ### Button Elevation Issues
 
 **Problem**: Buttons appearing "pressed" or "depressed" in default state instead of elevated.
@@ -639,6 +839,75 @@ The neumorphic theme uses a refined compact spacing system for better informatio
 4. **Clear Cache**: Restart dev server to ensure CSS changes are loaded
 
 **Key Learning**: Always trace from component → CSS class → variable to understand the full styling chain.
+
+### Build Error Debugging Workflow
+
+**Systematic Approach to Fixing Build Errors**:
+
+**1. Categorize Errors by Type**
+- **TypeScript Errors**: Interface mismatches, missing types, `any` usage
+- **Linting Errors**: Unused variables/imports, code style violations  
+- **Build Tool Errors**: File parsing issues, module resolution problems
+- **Runtime Errors**: SSR issues, undefined references
+
+**2. Fix in Priority Order**
+```bash
+# High Priority: Build-blocking errors
+1. TypeScript interface issues
+2. Missing required properties
+3. File parsing errors (system files)
+
+# Medium Priority: Code quality issues  
+4. Unused imports/variables
+5. Type safety improvements
+6. Component prop mismatches
+
+# Low Priority: Warnings and optimizations
+7. Performance warnings
+8. Accessibility warnings
+9. Style optimizations
+```
+
+**3. Use Reference Components**
+- **For Tables**: Always reference `SimpleDataTableDemo` for correct interface usage
+- **For Forms**: Check `FormComponentsDemo` for proper form patterns
+- **For UI Elements**: Refer to `dashboard/ui-elements/page.tsx` for working examples
+
+**4. Validation Steps After Each Fix**
+```bash
+# Run build to check for remaining errors
+npm run build
+
+# Clean system files if parsing errors persist
+find . -name "._*" -delete
+
+# Check specific file if errors persist
+npm run type-check src/path/to/problematic-file.tsx
+```
+
+**5. Common Error Patterns & Quick Fixes**
+```typescript
+// ❌ Quick fix: Comment out problematic code temporarily
+// const problematicFunction = () => { ... }
+
+// ❌ Quick fix: Add eslint disable for unused vars
+// eslint-disable-line @typescript-eslint/no-unused-vars
+
+// ❌ Quick fix: Remove non-existent props
+// size="lg" // Remove if component doesn't support this prop
+
+// ❌ Quick fix: Add proper interface extension
+interface MyData extends Record<string, unknown> {
+  // ... properties
+}
+```
+
+**Lessons Learned**:
+1. **Root Cause Analysis**: The ActiveCasesTable issue revealed the importance of following established patterns rather than trying to make incompatible interfaces work
+2. **Reference Examples**: Always check working examples in the codebase before implementing similar functionality
+3. **Build Early and Often**: Run builds frequently to catch issues early rather than accumulating multiple errors
+4. **System File Management**: macOS development requires regular cleanup of hidden system files
+5. **SSR Considerations**: Map and browser-specific components need special handling in Next.js applications
 
 ### Input Field Visual Hierarchy Issues
 
@@ -1032,6 +1301,63 @@ import 'leaflet/dist/leaflet.css';
 - **Problem**: Map elements don't follow neumorphic theme
 - **Solution**: Check CSS variable inheritance and popup styling
 
+## Build Resolution Case Study (January 2025)
+
+### Summary of Issues Fixed
+
+During a comprehensive build error resolution session, the following critical issues were identified and resolved:
+
+**Major Issues Resolved**:
+1. **ActiveCasesTable.tsx Complete Rewrite** - Fixed 10+ TypeScript errors by following `SimpleDataTableDemo` pattern
+2. **Interface Compliance** - Extended `ActiveVettingCase` to satisfy `Record<string, unknown>` constraint
+3. **Type Safety Improvements** - Replaced all `any` types with proper interfaces (`GeoJsonData`)
+4. **Sample Data Validation** - Fixed enum violations in sample data files
+5. **SSR Resolution** - Added `ssr: false` to map components to prevent build failures
+6. **System File Cleanup** - Automated removal of macOS hidden files causing parsing errors
+
+**Files Modified During Resolution**:
+- `src/components/vetting/ActiveCasesTable.tsx` (complete rewrite)
+- `src/app/field-operations/geofence-management/page.tsx` (type safety)
+- `src/app/vetting/completed-reports/page.tsx` (unused imports)
+- `src/components/vetting/InitiateVettingForm.tsx` (unused variables)
+- `src/lib/sample-data/activeVettingCasesSample.ts` (enum validation)
+- `src/app/field-operations/map-overview/page.tsx` (SSR handling)
+
+**Key Architectural Decisions**:
+1. **Established SimpleDataTableDemo as Standard**: All future data tables must follow this pattern
+2. **Mandatory Interface Extensions**: All data types for tables must extend `Record<string, unknown>`
+3. **Reference Component Strategy**: Always check working examples before implementing similar components
+4. **Build Validation Workflow**: Implemented systematic error categorization and fixing priority
+
+### Critical Success Factors
+
+**What Worked**:
+- **Root Cause Analysis**: Identified that wrong table component pattern was being used
+- **Reference-Based Fixes**: Used working examples (`SimpleDataTableDemo`) as templates
+- **Systematic Approach**: Fixed errors in priority order (build-blocking → code quality → warnings)
+- **Comprehensive Testing**: Verified build success after each major fix
+
+**What Caused Issues**:
+- **Interface Misunderstanding**: Trying to force incompatible interfaces to work
+- **Pattern Deviation**: Not following established working patterns in the codebase
+- **Accumulated Technical Debt**: Multiple small issues compounding into build failure
+- **Platform-Specific Issues**: macOS system files causing unexpected parsing errors
+
+### Future Prevention Strategies
+
+**Development Guidelines**:
+1. **Always Reference Working Examples**: Before implementing tables, forms, or complex components
+2. **Build Frequently**: Run `npm run build` after implementing each component
+3. **Follow Interface Patterns**: Use established patterns rather than creating new ones
+4. **System File Management**: Regular cleanup of hidden files in development environments
+
+**Code Review Checklist**:
+- [ ] Does the component follow an existing working pattern?
+- [ ] Are all interfaces properly extended (`Record<string, unknown>` for table data)?
+- [ ] Are there any `any` types that could be properly typed?
+- [ ] Are all imports actually used?
+- [ ] Does the component work in both light and dark themes?
+
 ## Future Enhancements
 
 - **Animation Library**: Micro-interactions and transitions
@@ -1040,7 +1366,9 @@ import 'leaflet/dist/leaflet.css';
 - **Data Visualization**: Charts and graphs with neumorphic styling
 - **Map Enhancements**: Clustering, heatmaps, and advanced marker animations
 - **Shadow System Refactor**: Consider renaming `shadow-concave` to `shadow-elevated` for clarity
+- **Build Automation**: Pre-commit hooks for system file cleanup and type checking
+- **Component Documentation**: Automated generation of component usage examples
 
 ---
 
-This neumorphic theme system provides a complete foundation for building beautiful, accessible, and performant user interfaces with stunning visual effects and seamless dual-theme support. The troubleshooting section documents real-world issues and solutions to help future development.
+This neumorphic theme system provides a complete foundation for building beautiful, accessible, and performant user interfaces with stunning visual effects and seamless dual-theme support. The troubleshooting section documents real-world issues and solutions to help future development, including a comprehensive case study of build error resolution that demonstrates the importance of following established patterns and systematic debugging approaches.

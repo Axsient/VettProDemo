@@ -61,7 +61,7 @@ const LabeledInput = ({ label, required, children }: { label: string; required?:
 );
 
 export function InitiateVettingForm({ 
-  checks, 
+  checks, // eslint-disable-line @typescript-eslint/no-unused-vars
   packages, 
   projects
 }: InitiateVettingFormProps) {

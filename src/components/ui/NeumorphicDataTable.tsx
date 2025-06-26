@@ -23,6 +23,7 @@ export function NeumorphicDataTable<T extends Record<string, unknown>>({
   export: exportOptions,
   className = '',
   tableClassName = '',
+  rowClassName,
   loading = false,
   loadingComponent: LoadingComponent,
   emptyComponent: EmptyComponent,
@@ -579,8 +580,9 @@ export function NeumorphicDataTable<T extends Record<string, unknown>>({
                     <tr
                       key={`row-${rowId}`}
                       className={`
-                        border-b border-border/30 hover:bg-purple-500/5 transition-colors cursor-pointer
+                        border-b border-border/30 transition-colors cursor-pointer
                         ${table.selection.isRowSelected(row) ? 'bg-purple-500/10' : ''}
+                        ${rowClassName ? rowClassName(row) : 'hover:bg-purple-500/5'}
                       `}
                       onClick={(e) => handleRowClick(row, e)}
                       style={{

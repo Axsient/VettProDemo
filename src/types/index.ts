@@ -95,4 +95,5 @@ export interface CardProps {
   glowEffect?: boolean;
 }
 
-export * from './supplier'; 
+export * from './supplier';
+export * from './rfp'; 

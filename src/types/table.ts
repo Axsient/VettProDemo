@@ -159,6 +159,7 @@ export interface NeumorphicDataTableProps<T = Record<string, unknown>> {
   // Styling
   className?: string;
   tableClassName?: string;
+  rowClassName?: (row: T) => string;
   
   // Loading & Empty states
   loading?: boolean;

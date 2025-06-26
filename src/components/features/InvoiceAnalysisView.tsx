@@ -1,41 +1,43 @@
 "use client";
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Brain } from 'lucide-react';
 import { NeumorphicCard, NeumorphicHeading, NeumorphicText } from '../ui/neumorphic';
 import FlagBadge from '../ui/FlagBadge';
 import { DNALink } from './DNALink';
+import { InvoiceAnalysis, InvoiceFlag } from '@/types/rfp';
+import { DNAComparisonItem } from '@/lib/sample-data/rfpSample';
 
-// Sample data for a single invoice - you'd pass this in as props
-const sampleAnalysisData = {
-  rfpItems: [
-    { label: "Drill Bits (x50)", value: "R1,500 / unit" },
-    { label: "Safety Gloves (x100)", value: "R50 / pair" },
-    { label: "Logistics", value: "R5,000" }
-  ],
-  invoiceItems: [
-    { label: "Drill Bits (x50)", value: "R1,875 / unit" },
-    { label: "Safety Gloves (x100)", value: "R50 / pair" },
-    { label: "Logistics", value: "R5,000" },
-    { label: "Admin Fee", value: "R2,500" }
-  ],
-  llmSummary: "Invoice contains a significant price discrepancy for 'Drill Bits' (25% over quote) and an unsolicited 'Admin Fee'.",
-  flags: [
-    { severity: 'High', type: 'Price Discrepancy' },
-    { severity: 'Medium', type: 'Unsolicited Item' }
-  ]
-};
+interface InvoiceAnalysisViewProps {
+  rfpTitle: string;
+  dnaItems: DNAComparisonItem[];
+  analysis: InvoiceAnalysis;
+}
 
-export const InvoiceAnalysisView = () => {
+export const InvoiceAnalysisView: React.FC<InvoiceAnalysisViewProps> = ({ 
+  rfpTitle, 
+  dnaItems, 
+  analysis 
+}) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
       {/* Left Column: DNA View */}
       <NeumorphicCard className="lg:col-span-3 p-4">
         <NeumorphicHeading>Invoice DNA Comparison</NeumorphicHeading>
+        <NeumorphicText className="text-sm text-neumorphic-text-secondary mb-4">
+          Comparing: {rfpTitle}
+        </NeumorphicText>
         <div className="mt-4">
-          <DNALink rfpLabel="Drill Bits (x50)" rfpValue="R1,500 / unit" invoiceLabel="Drill Bits (x50)" invoiceValue="R1,875 / unit" status="mismatch" />
-          <DNALink rfpLabel="Safety Gloves (x100)" rfpValue="R50 / pair" invoiceLabel="Safety Gloves (x100)" invoiceValue="R50 / pair" status="match" />
-          <DNALink rfpLabel="Logistics" rfpValue="R5,000" invoiceLabel="Logistics" invoiceValue="R5,000" status="match" />
-          <DNALink rfpLabel="-" invoiceLabel="Admin Fee" invoiceValue="R2,500" status="unsolicited_invoice" />
+          {dnaItems.map((item, index) => (
+            <DNALink 
+              key={index}
+              rfpLabel={item.rfpLabel || '-'} 
+              rfpValue={item.rfpValue} 
+              invoiceLabel={item.invoiceLabel || '-'} 
+              invoiceValue={item.invoiceValue} 
+              status={item.status === 'rfp_only' ? 'unsolicited_rfp' : item.status as 'match' | 'mismatch' | 'unsolicited_rfp' | 'unsolicited_invoice'} 
+            />
+          ))}
         </div>
       </NeumorphicCard>
 
@@ -47,24 +49,32 @@ export const InvoiceAnalysisView = () => {
         transition={{ delay: 0.3, duration: 0.5 }}
       >
         <NeumorphicCard className="p-4 border-[var(--neumorphic-severity-low)] h-full">
-          <NeumorphicHeading>AI Insights</NeumorphicHeading>
+          <NeumorphicHeading className="flex items-center gap-2">
+            <Brain className="w-5 h-5 text-purple-500" />
+            AI Insights
+          </NeumorphicHeading>
           <div className="mt-4 space-y-4">
             <div>
               <p className="text-sm font-semibold text-neumorphic-text-secondary mb-1">Summary</p>
-              <NeumorphicText>{sampleAnalysisData.llmSummary}</NeumorphicText>
+              <NeumorphicText>{analysis.llmSummary}</NeumorphicText>
             </div>
             <div>
               <p className="text-sm font-semibold text-neumorphic-text-secondary mb-2">Flags Detected</p>
               <div className="flex flex-wrap gap-2">
-                {sampleAnalysisData.flags.map((flag, i) => (
-                  <FlagBadge key={i} severity={flag.severity as 'Critical' | 'High' | 'Medium' | 'Low'}>{flag.type}</FlagBadge>
+                {analysis.flags.map((flag: InvoiceFlag, i: number) => (
+                  <FlagBadge key={i} severity={flag.severity}>{flag.type}</FlagBadge>
                 ))}
               </div>
             </div>
             <div className="pt-4 border-t border-[var(--neumorphic-border)] border-opacity-20">
               <p className="text-sm font-semibold text-neumorphic-text-secondary mb-1">Recommendation</p>
-              <NeumorphicText size="lg" className="font-bold text-[var(--neumorphic-severity-critical)]">
-                REJECT & ESCALATE
+              <NeumorphicText size="lg" className={`font-bold ${
+                analysis.llmRecommendation === 'Reject & Escalate' ? 'text-[var(--neumorphic-severity-critical)]' :
+                analysis.llmRecommendation === 'Query Supplier' ? 'text-[var(--neumorphic-severity-high)]' :
+                analysis.llmRecommendation === 'Approve with Adjustment' ? 'text-[var(--neumorphic-severity-medium)]' :
+                'text-[var(--neumorphic-severity-low)]'
+              }`}>
+                {analysis.llmRecommendation.toUpperCase()}
               </NeumorphicText>
             </div>
           </div>

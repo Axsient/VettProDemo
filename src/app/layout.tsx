@@ -27,6 +27,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Add preload class to prevent transitions during page load
+              document.documentElement.classList.add('preload');
+              // Remove preload class after page is loaded
+              window.addEventListener('load', () => {
+                document.documentElement.classList.remove('preload');
+              });
+            `,
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

@@ -39,17 +39,23 @@ interface Geofence {
   client: string;
 }
 
+interface GeoJsonData {
+  type: string;
+  coordinates: number[][][];
+  properties?: Record<string, unknown>;
+}
+
 export default function GeofenceManagement() {
   const [geofences] = useState<Geofence[]>(getGeofences());
   const [zoneName, setZoneName] = useState('');
-  const [drawnPolygon, setDrawnPolygon] = useState<any>(null);
+  const [drawnPolygon, setDrawnPolygon] = useState<GeoJsonData | null>(null);
 
-  // Handle map drawing events
-  const handlePolygonCreated = (geoJsonData: any) => {
-    console.log('Polygon created:', geoJsonData);
-    setDrawnPolygon(geoJsonData);
-    toast.success('Geofence polygon drawn successfully! You can now save it.');
-  };
+  // Handle map drawing events (functionality to be implemented)
+  // const handlePolygonCreated = (geoJsonData: GeoJsonData) => {
+  //   console.log('Polygon created:', geoJsonData);
+  //   setDrawnPolygon(geoJsonData);
+  //   toast.success('Geofence polygon drawn successfully! You can now save it.');
+  // };
 
   const handleSaveGeofence = () => {
     if (!zoneName.trim()) {
@@ -81,13 +87,15 @@ export default function GeofenceManagement() {
     zoom: 10,
     markers: [
       {
+        id: "westonaria-1",
         position: [-26.3195, 27.6499] as [number, number],
-        popup: "Westonaria Area",
-        status: "info" as const
+        type: "geofence" as const,
+        title: "Westonaria Area",
+        description: "Primary geofence monitoring area for supplier verification",
+        status: "active" as const,
+        priority: "medium" as const
       }
-    ],
-    enableDrawing: true,
-    onPolygonCreated: handlePolygonCreated
+    ]
   };
 
   return (
@@ -102,7 +110,7 @@ export default function GeofenceManagement() {
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <MapPinIcon className="w-5 h-5 text-[var(--neumorphic-text-primary)]" />
-                  <NeumorphicHeading size="lg">Managed Geofences</NeumorphicHeading>
+                  <NeumorphicHeading>Managed Geofences</NeumorphicHeading>
                 </div>
                 
                 <NeumorphicText variant="secondary" className="leading-tight">
@@ -161,7 +169,7 @@ export default function GeofenceManagement() {
           <div className="lg:col-span-2">
             <NeumorphicCard>
               <div className="space-y-4">
-                <NeumorphicHeading size="lg">Geofence Editor</NeumorphicHeading>
+                <NeumorphicHeading>Geofence Editor</NeumorphicHeading>
                 <NeumorphicText variant="secondary" className="leading-tight">
                   Use the drawing tools on the map to create new geofence boundaries. Click and drag to draw a polygon around the desired area.
                 </NeumorphicText>

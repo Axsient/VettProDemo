@@ -287,7 +287,24 @@ export default function UIElementsPage() {
               Advanced RFP vs Invoice comparison with AI-powered insights, animated connections, and risk flag detection.
             </NeumorphicText>
           </div>
-          <InvoiceAnalysisView />
+          <InvoiceAnalysisView 
+            rfpTitle="Q2 Office Supply Contract"
+            dnaItems={[
+              { rfpLabel: "Drill Bits (x50)", rfpValue: "R1,500 / unit", invoiceLabel: "Drill Bits (x50)", invoiceValue: "R1,875 / unit", status: "mismatch" },
+              { rfpLabel: "Safety Gloves (x100)", rfpValue: "R50 / pair", invoiceLabel: "Safety Gloves (x100)", invoiceValue: "R50 / pair", status: "match" },
+              { rfpLabel: "Logistics", rfpValue: "R5,000", invoiceLabel: "Logistics", invoiceValue: "R5,000", status: "match" },
+              { invoiceLabel: "Admin Fee", invoiceValue: "R2,500", status: "unsolicited_invoice" }
+            ]}
+            analysis={{
+              overallConfidenceScore: 25,
+              llmSummary: "Invoice contains a significant price discrepancy for 'Drill Bits' (25% over quote) and an unsolicited 'Admin Fee'. This demonstrates the component's ability to highlight critical issues.",
+              llmRecommendation: "Reject & Escalate",
+              flags: [
+                { type: "Price Discrepancy", severity: "High", description: "Drill Bits priced 25% higher than RFP quote", details: { item: "Drill Bits", rfp_value: "R1,500", invoice_value: "R1,875" } },
+                { type: "Unsolicited Item", severity: "Medium", description: "Admin Fee not included in original RFP", details: { item: "Admin Fee", invoice_value: "R2,500" } }
+              ]
+            }}
+          />
         </NeumorphicCard>
 
         {/* Charts Section */}

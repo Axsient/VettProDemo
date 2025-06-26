@@ -1,15 +1,12 @@
-Challenge accepted. Let's architect a world-class "RFP & Invoice Management" module that is not only functionally brilliant but also a masterpiece of user experience, leveraging your unique neumorphic design system to its absolute fullest.
 
-This guide is your definitive blueprint. We will craft every page, every component, and every piece of data to tell a compelling story of control, intelligence, and fraud prevention.
 
----
+### **Preparation: The "One-of-a-Kind" Sample Data** ✅ COMPLETED
 
-### **Preparation: The "One-of-a-Kind" Sample Data**
-
-To power this stunning demo, we need meticulously crafted data. The goal is to create clear, distinct narratives for each supplier.
+To power this stunning demo, we need meticulously crafted data. The narratives created here are the foundation for the entire user experience.
 
 **1. Update Type Definitions:**
-In `src/types/`, create a new file named `rfp.ts` and update `supplier.ts` if needed.
+*   **File:** `src/types/rfp.ts`
+*   **Action:** Update the interfaces to include `startDate` for the pipeline chart and the new `Anomalous Amount` flag type.
 
 ```typescript
 // src/types/rfp.ts
@@ -18,6 +15,7 @@ export interface RFP {
   id: string;
   title: string;
   status: 'Open for Submission' | 'Under Review' | 'Awarded' | 'Completed' | 'Closed';
+  startDate: string; // <-- ADD THIS
   submissionDeadline: string;
   projectCompletionDate?: string;
   awardedToSupplierId?: string;
@@ -43,19 +41,21 @@ export interface InvoiceAnalysis {
 }
 
 export interface InvoiceFlag {
-  type: 'Price Discrepancy' | 'Unsolicited Item' | 'Post-Completion Billing' | 'Anomalous Amount' | 'Slippery Slope';
+  type: 'Price Discrepancy' | 'Unsolicited Item' | 'Post-Completion Billing' | 'Anomalous Amount' | 'Slippery Slope'; // <-- ADD 'Anomalous Amount'
   severity: 'Critical' | 'High' | 'Medium' | 'Low';
   description: string;
   details: {
     item?: string;
     rfp_value?: string | number;
     invoice_value?: string | number;
+    [key: string]: any; // Allow for flexible details
   };
 }
 ```
 
-**2. Create the Sample Data File:**
-In `src/lib/sample-data/`, create `rfpSample.ts`. This is the most important data file for this module.
+**2. Create/Update the Sample Data File:**
+*   **File:** `src/lib/sample-data/rfpSample.ts`
+*   **Action:** Update the file with the complete narratives for all supplier archetypes.
 
 ```typescript
 // src/lib/sample-data/rfpSample.ts
@@ -65,172 +65,119 @@ const createInvoicesForRFP = (rfpId: string): { invoices: Invoice[], analyses: R
   let invoices: Invoice[] = [];
   let analyses: Record<string, InvoiceAnalysis> = {};
 
-  if (rfpId === 'RFP-001') { // The "Model Supplier"
+  // Case 1: The "Model Supplier"
+  if (rfpId === 'RFP-001') {
     const invId = 'INV-101';
     invoices.push({ id: invId, rfpId, supplierId: 'sup-001', supplierName: 'Westonaria Mining Supplies', status: 'Approved', amount: 50000, submissionDate: '2024-04-10' });
-    analyses[invId] = {
-      overallConfidenceScore: 99,
-      llmSummary: 'Invoice is fully compliant with RFP terms and pricing. All line items match the original quote.',
-      llmRecommendation: 'Approve',
-      flags: []
-    };
+    analyses[invId] = { overallConfidenceScore: 99, llmSummary: 'Invoice is fully compliant with RFP terms and pricing. All line items match the original quote.', llmRecommendation: 'Approve', flags: [] };
   }
 
-  if (rfpId === 'RFP-002') { // The "Slippery Slope" Supplier
-    const invId1 = 'INV-201', invId2 = 'INV-202';
-    invoices.push({ id: invId1, rfpId, supplierId: 'sup-002', supplierName: 'Carletonville Catering', status: 'Approved', amount: 25000, submissionDate: '2024-03-15' });
-    analyses[invId1] = { overallConfidenceScore: 98, llmSummary: 'Invoice compliant.', llmRecommendation: 'Approve', flags: [] };
-    invoices.push({ id: invId2, rfpId, supplierId: 'sup-002', supplierName: 'Carletonville Catering', status: 'Queried', amount: 26500, submissionDate: '2024-04-16' });
-    analyses[invId2] = {
-      overallConfidenceScore: 65,
-      llmSummary: "Invoice includes an unapproved 'Fuel Surcharge'. While minor, this is the second consecutive invoice with a small, unquoted fee.",
-      llmRecommendation: 'Query Supplier',
-      flags: [{ type: 'Slippery Slope', severity: 'Medium', description: "Detected 'Boiling the Frog' pattern: 2 consecutive invoices with minor, unapproved charges.", details: {} }]
-    };
+  // Case 2: The "Slippery Slope" Supplier
+  if (rfpId === 'RFP-002') {
+    invoices.push({ id: 'INV-201', rfpId, supplierId: 'sup-002', supplierName: 'Carletonville Catering', status: 'Approved', amount: 25000, submissionDate: '2024-03-15' });
+    analyses['INV-201'] = { overallConfidenceScore: 98, llmSummary: 'Invoice compliant.', llmRecommendation: 'Approve', flags: [] };
+    invoices.push({ id: 'INV-202', rfpId, supplierId: 'sup-002', supplierName: 'Carletonville Catering', status: 'Queried', amount: 26500, submissionDate: '2024-04-16' });
+    analyses['INV-202'] = { overallConfidenceScore: 65, llmSummary: "Invoice includes an unapproved 'Fuel Surcharge'. While minor, this is the second consecutive invoice with a small, unquoted fee.", llmRecommendation: 'Query Supplier', flags: [{ type: 'Slippery Slope', severity: 'Medium', description: "Detected 'Boiling the Frog' pattern: 2 consecutive invoices with minor, unapproved charges.", details: {} }] };
   }
   
-  if (rfpId === 'RFP-003') { // The "Problem Child" Supplier
-    const invId1 = 'INV-301', invId2 = 'INV-302';
-    invoices.push({ id: invId1, rfpId, supplierId: 'sup-003', supplierName: 'Randfontein Logistics', status: 'Rejected', amount: 85000, submissionDate: '2024-02-20' });
-    analyses[invId1] = {
-      overallConfidenceScore: 25,
-      llmSummary: "Invoice contains a significant price discrepancy for 'Drill Bits' (25% over quote) and an unsolicited 'Admin Fee'.",
-      llmRecommendation: 'Reject & Escalate',
-      flags: [
-        { type: 'Price Discrepancy', severity: 'High', description: 'Unit price for Drill Bits is 25% over quote.', details: { item: 'Drill Bits', rfp_value: 'R1,500', invoice_value: 'R1,875' } },
-        { type: 'Unsolicited Item', severity: 'Medium', description: "Unapproved 'Admin Fee' of R2,500 added.", details: { item: 'Admin Fee', invoice_value: 'R2,500' } }
-      ]
-    };
-    invoices.push({ id: invId2, rfpId, supplierId: 'sup-003', supplierName: 'Randfontein Logistics', status: 'Rejected', amount: 45000, submissionDate: '2024-05-15' }); // Note date is after project completion
-    analyses[invId2] = {
-      overallConfidenceScore: 5,
-      llmSummary: "CRITICAL: Invoice submitted 45 days after project completion date for services not included in the original RFP. High probability of fraudulent billing.",
-      llmRecommendation: 'Reject & Escalate',
-      flags: [
-        { type: 'Post-Completion Billing', severity: 'Critical', description: 'Invoice submitted 45 days after project completion date.', details: { rfp_value: '2024-03-31', invoice_value: '2024-05-15' } },
-        { type: 'Unsolicited Item', severity: 'High', description: "Billed for 'Emergency Repair Services', which was not in the RFP scope.", details: { item: 'Emergency Repair Services' } }
-      ]
+  // Case 3: The "Problem Child" Supplier
+  if (rfpId === 'RFP-003') {
+    invoices.push({ id: 'INV-301', rfpId, supplierId: 'sup-003', supplierName: 'Randfontein Logistics', status: 'Rejected', amount: 85000, submissionDate: '2024-02-20' });
+    analyses['INV-301'] = { overallConfidenceScore: 25, llmSummary: "Invoice contains a significant price discrepancy for 'Drill Bits' (25% over quote) and an unsolicited 'Admin Fee'. The overall supplier risk profile for **'Randfontein Logistics'** is currently **High-Risk** following a failed **Director Credit Check**.", llmRecommendation: 'Reject & Escalate', flags: [ /* flags data */] };
+    invoices.push({ id: 'INV-302', rfpId, supplierId: 'sup-003', supplierName: 'Randfontein Logistics', status: 'Rejected', amount: 45000, submissionDate: '2024-05-15' });
+    analyses['INV-302'] = { overallConfidenceScore: 5, llmSummary: "CRITICAL: Invoice submitted 45 days after project completion date for services not included in the original RFP. High probability of fraudulent billing.", llmRecommendation: 'Reject & Escalate', flags: [/* flags data */] };
+  }
+
+  // Case 4: The "Anomalous but Compliant" Supplier
+  if (rfpId === 'RFP-006') {
+    const invId = 'INV-601';
+    invoices.push({ id: invId, rfpId, supplierId: 'sup-006', supplierName: 'Fochville IT Solutions', status: 'Pending Analysis', amount: 150000, submissionDate: '2024-05-20' });
+    analyses[invId] = {
+      overallConfidenceScore: 70,
+      llmSummary: "This invoice is fully compliant with the RFP's line items. However, the total amount is 275% higher than the historical average for this supplier and service type.",
+      llmRecommendation: 'Query Supplier',
+      flags: [{ type: 'Anomalous Amount', severity: 'Medium', description: 'Invoice total is 275% higher than historical average.', details: { average: 'R40,000', current: 'R150,000' } }]
     };
   }
   return { invoices, analyses };
 };
 
-
-export const getRFPs = (): RFP[] => {
-  const rfp3Data = createInvoicesForRFP('RFP-003');
-  return [
-    { id: 'RFP-001', title: 'Q2 Office Supply Contract', status: 'Completed', submissionDeadline: '2024-03-01', projectCompletionDate: '2024-06-30', awardedToSupplierId: 'sup-001', associatedInvoices: createInvoicesForRFP('RFP-001').invoices },
-    { id: 'RFP-002', title: 'Monthly Catering Services', status: 'Awarded', submissionDeadline: '2024-02-15', projectCompletionDate: '2024-12-31', awardedToSupplierId: 'sup-002', associatedInvoices: createInvoicesForRFP('RFP-002').invoices },
-    { id: 'RFP-003', title: 'Heavy Vehicle Drill Bit Supply', status: 'Completed', submissionDeadline: '2024-01-20', projectCompletionDate: '2024-03-31', awardedToSupplierId: 'sup-003', associatedInvoices: rfp3Data.invoices },
-    { id: 'RFP-004', title: 'On-site IT Support Services', status: 'Under Review', submissionDeadline: '2024-06-15', associatedInvoices: [] },
-    { id: 'RFP-005', title: 'Community Hall Renovation', status: 'Open for Submission', submissionDeadline: '2024-07-01', associatedInvoices: [] },
-  ];
-};
+export const getRFPs = (): RFP[] => [
+    { id: 'RFP-001', title: 'Q2 Office Supply Contract', status: 'Completed', startDate: '2024-02-01', submissionDeadline: '2024-03-01', awardedToSupplierId: 'sup-001', associatedInvoices: createInvoicesForRFP('RFP-001').invoices },
+    { id: 'RFP-002', title: 'Monthly Catering Services', status: 'Awarded', startDate: '2024-02-01', submissionDeadline: '2024-02-15', awardedToSupplierId: 'sup-002', associatedInvoices: createInvoicesForRFP('RFP-002').invoices },
+    { id: 'RFP-003', title: 'Heavy Vehicle Drill Bit Supply', status: 'Completed', startDate: '2024-01-01', submissionDeadline: '2024-01-20', projectCompletionDate: '2024-03-31', awardedToSupplierId: 'sup-003', associatedInvoices: createInvoicesForRFP('RFP-003').invoices },
+    { id: 'RFP-004', title: 'On-site IT Support Services', status: 'Under Review', startDate: '2024-05-15', submissionDeadline: '2024-06-15', associatedInvoices: [] },
+    { id: 'RFP-005', title: 'Community Hall Renovation', status: 'Open for Submission', startDate: '2024-06-01', submissionDeadline: '2024-07-01', associatedInvoices: [] },
+    { id: 'RFP-006', title: 'Network Infrastructure Upgrade', status: 'Awarded', startDate: '2024-04-01', submissionDeadline: '2024-04-30', awardedToSupplierId: 'sup-006', associatedInvoices: createInvoicesForRFP('RFP-006').invoices },
+];
 
 export const getInvoiceDetails = (invoiceId: string): { invoice: Invoice, analysis: InvoiceAnalysis } | null => {
-  const allRFPs = getRFPs();
-  for (const rfp of allRFPs) {
-    const invoice = rfp.associatedInvoices.find(inv => inv.id === invoiceId);
-    if (invoice) {
-      const { analyses } = createInvoicesForRFP(rfp.id);
-      return { invoice, analysis: analyses[invoiceId] };
-    }
-  }
-  return null;
+  // ... (implementation remains the same)
 };
 ```
 
 ---
 
-### **Step-by-Step Build Guide**
+### **Step-by-Step Build Guide (Revised)**
 
-#### **Section 1: The RFP Dashboard**
+#### **Section 1: The RFP Mission Control (Dashboard)** ✅ PROPERLY COMPLETED
 
-*   **File Path:** `src/app/rfp/dashboard/page.tsx`
-*   **Purpose:** The command center. A beautiful, at-a-glance view of the entire RFP landscape.
-*   **UI Layout & Components:**
-    1.  Wrap the page in `<NeumorphicBackground>`.
-    2.  **Top Row: KPI Grid (`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2`)**
-        *   Use four `<NeumorphicStatsCard>` components.
-            *   Card 1: Title "Open for Submission", Value "1", Icon `<FileText>`.
-            *   Card 2: Title "Under Review", Value "1", Icon `<ClockIcon>`.
-            *   Card 3: Title "Invoices Pending Analysis", Value "1", Icon `<AlertCircleIcon>` with `text-yellow-400`.
-            *   Card 4: Title "Critical Flags This Month", Value "3", Icon `<AlertCircleIcon>` with `text-red-400`.
-    3.  **Main Content: RFP Table**
-        *   A full-width `<NeumorphicCard>` containing your advanced `<NeumorphicDataTable>`.
-        *   **Header:** `<NeumorphicHeading>`: "Active & Recent RFPs". On the right, `<NeumorphicButton variant="neumorphic-outline">`: "Create New RFP".
-*   **Interactivity & Functionality:**
-    *   **Data Table:**
-        *   Populate with `getRFPs()`.
-        *   **Columns:**
-            *   `RFP Title`: `NeumorphicText` with `font-semibold`.
-            *   `Status`: `<NeumorphicBadge>` (e.g., `Open for Submission`=info, `Awarded`=success, `Completed`=secondary).
-            *   `Submission Deadline`: `NeumorphicText variant="secondary"`.
-            *   `Associated Invoices`: A small count with a link, e.g., "3 Invoices".
-    *   **On Row Click:** Clicking an RFP row navigates to `rfp/manage/[id]`. This is a key user flow.
-
-#### **Section 2: The Invoice Analysis Center**
-
-*   **File Path:** `src/app/rfp/invoice-analysis/page.tsx`
-*   **Purpose:** The dedicated workspace for the finance/risk team. This is where the magic happens.
+*   **File Path:** `src/app/rfp-invoice/rfp-dashboard/page.tsx`
+*   **Purpose:** A strategic command center for the entire procurement pipeline.
 *   **UI Layout & Components:**
     1.  `<NeumorphicBackground>`.
-    2.  A single, full-width `<NeumorphicCard>` containing a `<NeumorphicDataTable>`.
-    3.  **Header:** `<NeumorphicHeading>`: "Invoice Analysis Center". On the right, `<NeumorphicFileUpload>` button: "Upload Manual Invoice".
-*   **Interactivity & Functionality:**
-    *   **Data Table:**
-        *   This table should be populated by finding all invoices with status `Pending Analysis` or `Queried`.
-        *   **Columns:**
-            *   `Invoice ID`: `NeumorphicText` with `font-mono`.
-            *   `Supplier Name`: Should link to the supplier's profile page.
-            *   `Amount`: Formatted as currency.
-            *   `AI Risk Score`: A special cell. Display the number from `analysis.overallConfidenceScore`. Use a colored circular progress ring around the number (Green 90+, Yellow 60+, Red <60).
-            *   `Status`: `<NeumorphicBadge>` for "Pending Analysis", "Queried".
-    *   **On Row Click:** This is the most important interaction. Clicking a row **MUST** open a full-screen `<Dialog variant="neumorphic">` which contains the **Invoice DNA & LLM Insights View**.
+    2.  **Top Row: KPIs (`grid`)**: Use four `<NeumorphicStatsCard>` as planned.
+    3.  **Second Row: RFP Pipeline Chart**
+        *   A full-width `<NeumorphicCard>` with `<NeumorphicHeading>`: "RFP Pipeline".
+        *   Inside, use `<LazyLoad>` to render an **ApexCharts Range Bar Chart**.
+        *   **Chart Data:** Map over `getRFPs()` to create a series where each RFP is a bar spanning from its `startDate` to its `submissionDeadline`. Color-code the bars by status.
+        *   **Why it's a "Wow":** Provides an instant, visual overview of workload and strategic planning.
+    4.  **Main Content: RFP Table (`<NeumorphicCard>` with `<NeumorphicDataTable>`)**: As planned.
 
-#### **Section 3: The "Invoice DNA & LLM Insights" View**
+#### **Section 2: The Invoice Triage Center**✅ PROPERLY COMPLETED
 
-*   **File Path:** This is a new component, e.g., `src/components/features/InvoiceAnalysisView.tsx`. It will be rendered inside the `Dialog` from the previous step.
-*   **Purpose:** The "Wow" moment. This is where you showcase the fraud detection capabilities in a stunning, intuitive interface.
+*   **File Path:** `src/app/rfp-invoice/invoice-analysis/page.tsx`
+*   **Purpose:** An intelligent, prioritized workspace for the finance/risk team.
 *   **UI Layout & Components:**
-    1.  **Dialog Layout:** A two-column grid (`grid-cols-1 lg:grid-cols-5 gap-4`) for the main content.
-    2.  **Left Column (`lg:col-span-3`): The "Invoice DNA"**
-        *   `<NeumorphicHeading>`: "Invoice DNA Comparison".
-        *   A container `div` where you will render the visual comparison.
-            *   Use two vertical divs side-by-side, one for "RFP Terms" and one for "Invoice Items".
-            *   **Build a new component `DNALink.tsx`:** This component will take props like `rfp_value`, `invoice_value`, and `status ('match', 'mismatch', 'unsolicited')` and render the correct visual (green solid line, red broken line, etc.).
-            *   Render a list of these links for each item to create the "strand" effect.
-    3.  **Right Column (`lg:col-span-2`): The LLM Panel**
-        *   A `<NeumorphicCard>` with a subtle glow (use `glow-subtle-blue` from `custom.css` but with a purple color variable) to signify "AI-Powered".
-        *   Inside the card:
-            *   `<NeumorphicHeading>`: "LLM Insights & Recommendation".
-            *   `LLM Summary`: A `<NeumorphicText>` displaying the summary.
-            *   `Flags`: A list where each item is a **new component `FlagBadge.tsx`** that shows the severity (`Critical`=red, `High`=orange) and the flag type.
-            *   `Recommendation`: Display the `llmRecommendation` text boldly, e.g., "Recommendation: **REJECT & ESCALATE**".
-    4.  **Dialog Footer (`<DialogFooter variant="neumorphic">`)**
-        *   Render `<NeumorphicButton>`s that correspond to the LLM's recommendation (e.g., "Approve", "Reject").
+    1.  `<NeumorphicBackground>`.
+    2.  A `<NeumorphicCard>` with `<NeumorphicHeading>`: "Invoice Triage Center".
+    3.  **Triage Filter Buttons:** Above the table, add a `div` with `<NeumorphicButton>`s: `[ All ]`, `[ Critical (2) ]`, `[ Medium (1) ]`, etc.
+    4.  **Invoice Table (`<NeumorphicDataTable>`)**:
+        *   **Enhancement:** Your `<NeumorphicDataTable>` component must be updated to accept a `rowClassName` function prop. This function will receive the row data and return a CSS class.
+        *   **Implementation:** `rowClassName={(row) => getRowColor(row.analysis.overallConfidenceScore)}`. The `getRowColor` function returns `bg-red-500/10` or `bg-yellow-500/10`.
+        *   **Columns:**
+            *   **`AI Risk Score`:** Use your new `<CircularProgressRing>` component here.
+            *   Other columns as planned.
+    *   **Why it's a "Wow":** The combination of quick filters and color-coded rows turns a boring list into a powerful, intuitive triage system that guides the user's attention.
+
+#### **Section 3: The "Invoice DNA & Interactive LLM" View**✅ PROPERLY COMPLETED
+
+*   **File Path:** `src/components/features/InvoiceAnalysisView.tsx` (to be used in a Dialog).
+*   **Purpose:** The ultimate "wow" moment, showcasing deep analysis and seamless action.
+*   **UI Layout & Components:**
+    1.  **Dialog Layout:** Two-column grid (`lg:grid-cols-5`) as planned.
+    2.  **Left Column: "Invoice DNA"**
+        *   Use the `<DNALink>` component as planned.
+        *   **Enhancement:** Update the `DNALink` `status` prop to handle `'rfp_only'` to show items that were quoted but not delivered/invoiced.
+    3.  **Right Column: The Interactive LLM Panel**
+        *   `<NeumorphicCard>` with a subtle glow as planned.
+        *   `<NeumorphicHeading>`: "LLM Insights".
+        *   **Interactive Summary:**
+            *   Instead of a simple string, the `llmSummary` should be parsed. Create a small utility function or component that takes the summary text and turns keywords (like supplier names or check names) into interactive `<Link>` components.
+        *   **Flags:** Use your new `<FlagBadge>` component as planned.
+        *   **Actionable Recommendation:**
+            *   Display the recommendation text boldly.
+            *   **Directly below the text**, render the corresponding `<NeumorphicButton>`. For `Reject & Escalate`, show a red-tinted button.
+            *   **Why it's a "Wow":** The user reads the recommendation and the tool to execute it is *right there*. It feels like the AI is an active partner in the workflow.
 
 ---
 
-### **Component Inventory**
+### **Component Inventory (Revised)**
 
-#### **Existing Components Used:**
+This plan leverages your existing library and the new components you've already built.
 
-*   `NeumorphicBackground`
-*   `NeumorphicCard`
-*   `NeumorphicStatsCard`
-*   `NeumorphicDataTable`
-*   `NeumorphicHeading`
-*   `NeumorphicText`
-*   `NeumorphicButton`
-*   `NeumorphicBadge`
-*   `NeumorphicFileUpload`
-*   `Dialog` (with `neumorphic` variant)
-*   `Lucide Icons` (FileText, ClockIcon, AlertCircleIcon)
 
-#### **New Components to Build:**
+#### **Required Component Enhancements (No New Builds):**✅ PROPERLY COMPLETED
 
-1.  **`InvoiceAnalysisView.tsx`**: The main container for the DNA/LLM view inside the dialog. This is mostly compositional.
-2.  **`DNALink.tsx`**: **(Visual - Key Feature)**. A component that visually connects RFP and Invoice line items. It will use `div`s and clever CSS `::before` pseudo-elements to draw the connecting lines, colored based on status.
-3.  **`FlagBadge.tsx`**: A specialized version of `<NeumorphicBadge>` that includes an icon and uses a more vibrant color scale based on severity (`Critical`, `High`, etc.) to draw the user's eye.
-4.  **`CircularProgressRing.tsx`**: A small component using SVG to display a circular progress bar. You'll use this in the invoice table to show the AI Risk Score visually. It should be theme-aware.
+1.  **`NeumorphicDataTable`**: Needs to be modified to accept and apply a `rowClassName` prop to enable the visual triage system. This is an enhancement, not a new component.
+2.  **`DNALink.tsx`**: Update the internal logic to handle the `'rfp_only'` status for a more complete comparison.

@@ -537,6 +537,21 @@ div.glow-subtle-blue {
 
 /* Top Menu Bar Neumorphic Theme System - Matches Main Theme */
 
+/* Base positioning for top menu bar - always applied regardless of theme */
+.topbar-neumorphic-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 40;
+  height: 4rem; /* h-16 equivalent */
+  /* Fallback background for before theme is applied */
+  background: rgba(26, 28, 32, 0.95);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
 /* Top Menu Bar Dark Theme (when app is dark) */
 .topbar-neumorphic-container.dark {
   /* Base Colors - Dark theme for top menu bar */

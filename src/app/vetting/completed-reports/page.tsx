@@ -17,7 +17,6 @@ import {
 } from '@/components/ui/neumorphic';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -31,8 +30,6 @@ import {
   RefreshCw, 
   Download, 
   Eye, 
-  ExternalLink,
-  Archive,
   FileText,
   Shield,
   AlertTriangle,
@@ -41,7 +38,6 @@ import {
   Calendar,
   MoreHorizontal
 } from 'lucide-react';
-import { TableColumn, TableAction } from '@/types/table';
 import { 
   CompletedVettingReport, 
   RiskLevel, 
@@ -168,10 +164,10 @@ export default function CompletedVettingReportsPage() {
     toast.success(`Downloading report ${report.reportId}.pdf`);
   };
 
-  const handleViewCase = (report: CompletedReportTableRow) => {
-    // Navigate to vetting case view
-    toast.info(`Navigating to vetting case ${report.vettingCaseId}`);
-  };
+  // const handleViewCase = (report: CompletedReportTableRow) => {
+  //   // Navigate to vetting case view
+  //   toast.info(`Navigating to vetting case ${report.vettingCaseId}`);
+  // };
 
   const handleArchiveReport = (report: CompletedReportTableRow) => {
     setData(prev => prev.filter(r => r.reportId !== report.reportId));

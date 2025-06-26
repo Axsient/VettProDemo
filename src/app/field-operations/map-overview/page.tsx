@@ -6,6 +6,7 @@ import { NeumorphicCard, NeumorphicText } from '@/components/ui/neumorphic';
 
 // Dynamically import InteractiveMap to avoid SSR issues
 const InteractiveMap = dynamic(() => import('@/components/maps/InteractiveMap'), {
+  ssr: false,
   loading: () => (
     <div className="flex items-center justify-center h-[600px] bg-[var(--neumorphic-card)] rounded-lg">
       <div className="text-center">
