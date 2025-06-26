@@ -92,14 +92,14 @@ const sampleMarkers: MarkerData[] = [
 const geofenceAreas = [
   {
     id: 'geo1',
-    center: [-26.2041, 28.0473],
+    center: [-26.2041, 28.0473] as [number, number],
     radius: 3000,
     color: '#3B82F6',
     name: 'Johannesburg Central'
   },
   {
     id: 'geo2',
-    center: [-26.1076, 28.0567],
+    center: [-26.1076, 28.0567] as [number, number],
     radius: 2000,
     color: '#10B981',
     name: 'Sandton Business District'
@@ -136,7 +136,6 @@ const createAnimatedIcon = (type: MarkerData['type'], status: MarkerData['status
 
   // Create animated divIcon with pulsing ring
   return L.divIcon({
-    className: 'animated-marker-icon',
     html: `
       <style>
         .pulse-ring-${uniqueId} {
