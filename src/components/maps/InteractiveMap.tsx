@@ -205,7 +205,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
   className = "",
   height = '500px',
   markers = sampleMarkers,
-  center = [-26.2041, 28.0473] as [number, number],
+  center = [-26.2041, 28.0473] as const,
   zoom = 10,
   showControls = true,
   showGeofences = true,
@@ -217,7 +217,7 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
     console.log('InteractiveMap loaded with markers:', markers);
     
     // Fix Leaflet default icons
-    // @ts-ignore - Leaflet workaround for default icons
+    // @ts-expect-error - Leaflet workaround for default icons
     delete L.Icon.Default.prototype._getIconUrl;
     L.Icon.Default.mergeOptions({
       iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -442,64 +442,199 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
 
       {/* CSS for animations and styling */}
       <style jsx global>{`
-        .custom-popup .leaflet-popup-content-wrapper {
-          background: transparent !important;
-          border-radius: 8px !important;
-          box-shadow: none !important;
+        /* Neumorphic Map Popup Styling - Override Leaflet defaults */
+        .neumorphic-map-popup .leaflet-popup-content-wrapper {
+          background: var(--neumorphic-gradient) !important;
+          border: 1px solid var(--neumorphic-border) !important;
+          border-radius: var(--neumorphic-radius-md) !important;
+          box-shadow: var(--neumorphic-shadow-convex) !important;
           padding: 0 !important;
           margin: 0 !important;
+          backdrop-filter: blur(var(--neumorphic-blur)) !important;
+          color: var(--neumorphic-text-primary) !important;
         }
         
-        .custom-popup .leaflet-popup-content {
+        .neumorphic-map-popup .leaflet-popup-content {
           margin: 0 !important;
           padding: 0 !important;
           background: transparent !important;
+          color: var(--neumorphic-text-primary) !important;
+          line-height: 1.5 !important;
         }
         
-        .custom-popup .leaflet-popup-tip {
-          background: white !important;
-          border: 1px solid #e5e7eb !important;
+        .neumorphic-map-popup .leaflet-popup-tip {
+          background: var(--neumorphic-card) !important;
+          border: 1px solid var(--neumorphic-border) !important;
+          box-shadow: var(--neumorphic-shadow-convex-sm) !important;
         }
 
-        .custom-popup .leaflet-popup-close-button {
-          color: #374151 !important;
-          background: #f9fafb !important;
+        /* Close button styling - Consolidated */
+        .neumorphic-map-popup .leaflet-popup-close-button {
+          background: var(--neumorphic-button) !important;
+          color: var(--neumorphic-text-primary) !important;
+          border: 1px solid var(--neumorphic-border) !important;
           border-radius: 50% !important;
-          width: 24px !important;
-          height: 24px !important;
-          font-size: 14px !important;
+          width: 28px !important;
+          height: 28px !important;
+          font-size: 16px !important;
           font-weight: bold !important;
           right: 8px !important;
           top: 8px !important;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+          box-shadow: var(--neumorphic-shadow-convex-sm) !important;
+          transition: all 0.2s ease !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          text-decoration: none !important;
+          z-index: 1000 !important;
         }
 
-        .custom-popup .leaflet-popup-close-button:hover {
-          background: #f3f4f6 !important;
+        .neumorphic-map-popup .leaflet-popup-close-button:hover {
+          box-shadow: var(--neumorphic-shadow-button-hover) !important;
+          transform: translateY(-1px) !important;
+          color: var(--neumorphic-accent) !important;
         }
 
+        .neumorphic-map-popup .leaflet-popup-close-button:active {
+          box-shadow: var(--neumorphic-shadow-button-active) !important;
+          transform: translateY(0) !important;
+        }
+
+        /* Neumorphic popup content styling */
+        .neumorphic-map-popup h4 {
+          color: var(--neumorphic-text-primary) !important;
+          font-size: 1rem !important;
+          font-weight: 600 !important;
+          margin: 0 !important;
+        }
+
+        .neumorphic-map-popup p {
+          color: var(--neumorphic-text-secondary) !important;
+          font-size: 0.875rem !important;
+          margin: 0 !important;
+        }
+
+        .neumorphic-map-popup .text-muted-foreground {
+          color: var(--neumorphic-text-secondary) !important;
+        }
+
+        .neumorphic-map-popup .text-foreground {
+          color: var(--neumorphic-text-primary) !important;
+        }
+
+        .neumorphic-map-popup .text-sm {
+          font-size: 0.875rem !important;
+        }
+
+        /* Neumorphic badge styling - Consolidated */
+        .neumorphic-map-popup .neumorphic-badge {
+          background: var(--neumorphic-button) !important;
+          color: var(--neumorphic-text-primary) !important;
+          border: 1px solid var(--neumorphic-border) !important;
+          box-shadow: var(--neumorphic-shadow-convex-sm) !important;
+          border-radius: var(--neumorphic-radius-sm) !important;
+          padding: 0.25rem 0.5rem !important;
+          font-size: 0.75rem !important;
+          font-weight: 500 !important;
+        }
+
+        /* Neumorphic button styling - Consolidated */
+        .neumorphic-map-popup .neumorphic-button {
+          background: var(--neumorphic-button) !important;
+          color: var(--neumorphic-text-primary) !important;
+          border: 1px solid var(--neumorphic-border) !important;
+          box-shadow: var(--neumorphic-shadow-button-default) !important;
+          border-radius: var(--neumorphic-radius-md) !important;
+          padding: 0.5rem 1rem !important;
+          font-size: 0.875rem !important;
+          font-weight: 500 !important;
+          transition: all 0.2s ease !important;
+          cursor: pointer !important;
+          text-decoration: none !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+
+        .neumorphic-map-popup .neumorphic-button:hover {
+          box-shadow: var(--neumorphic-shadow-button-hover) !important;
+          transform: translateY(-1px) !important;
+          color: var(--neumorphic-accent) !important;
+        }
+
+        .neumorphic-map-popup .neumorphic-button:active {
+          box-shadow: var(--neumorphic-shadow-button-active) !important;
+          transform: translateY(0) !important;
+        }
+
+        /* Badge variants */
+        .neumorphic-map-popup .neumorphic-badge.badge-success {
+          background: rgba(16, 185, 129, 0.2) !important;
+          color: #10b981 !important;
+          border-color: rgba(16, 185, 129, 0.3) !important;
+        }
+
+        .neumorphic-map-popup .neumorphic-badge.badge-warning {
+          background: rgba(245, 158, 11, 0.2) !important;
+          color: #f59e0b !important;
+          border-color: rgba(245, 158, 11, 0.3) !important;
+        }
+
+        .neumorphic-map-popup .neumorphic-badge.badge-danger {
+          background: rgba(239, 68, 68, 0.2) !important;
+          color: #ef4444 !important;
+          border-color: rgba(239, 68, 68, 0.3) !important;
+        }
+
+        .neumorphic-map-popup .neumorphic-badge.badge-info {
+          background: rgba(59, 130, 246, 0.2) !important;
+          color: #3b82f6 !important;
+          border-color: rgba(59, 130, 246, 0.3) !important;
+        }
+
+        /* Icon colors in popup */
+        .neumorphic-map-popup .w-3,
+        .neumorphic-map-popup .w-4 {
+          color: var(--neumorphic-text-secondary) !important;
+        }
+
+        /* Priority colors */
+        .neumorphic-map-popup .text-green-500 {
+          color: #10b981 !important;
+        }
+
+        .neumorphic-map-popup .text-yellow-500 {
+          color: #f59e0b !important;
+        }
+
+        .neumorphic-map-popup .text-red-500 {
+          color: #ef4444 !important;
+        }
+
+        /* Custom marker animations */
         .leaflet-marker-icon.animated-marker {
           background: transparent !important;
           border: none !important;
         }
 
+        /* Map container styling */
         .leaflet-container {
-          background: #f8fafc !important;
-          border-radius: 8px !important;
+          background: var(--neumorphic-bg) !important;
+          border-radius: var(--neumorphic-radius-lg) !important;
         }
 
+        /* Zoom controls styling - Consolidated */
         .leaflet-control-zoom {
-          border: none !important;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
-          border-radius: 6px !important;
+          background: var(--neumorphic-button) !important;
+          border: 1px solid var(--neumorphic-border) !important;
+          border-radius: var(--neumorphic-radius-md) !important;
+          box-shadow: var(--neumorphic-shadow-convex) !important;
           overflow: hidden;
-          background: white !important;
-          border: 1px solid #e5e7eb !important;
         }
 
         .leaflet-control-zoom a {
-          background: white !important;
-          color: #374151 !important;
+          background: var(--neumorphic-button) !important;
+          color: var(--neumorphic-text-primary) !important;
           border: none !important;
           width: 40px !important;
           height: 40px !important;
@@ -511,22 +646,32 @@ const InteractiveMap: React.FC<InteractiveMapProps> = ({
         }
 
         .leaflet-control-zoom a:hover {
-          background: #f9fafb !important;
+          box-shadow: var(--neumorphic-shadow-button-hover) !important;
           transform: scale(0.95);
+          color: var(--neumorphic-accent) !important;
         }
 
+        .leaflet-control-zoom a:active {
+          box-shadow: var(--neumorphic-shadow-button-active) !important;
+        }
+
+        /* Attribution styling */
         .leaflet-control-attribution {
-          background: rgba(255, 255, 255, 0.9) !important;
-          color: #6b7280 !important;
-          border-radius: 6px !important;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
-          border: 1px solid #e5e7eb !important;
+          background: var(--neumorphic-card) !important;
+          color: var(--neumorphic-text-secondary) !important;
+          border-radius: var(--neumorphic-radius-md) !important;
+          box-shadow: var(--neumorphic-shadow-convex-sm) !important;
+          border: 1px solid var(--neumorphic-border) !important;
           font-size: 11px !important;
-          backdrop-filter: blur(4px);
+          backdrop-filter: blur(var(--neumorphic-blur)) !important;
         }
 
         .leaflet-control-attribution a {
-          color: #374151 !important;
+          color: var(--neumorphic-text-primary) !important;
+        }
+
+        .leaflet-control-attribution a:hover {
+          color: var(--neumorphic-accent) !important;
         }
       `}</style>
     </div>
