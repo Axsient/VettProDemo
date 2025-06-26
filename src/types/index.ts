@@ -93,4 +93,6 @@ export interface CardProps {
   className?: string;
   variant?: 'default' | 'glassmorphic';
   glowEffect?: boolean;
-} 
+}
+
+export * from './supplier'; 

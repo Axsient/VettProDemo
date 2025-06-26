@@ -39,8 +39,12 @@ import {
   NeumorphicTableCell,
   NeumorphicButton,
   NeumorphicTabs,
+  NeumorphicCalendar,
 } from "@/components/ui/neumorphic";
 import { ActivityIcon, AlertCircleIcon, CheckCircleIcon, ClockIcon, FileText, TrendingUp, Award } from "lucide-react";
+import CircularProgressRing from '@/components/ui/CircularProgressRing';
+import FlagBadge from '@/components/ui/FlagBadge';
+import { InvoiceAnalysisView } from '@/components/features/InvoiceAnalysisView';
 
 // Dynamic import for InteractiveMap to handle SSR
 const InteractiveMap = dynamic(() => import('@/components/maps/InteractiveMap'), {
@@ -222,6 +226,69 @@ export default function UIElementsPage() {
             icon={<AlertCircleIcon className="w-6 h-6 text-red-400" />}
           />
         </div>
+
+        {/* Circular Progress Rings */}
+        <NeumorphicCard>
+          <NeumorphicHeading>Circular Progress Rings</NeumorphicHeading>
+          <NeumorphicText variant="secondary" size="sm" className="mt-1 mb-4">
+            AI Risk Score indicators with 4-tier color system: 🟢 Excellent (90+), 🟡 Good (75-89), 🟠 Caution (50-74), 🔴 Critical (&lt;50).
+          </NeumorphicText>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-4">
+            <div className="flex flex-col items-center space-y-3">
+              <CircularProgressRing percentage={95} size={60} strokeWidth={5} />
+              <div className="text-center">
+                <NeumorphicText size="sm" className="font-medium">Excellent</NeumorphicText>
+                <NeumorphicText size="sm" variant="secondary">95% Score</NeumorphicText>
+              </div>
+            </div>
+            <div className="flex flex-col items-center space-y-3">
+              <CircularProgressRing percentage={82} size={60} strokeWidth={5} />
+              <div className="text-center">
+                <NeumorphicText size="sm" className="font-medium">Good</NeumorphicText>
+                <NeumorphicText size="sm" variant="secondary">82% Score</NeumorphicText>
+              </div>
+            </div>
+            <div className="flex flex-col items-center space-y-3">
+              <CircularProgressRing percentage={65} size={60} strokeWidth={5} />
+              <div className="text-center">
+                <NeumorphicText size="sm" className="font-medium">Caution</NeumorphicText>
+                <NeumorphicText size="sm" variant="secondary">65% Score</NeumorphicText>
+              </div>
+            </div>
+            <div className="flex flex-col items-center space-y-3">
+              <CircularProgressRing percentage={35} size={60} strokeWidth={5} />
+              <div className="text-center">
+                <NeumorphicText size="sm" className="font-medium">Critical</NeumorphicText>
+                <NeumorphicText size="sm" variant="secondary">35% Score</NeumorphicText>
+              </div>
+            </div>
+          </div>
+        </NeumorphicCard>
+
+        {/* Flag Badges */}
+        <NeumorphicCard>
+          <NeumorphicHeading>Flag Badges</NeumorphicHeading>
+          <NeumorphicText variant="secondary" size="sm" className="mt-1 mb-4">
+            Visually impactful badges for displaying risk flags with severity-based colors and icons.
+          </NeumorphicText>
+          <div className="flex flex-wrap items-center gap-4 mt-4">
+            <FlagBadge severity="Critical">Post-Completion Billing</FlagBadge>
+            <FlagBadge severity="High">Price Discrepancy</FlagBadge>
+            <FlagBadge severity="Medium">Slippery Slope Pattern</FlagBadge>
+            <FlagBadge severity="Low">Minor Compliance Issue</FlagBadge>
+          </div>
+        </NeumorphicCard>
+
+        {/* Invoice DNA Analysis */}
+        <NeumorphicCard>
+          <div className="mb-4">
+            <NeumorphicHeading>Invoice DNA Analysis</NeumorphicHeading>
+            <NeumorphicText variant="secondary" size="sm" className="mt-1">
+              Advanced RFP vs Invoice comparison with AI-powered insights, animated connections, and risk flag detection.
+            </NeumorphicText>
+          </div>
+          <InvoiceAnalysisView />
+        </NeumorphicCard>
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
@@ -661,6 +728,174 @@ export default function UIElementsPage() {
                   </NeumorphicTabs.Content>
                 </NeumorphicTabs>
               </div>
+            </div>
+          </NeumorphicCard>
+        </LazyLoad>
+
+        {/* Neumorphic Calendar Demo */}
+        <LazyLoad fallback={<NeumorphicCard className="animate-pulse h-96" />}>
+          <NeumorphicCard>
+            <div className="mb-4">
+              <NeumorphicText size="lg" className="font-semibold">📅 Neumorphic Calendar</NeumorphicText>
+              <NeumorphicText variant="secondary" size="sm" className="mt-1">
+                Full-featured calendar with neumorphic styling, event management, and theme integration.
+              </NeumorphicText>
+            </div>
+
+            {/* Calendar Component */}
+            <div className="space-y-6">
+              <div>
+                <NeumorphicText className="font-medium mb-3">Vetting Schedule Calendar</NeumorphicText>
+                <NeumorphicCalendar
+                  events={[
+                    {
+                      id: 'event-1',
+                      title: 'Financial Check - Acme Corp',
+                      date: '2024-01-15',
+                      backgroundColor: '#10b981',
+                      borderColor: '#10b981',
+                      textColor: '#ffffff'
+                    },
+                    {
+                      id: 'event-2',
+                      title: 'Background Verification - John Doe',
+                      date: '2024-01-18',
+                      backgroundColor: '#3b82f6',
+                      borderColor: '#3b82f6',
+                      textColor: '#ffffff'
+                    },
+                    {
+                      id: 'event-3',
+                      title: 'Compliance Review - TechFlow Ltd',
+                      date: '2024-01-20',
+                      backgroundColor: '#f59e0b',
+                      borderColor: '#f59e0b',
+                      textColor: '#ffffff'
+                    },
+                    {
+                      id: 'event-4',
+                      title: 'Risk Assessment - Global Solutions',
+                      date: '2024-01-22',
+                      backgroundColor: '#ef4444',
+                      borderColor: '#ef4444',
+                      textColor: '#ffffff'
+                    },
+                    {
+                      id: 'event-5',
+                      title: 'Medical Check - Dr. Smith',
+                      date: '2024-01-25',
+                      backgroundColor: '#8b5cf6',
+                      borderColor: '#8b5cf6',
+                      textColor: '#ffffff'
+                    },
+                    {
+                      id: 'event-6',
+                      title: 'Document Review - ABC Manufacturing',
+                      date: '2024-01-28',
+                      backgroundColor: '#06b6d4',
+                      borderColor: '#06b6d4',
+                      textColor: '#ffffff'
+                    },
+                    {
+                      id: 'event-7',
+                      title: 'Field Verification - Construction Co',
+                      date: '2024-01-30',
+                      backgroundColor: '#84cc16',
+                      borderColor: '#84cc16',
+                      textColor: '#ffffff'
+                    }
+                  ]}
+                  onEventClick={(eventApi) => {
+                    toast(`Event Selected: ${eventApi.title}`, {
+                      description: `Date: ${eventApi.startStr}`,
+                      action: {
+                        label: "View Details",
+                        onClick: () => console.log('View details:', eventApi)
+                      }
+                    });
+                  }}
+                  height="500px"
+                  initialDate={new Date('2024-01-15')}
+                />
+              </div>
+
+              {/* Calendar Features Overview */}
+              <NeumorphicCard className="p-4">
+                <NeumorphicText size="lg" className="font-semibold mb-3">Calendar Features</NeumorphicText>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <NeumorphicText className="font-medium">🎨 Neumorphic Design</NeumorphicText>
+                    <NeumorphicText variant="secondary" size="sm">
+                      Fully integrated with the neumorphic theme system, supporting both light and dark modes
+                    </NeumorphicText>
+                  </div>
+                  <div className="space-y-2">
+                    <NeumorphicText className="font-medium">📊 Event Management</NeumorphicText>
+                    <NeumorphicText variant="secondary" size="sm">
+                      Color-coded events with click handlers, custom styling, and extended properties
+                    </NeumorphicText>
+                  </div>
+                  <div className="space-y-2">
+                    <NeumorphicText className="font-medium">🌙 Theme Integration</NeumorphicText>
+                    <NeumorphicText variant="secondary" size="sm">
+                      Seamless theme switching with CSS variables and automatic color adaptation
+                    </NeumorphicText>
+                  </div>
+                  <div className="space-y-2">
+                    <NeumorphicText className="font-medium">🔘 Interactive Elements</NeumorphicText>
+                    <NeumorphicText variant="secondary" size="sm">
+                      Neumorphic buttons, tooltips, and hover effects throughout the calendar interface
+                    </NeumorphicText>
+                  </div>
+                  <div className="space-y-2">
+                    <NeumorphicText className="font-medium">📱 Responsive Design</NeumorphicText>
+                    <NeumorphicText variant="secondary" size="sm">
+                      Mobile-optimized layout with touch-friendly interactions and adaptive sizing
+                    </NeumorphicText>
+                  </div>
+                  <div className="space-y-2">
+                    <NeumorphicText className="font-medium">⚡ Performance</NeumorphicText>
+                    <NeumorphicText variant="secondary" size="sm">
+                      Optimized FullCalendar integration with lazy loading and efficient event rendering
+                    </NeumorphicText>
+                  </div>
+                </div>
+              </NeumorphicCard>
+
+              {/* Event Legend */}
+              <NeumorphicCard className="p-4">
+                <NeumorphicText size="lg" className="font-semibold mb-3">Event Legend</NeumorphicText>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-green-500 rounded"></div>
+                    <NeumorphicText size="sm">Financial Checks</NeumorphicText>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                    <NeumorphicText size="sm">Background Verification</NeumorphicText>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-amber-500 rounded"></div>
+                    <NeumorphicText size="sm">Compliance Review</NeumorphicText>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-red-500 rounded"></div>
+                    <NeumorphicText size="sm">Risk Assessment</NeumorphicText>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-purple-500 rounded"></div>
+                    <NeumorphicText size="sm">Medical Checks</NeumorphicText>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-cyan-500 rounded"></div>
+                    <NeumorphicText size="sm">Document Review</NeumorphicText>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-lime-500 rounded"></div>
+                    <NeumorphicText size="sm">Field Verification</NeumorphicText>
+                  </div>
+                </div>
+              </NeumorphicCard>
             </div>
           </NeumorphicCard>
         </LazyLoad>

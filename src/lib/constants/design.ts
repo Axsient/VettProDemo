@@ -84,9 +84,9 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     icon: 'Building2',
     type: 'collapsible',
     children: [
-      { id: '3.1', title: 'All Suppliers', icon: 'Building', href: '/suppliers/all', type: 'link' },
-      { id: '3.2', title: 'Add New Supplier', icon: 'PlusCircle', href: '/suppliers/add', type: 'link' },
-      { id: '3.3', title: 'Supplier Risk Dashboard', icon: 'ShieldAlert', href: '/suppliers/risk-dashboard', type: 'link' },
+      { id: '3.1', title: 'All Suppliers', icon: 'Building', href: '/suppliers/all-suppliers', type: 'link' },
+      { id: '3.2', title: 'Add New Supplier', icon: 'PlusCircle', href: '/suppliers/add-new-supplier', type: 'link' },
+      { id: '3.3', title: 'Supplier Risk Dashboard', icon: 'ShieldAlert', href: '/suppliers/supplier-risk-dashboard', type: 'link' },
     ],
   },
   {
@@ -106,9 +106,11 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     icon: 'MapPin',
     type: 'collapsible',
     children: [
-      { id: '5.1', title: 'Location Verification Queue', icon: 'List', href: '/field-operations/verification-queue', type: 'link' },
-      { id: '5.2', title: 'Map Overview', icon: 'Map', href: '/field-operations/map-overview', type: 'link' },
-      { id: '5.3', title: 'Submitted Location Verifications', icon: 'CheckCircle', href: '/field-operations/submitted-verifications', type: 'link' },
+      { id: '5.1', title: 'Dashboard', icon: 'LayoutDashboard', href: '/field-operations/dashboard', type: 'link' },
+      { id: '5.2', title: 'Community Canvassing', icon: 'Users', href: '/field-operations/community-canvassing', type: 'link' },
+      { id: '5.3', title: 'Business Location Verification', icon: 'MapPin', href: '/field-operations/business-location-verification', type: 'link' },
+      { id: '5.4', title: 'Field Agent Management', icon: 'UserCheck', href: '/field-operations/agent-management', type: 'link' },
+      { id: '5.5', title: 'Geofence Management', icon: 'MapPinned', href: '/field-operations/geofence-management', type: 'link' },
     ],
   },
   {

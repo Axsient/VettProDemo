@@ -89,6 +89,12 @@
   --neumorphic-radius-md: 0.46875rem; /* 7.5px */
   --neumorphic-radius-lg: 0.625rem;  /* 10px */
   --neumorphic-radius-xl: 0.75rem;   /* 12px */
+
+  /* Severity Colors - For risk levels and status indicators */
+  --neumorphic-severity-critical: #ef4444; /* red-500 */
+  --neumorphic-severity-high: #f97316;     /* orange-500 */
+  --neumorphic-severity-medium: #eab308;  /* yellow-500 */
+  --neumorphic-severity-low: #0dd442;      /* custom green */
 }
 
 /* Light Theme Variables */
@@ -163,6 +169,44 @@
   /* Light theme gradients */
   --neumorphic-gradient: linear-gradient(135deg, var(--neumorphic-card), var(--neumorphic-card-end));
   --neumorphic-bg-gradient: linear-gradient(145deg, var(--neumorphic-gradient-start), var(--neumorphic-gradient-end));
+
+  /* Severity Colors - Light theme variants */
+  --neumorphic-severity-critical: #dc2626; /* red-600 */
+  --neumorphic-severity-high: #ea580c;     /* orange-600 */
+  --neumorphic-severity-medium: #ca8a04;  /* yellow-600 */
+  --neumorphic-severity-low: #0bb83a;      /* custom green (darker for light theme) */
+}
+
+/* Circular Progress Ring Animations and Styling */
+@keyframes progressRingFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes progressGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px currentColor);
+  }
+  50% {
+    filter: drop-shadow(0 0 8px currentColor);
+  }
+}
+
+/* Enhanced visibility for progress ring backgrounds */
+.light svg circle[stroke="var(--neumorphic-text-secondary)"] {
+  stroke: #6b7280; /* gray-500 for better visibility in light mode */
+  stroke-opacity: 0.4;
+}
+
+.dark svg circle[stroke="var(--neumorphic-text-secondary)"] {
+  stroke: #9ca3af; /* gray-400 for better visibility in dark mode */
+  stroke-opacity: 0.5;
 }
 
 /* Neumorphic Card Gradient Class */

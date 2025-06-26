@@ -1,5 +1,5 @@
 {
-  "name": "vettpro-temp",
+  "name": "vettpro",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -22,6 +22,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "framer-motion": "^12.19.1",
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
     "leaflet": "^1.9.4",
