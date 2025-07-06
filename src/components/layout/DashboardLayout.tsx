@@ -42,7 +42,7 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
   };
 
   return (
-    <main className="flex h-screen">
+    <main className="flex h-screen overflow-hidden">
       <TopMenuBar isSidebarOpen={isSidebarOpen} isMobile={isMobile} />
       <CurvedSidebar
         isOpen={isSidebarOpen}
@@ -54,19 +54,18 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
         <div className="mobile-overlay" onClick={handleSidebarToggle} />
       )}
       <div className={cn(
-        "flex-1 flex flex-col overflow-auto text-dashboard-foreground",
+        "flex-1 flex flex-col overflow-auto text-dashboard-foreground main-content-area",
         // Ultra-minimal horizontal padding, reduced vertical padding
         "px-1 md:px-2 py-1",
-        // Default margins - responsive first approach
-        "ml-0",
-        // Desktop margins based on sidebar state (only apply after mount to prevent hydration issues)  
-        mounted && !isMobile && isSidebarOpen && "md:ml-72",
-        mounted && !isMobile && !isSidebarOpen && "md:ml-20",
+        // Default responsive margin (matches TopMenuBar logic)
+        "ml-0 md:ml-72",
+        // Apply conditional positioning only for non-mobile (matches TopMenuBar)
+        !isMobile && !isSidebarOpen && "md:ml-20",
         // Apply tight layout classes
         !isMobile && "main-content-tight",
         isMobile && "main-content-mobile",
         // Add smooth transition after mount
-        mounted && "transition-[margin] duration-300 ease-in-out"
+        mounted && "transition-[margin-left] duration-300 ease-in-out"
       )}>
         <div className="flex justify-between md:justify-start items-center w-full mb-2">
           {isMobile && (

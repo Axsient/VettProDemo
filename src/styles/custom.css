@@ -105,21 +105,50 @@
 }
 
 /* Base responsive styles */
+/* Desktop sidebar positioning and transitions */
+@media (min-width: 769px) {
+  .sidebar-neumorphic-container {
+    position: fixed !important;
+    height: 100vh !important;
+    z-index: 30 !important;
+    transition: width 300ms cubic-bezier(0.2, 1, 0.3, 1) !important;
+  }
+  
+  /* Ensure smooth content area transitions on desktop */
+  .main-content-area {
+    transition: margin-left 300ms cubic-bezier(0.2, 1, 0.3, 1) !important;
+  }
+  
+  /* Force correct margin application for main content on desktop */
+  .main-content-area.md\:ml-72 {
+    margin-left: 18rem !important; /* 72 * 0.25rem = 18rem */
+  }
+  
+  .main-content-area.md\:ml-20 {
+    margin-left: 5rem !important; /* 20 * 0.25rem = 5rem */
+  }
+  
+  .main-content-area {
+    margin-left: 0 !important; /* Default mobile */
+  }
+}
+
 @media (max-width: 768px) {
-  /* Example for mobile-specific adjustments */
-  .curved-sidebar {
-    position: fixed;
-    height: 100vh;
-    z-index: 50;
-    width: 250px;
+  /* Mobile-specific sidebar adjustments */
+  .sidebar-neumorphic-container {
+    position: fixed !important;
+    height: 100vh !important;
+    z-index: 50 !important;
+    width: 288px !important; /* w-72 = 288px */
     transform: translateX(-100%);
+    transition: transform 300ms cubic-bezier(0.2, 1, 0.3, 1) !important;
   }
 
   .mobile-sidebar-open {
-    transform: translateX(0);
+    transform: translateX(0) !important;
   }
   .mobile-sidebar-hidden {
-    transform: translateX(-100%);
+    transform: translateX(-100%) !important;
   }
 
   .mobile-overlay {

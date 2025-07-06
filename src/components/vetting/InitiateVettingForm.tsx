@@ -42,12 +42,22 @@ import { VATInput } from '@/components/forms/business/VATInput';
 // Icons
 import { User, Building2, Stethoscope, Package, CheckSquare, Clock, DollarSign, AlertCircle, Check } from 'lucide-react';
 
+// Provider Intelligence Components
+import ProviderIntelligenceCard from './ProviderIntelligenceCard';
+import AISmartSuggestion from './AISmartSuggestion';
+
 interface InitiateVettingFormProps {
   checks: VettingCheckDefinition[];
   packages: VettingPackage[];
   projects: MiningProject[];
   categories: CheckCategory[];
   entityTypes: VettingEntityType[];
+  onStateChange?: (state: {
+    selectedCheckIds: Set<string>;
+    entityType: VettingEntityType | '';
+    selectionType: 'package' | 'individual';
+    selectedPackage: string;
+  }) => void;
 }
 
 // Helper component for labeled input
@@ -63,7 +73,8 @@ const LabeledInput = ({ label, required, children }: { label: string; required?:
 export function InitiateVettingForm({ 
   checks, // eslint-disable-line @typescript-eslint/no-unused-vars
   packages, 
-  projects
+  projects,
+  onStateChange
 }: InitiateVettingFormProps) {
   // Form state
   const [currentStep, setCurrentStep] = useState(1);
@@ -105,6 +116,18 @@ export function InitiateVettingForm({
       setSelectedChecks([]);
     }
   }, [entityType]);
+
+  // Notify parent component of state changes
+  useEffect(() => {
+    if (onStateChange) {
+      onStateChange({
+        selectedCheckIds: new Set(selectedChecks),
+        entityType,
+        selectionType,
+        selectedPackage
+      });
+    }
+  }, [selectedChecks, entityType, selectionType, selectedPackage]);
 
   // Calculate total cost and turnaround (helper function for future use)
   // const getCurrentChecks = () => {
@@ -210,6 +233,15 @@ export function InitiateVettingForm({
         ? prev.filter(id => id !== checkId)
         : [...prev, checkId]
     );
+  };
+
+  // Handle AI suggestion selection
+  const handleSuggestionClick = (suggestion: { checkId: string; checkName: string }) => {
+    if (!selectedChecks.includes(suggestion.checkId)) {
+      setSelectedChecks(prev => [...prev, suggestion.checkId]);
+      // Show success feedback
+      toast.success(`Added ${suggestion.checkName} based on AI recommendation`);
+    }
   };
 
   // Step navigation
@@ -627,11 +659,35 @@ export function InitiateVettingForm({
                     {selectedPackage === pkg.id && (
                       <div className="mt-4 pt-4 border-t border-neumorphic-border/20">
                         <NeumorphicText className="font-medium mb-2">Included Checks:</NeumorphicText>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <div className="space-y-3">
                           {getChecksInPackage(pkg.id).map((check) => (
-                            <NeumorphicText key={check.id} variant="secondary" size="sm">
-                              • {check.name}
-                            </NeumorphicText>
+                            <div key={check.id} className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <NeumorphicText variant="secondary" size="sm">
+                                  • {check.name}
+                                </NeumorphicText>
+                                <NeumorphicText variant="secondary" size="xs" className="opacity-70">
+                                  by
+                                </NeumorphicText>
+                                <ProviderIntelligenceCard provider={check.provider}>
+                                  <NeumorphicText 
+                                    variant="secondary" 
+                                    size="xs" 
+                                    className="underline decoration-dotted hover:text-neumorphic-accent-primary transition-colors cursor-help"
+                                  >
+                                    {check.provider}
+                                  </NeumorphicText>
+                                </ProviderIntelligenceCard>
+                              </div>
+                              <AISmartSuggestion
+                                checkId={check.id}
+                                checkName={check.name}
+                                entityType={entityType as VettingEntityType}
+                                selectedPackage={selectedPackage}
+                                selectedChecks={getChecksInPackage(pkg.id).map(c => c.id)}
+                                onSuggestionClick={handleSuggestionClick}
+                              />
+                            </div>
                           ))}
                         </div>
                       </div>
@@ -703,14 +759,33 @@ export function InitiateVettingForm({
                                   <NeumorphicText variant="secondary" size="sm" className="mt-1">
                                     {check.description}
                                   </NeumorphicText>
-                                  <div className="flex items-center space-x-2 mt-2 text-xs">
-                                    <NeumorphicText variant="secondary" size="sm">Provider: {check.provider}</NeumorphicText>
-                                    {check.consentRequired && (
-                                      <span className="flex items-center space-x-1">
-                                        <AlertCircle className="w-3 h-3" />
-                                        <NeumorphicText variant="secondary" size="sm">Consent Required</NeumorphicText>
-                                      </span>
-                                    )}
+                                  <div className="flex items-center justify-between mt-2">
+                                    <div className="flex items-center space-x-2 text-xs">
+                                      <NeumorphicText variant="secondary" size="sm">Provider: </NeumorphicText>
+                                      <ProviderIntelligenceCard provider={check.provider}>
+                                        <NeumorphicText 
+                                          variant="secondary" 
+                                          size="sm" 
+                                          className="underline decoration-dotted hover:text-neumorphic-accent-primary transition-colors cursor-help"
+                                        >
+                                          {check.provider}
+                                        </NeumorphicText>
+                                      </ProviderIntelligenceCard>
+                                      {check.consentRequired && (
+                                        <span className="flex items-center space-x-1">
+                                          <AlertCircle className="w-3 h-3" />
+                                          <NeumorphicText variant="secondary" size="sm">Consent Required</NeumorphicText>
+                                        </span>
+                                      )}
+                                    </div>
+                                    <AISmartSuggestion
+                                      checkId={check.id}
+                                      checkName={check.name}
+                                      entityType={entityType as VettingEntityType}
+                                      selectedPackage={selectedPackage}
+                                      selectedChecks={selectedChecks}
+                                      onSuggestionClick={handleSuggestionClick}
+                                    />
                                   </div>
                                 </div>
                               </div>

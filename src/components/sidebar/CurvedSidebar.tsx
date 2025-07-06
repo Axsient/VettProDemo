@@ -13,14 +13,17 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useInverseTheme } from '@/lib/hooks/useInverseTheme';
 import { useTheme } from 'next-themes';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const NavItem: React.FC<{
   item: NavigationItem;
   isOpen: boolean;
   isMobile: boolean;
-}> = ({ item, isOpen, isMobile }) => {
+  openSubMenuId: string | null;
+  onToggleSubMenu: (itemId: string) => void;
+}> = ({ item, isOpen, isMobile, openSubMenuId, onToggleSubMenu }) => {
   const pathname = usePathname();
-  const [isSubMenuOpen, setIsSubMenuOpen] = useState(false);
+  const isSubMenuOpen = openSubMenuId === item.id;
 
   if (item.type === 'separator') {
     return <hr className="my-2 border-white/10" />;
@@ -30,13 +33,13 @@ const NavItem: React.FC<{
   const isActive = pathname === item.href || (hasChildren && item.children?.some(child => child.href === pathname));
 
   const handleToggleSubMenu = () => {
-    setIsSubMenuOpen(!isSubMenuOpen);
+    onToggleSubMenu(item.id);
   };
 
   if (hasChildren) {
     return (
       <>
-        <button
+        <motion.button
           onClick={handleToggleSubMenu}
           aria-expanded={isSubMenuOpen}
           className={cn(
@@ -44,6 +47,9 @@ const NavItem: React.FC<{
             isActive && 'active',
             !isOpen && !isMobile ? 'justify-center' : 'justify-between'
           )}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ duration: 0.2 }}
         >
           <div className={cn('flex items-center gap-3', !isOpen && !isMobile && 'justify-center')}>
             <Icon name={item.icon as IconName} className="h-5 w-5 flex-shrink-0 neumorphic-text" />
@@ -51,46 +57,86 @@ const NavItem: React.FC<{
               {item.title}
             </span>
           </div>
-          {isOpen && <ChevronDown className={cn('h-4 w-4 transition-transform flex-shrink-0 neumorphic-text', isSubMenuOpen && 'rotate-180')} />}
-        </button>
-        {isSubMenuOpen && isOpen && (
-          <ul className="pl-8 pt-1 space-y-2">
-            {item.children?.map(child => (
-              <li key={child.id}>
-                <Link
-                  href={child.href || '#'}
-                  aria-current={pathname === child.href ? 'page' : undefined}
-                  className={cn(
-                    'neumorphic-nav-item flex items-center gap-3 px-3 py-2 text-sm',
-                    pathname === child.href && 'active'
-                  )}
+          {isOpen && (
+            <motion.div
+              animate={{ rotate: isSubMenuOpen ? 180 : 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <ChevronDown className="h-4 w-4 flex-shrink-0 neumorphic-text" />
+            </motion.div>
+          )}
+        </motion.button>
+        <AnimatePresence>
+          {isSubMenuOpen && isOpen && (
+            <motion.ul 
+              className="pl-8 pt-1 space-y-2 overflow-hidden"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ 
+                duration: 0.3, 
+                ease: "easeInOut",
+                opacity: { duration: 0.2 }
+              }}
+            >
+              {item.children?.map((child, index) => (
+                <motion.li 
+                  key={child.id}
+                  initial={{ x: -20, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: -20, opacity: 0 }}
+                  transition={{ 
+                    delay: index * 0.05,
+                    duration: 0.2,
+                    ease: "easeOut"
+                  }}
                 >
-                  <Icon name={child.icon as IconName} className="h-4 w-4 neumorphic-text" />
-                  <span className="neumorphic-text">{child.title}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
+                  <motion.div
+                    whileHover={{ x: 4, scale: 1.01 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Link
+                      href={child.href || '#'}
+                      aria-current={pathname === child.href ? 'page' : undefined}
+                      className={cn(
+                        'neumorphic-nav-item flex items-center gap-3 px-3 py-2 text-sm',
+                        pathname === child.href && 'active'
+                      )}
+                    >
+                      <Icon name={child.icon as IconName} className="h-4 w-4 neumorphic-text" />
+                      <span className="neumorphic-text">{child.title}</span>
+                    </Link>
+                  </motion.div>
+                </motion.li>
+              ))}
+            </motion.ul>
+          )}
+        </AnimatePresence>
       </>
     );
   }
 
   return (
-    <Link
-      href={item.href || '#'}
-      aria-current={isActive ? 'page' : undefined}
-      className={cn(
-        'neumorphic-nav-item flex items-center gap-3 px-3 py-2 mb-2',
-        isActive && 'active',
-        !isOpen && !isMobile && 'justify-center'
-      )}
+    <motion.div
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.2 }}
     >
-      <Icon name={item.icon as IconName} className="h-5 w-5 flex-shrink-0 neumorphic-text" />
-      <span className={cn('text-sm font-medium transition-all duration-300 neumorphic-text', isOpen ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden')}>
-        {item.title}
-      </span>
-    </Link>
+      <Link
+        href={item.href || '#'}
+        aria-current={isActive ? 'page' : undefined}
+        className={cn(
+          'neumorphic-nav-item flex items-center gap-3 px-3 py-2 mb-2',
+          isActive && 'active',
+          !isOpen && !isMobile && 'justify-center'
+        )}
+      >
+        <Icon name={item.icon as IconName} className="h-5 w-5 flex-shrink-0 neumorphic-text" />
+        <span className={cn('text-sm font-medium transition-all duration-300 neumorphic-text', isOpen ? 'opacity-100' : 'opacity-0 w-0 overflow-hidden')}>
+          {item.title}
+        </span>
+      </Link>
+    </motion.div>
   );
 };
 
@@ -103,6 +149,11 @@ const CurvedSidebar: React.FC<CurvedSidebarProps> = ({
   const inverseTheme = useInverseTheme();
   const { theme } = useTheme();
   const [sidebarThemeMode, setSidebarThemeMode] = React.useState<'inverse' | 'match'>('inverse');
+  const [openSubMenuId, setOpenSubMenuId] = useState<string | null>(null);
+
+  const handleToggleSubMenu = (itemId: string) => {
+    setOpenSubMenuId(prevId => prevId === itemId ? null : itemId);
+  };
 
   // Listen for sidebar theme mode changes
   React.useEffect(() => {
@@ -175,11 +226,17 @@ const CurvedSidebar: React.FC<CurvedSidebarProps> = ({
               <ChevronLeft className={cn('transition-transform duration-300 w-4 h-4', !isMobile && !isOpen && 'rotate-180')} />
             </Button>
           </div>
-          <nav className="flex-1" role="navigation" aria-label="Main Navigation">
-            <ul className="space-y-2">
+          <nav className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent" role="navigation" aria-label="Main Navigation">
+            <ul className="space-y-2 pr-2">
               {navItems.map((item) => (
                 <li key={item.id}>
-                  <NavItem item={item} isOpen={isOpen} isMobile={isMobile ?? false} />
+                  <NavItem 
+                    item={item} 
+                    isOpen={isOpen} 
+                    isMobile={isMobile ?? false}
+                    openSubMenuId={openSubMenuId}
+                    onToggleSubMenu={handleToggleSubMenu}
+                  />
                 </li>
               ))}
             </ul>

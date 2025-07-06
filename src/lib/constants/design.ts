@@ -140,14 +140,26 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
   },
   {
     id: '8',
+    title: 'Vetting Operations Command Center (v2)',
+    icon: 'Command',
+    type: 'collapsible',
+    children: [
+      { id: '8.1', title: 'Smart Vetting Canvas (Initiate)', icon: 'Sparkles', href: '/vetting-v2/smart-canvas', type: 'link' },
+      { id: '8.2', title: 'Live Mission Board (Active Cases)', icon: 'MonitorSpeaker', href: '/vetting-v2/live-mission-board', type: 'link' },
+      { id: '8.3', title: 'Consent Communications Hub', icon: 'MessageSquareHeart', href: '/vetting-v2/consent-hub', type: 'link' },
+      { id: '8.4', title: 'Intelligence Library (Reports)', icon: 'Library', href: '/vetting-v2/intelligence-library', type: 'link' },
+    ],
+  },
+  {
+    id: '9',
     title: 'Help & Support',
     icon: 'HelpCircle',
     type: 'collapsible',
     children: [
-      { id: '8.1', title: 'Knowledge Base / FAQs', icon: 'BookOpen', href: '/help/knowledge-base', type: 'link' },
-      { id: '8.2', title: 'System Documentation', icon: 'Book', href: '/help/system-documentation', type: 'link' },
-      { id: '8.3', title: 'Contact Support', icon: 'Mail', href: '/help/contact-support', type: 'link' },
-      { id: '8.4', title: 'Release Notes', icon: 'GitBranch', href: '/help/release-notes', type: 'link' },
+      { id: '9.1', title: 'Knowledge Base / FAQs', icon: 'BookOpen', href: '/help/knowledge-base', type: 'link' },
+      { id: '9.2', title: 'System Documentation', icon: 'Book', href: '/help/system-documentation', type: 'link' },
+      { id: '9.3', title: 'Contact Support', icon: 'Mail', href: '/help/contact-support', type: 'link' },
+      { id: '9.4', title: 'Release Notes', icon: 'GitBranch', href: '/help/release-notes', type: 'link' },
     ],
   },
 ]; 

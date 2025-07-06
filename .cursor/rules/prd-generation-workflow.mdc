@@ -1,0 +1,55 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: Enforces the strict, iterative, and verifiable process for generating the VettPro PRD, ensuring one section is completed and approved at a time.
+globs: docs/codebase/prd/prd-wip.md
+alwaysApply: true
+---
+
+- **Master Tracker is Mandatory**
+    - The PRD file, `prd-wip.md`, MUST always begin with the "VettPro Product Requirements Document (PRD) - Master Tracker".
+    - This tracker is the single source of truth for the generation process and must be updated at every step.
+    - The tracker must follow this exact format:
+      ```markdown
+      **VettPro Product Requirements Document (PRD) - Master Tracker**
+
+      | Section # | Section Title | Status | Notes |
+      | :--- | :--- | :--- | :--- |
+      | **Phase 1: Strategic Foundation** | | | |
+      | 1.0 | Introduction & Vision | 🔵 To-Do | The "Why" behind the project. |
+      | 2.0 | User Personas & Scenarios | 🔵 To-Do | The "Who" we are building for. |
+      | 3.0 | Scope & Release Plan (MVP) | 🔵 To-Do | The "What" we are building now. |
+      | **Phase 2: MVP Feature Breakdown (The Core Product)** | | | |
+      | 4.1 | Epic: Core Platform & Auth | 🔵 To-Do | User login, roles, main dashboard. |
+      | 4.2 | Epic: Company Pre-Vetting Workflow | 🔵 To-Do | End-to-end user story breakdown. |
+      | 4.3 | Epic: Digital & Manual Consent | 🔵 To-Do | Signature canvas, PDF uploads. |
+      | 4.4 | Epic: Admin Audit & Reporting | 🔵 To-Do | Read-only audit trail UI. |
+      | **Phase 3: The Engineering & Security Blueprint** | | | |
+      | 5.0 | Technical Framework & Architecture | 🔵 To-Do | C4 models, tech stack, key patterns. |
+      | 6.0 | Database & Schema Design | 🔵 To-Do | Detailed `CREATE TABLE` statements. |
+      | 7.0 | API & Integration Contracts | 🔵 To-Do | Endpoint definitions, webhook specs. |
+      | 8.0 | Security & Compliance by Design | 🔵 To-Do | Actionable security requirements. |
+      | **Phase 4: Quality & Reference** | | | |
+      | 9.0 | Non-Functional Requirements (NFRs) | 🔵 To-Do | Performance, availability, a11y. |
+      | 10.0 | Success Metrics | 🔵 To-Do | How we measure success. |
+      | 11.0 | Glossary & Assumptions | 🔵 To-Do | Defining our terms. |
+
+      *Status Key: 🔵 To-Do | 🟡 In Review | 🟢 Approved*
+      ```
+
+- **Strict Iterative Generation Loop**
+    - The PRD MUST be generated one section at a time, following the order in the Master Tracker.
+    - The generation process follows a strict, non-negotiable loop for each section:
+        1.  **Generate:** I will generate the content for the *next single section* marked `🔵 To-Do`. At this point, I will update its status to `🟡 In Review`.
+        2.  **Review:** You, the user, will review the generated content.
+        3.  **Revise:** I will revise the content based on your feedback until it meets your requirements.
+        4.  **Approve:** You must give explicit approval for the section.
+        5.  **Update & Proceed:** Upon your approval, I will update the section's status to `🟢 Approved` in the Master Tracker. Only then am I permitted to proceed to the next section marked `🔵 To-Do`.
+    - I am explicitly forbidden from generating content for a new section if the previous section is not marked `🟢 Approved`.
+    - I must always state which section I am working on at the beginning of my response.
+
+- **Reference Document**
+    - This workflow is based on the agreement established in the conversation log `docs/codebase/prd/prd-dev.md`.
