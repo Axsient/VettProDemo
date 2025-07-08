@@ -482,13 +482,12 @@ export default function ExecutiveDashboardPage() {
               className="w-full lg:col-span-4"
               variants={slideInFromRightVariants}
             >
-              <NeumorphicCard className="p-0 h-[600px]">
-                <StrategicEventFeed
-                  events={strategicEvents}
-                  selectedEvent={selectedEvent}
-                  onEventSelect={handleEventSelect}
-                />
-              </NeumorphicCard>
+              <StrategicEventFeed
+                events={strategicEvents}
+                selectedEvent={selectedEvent}
+                onEventSelect={handleEventSelect}
+                className="h-[725px]"
+              />
             </motion.div>
           </motion.div>
         </div>

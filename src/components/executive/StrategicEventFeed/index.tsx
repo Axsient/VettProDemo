@@ -6,7 +6,8 @@ import {
   NeumorphicText, 
   NeumorphicHeading, 
   NeumorphicBadge,
-  NeumorphicButton 
+  NeumorphicButton,
+  NeumorphicCard 
 } from '@/components/ui/neumorphic';
 import { StrategicEvent } from '@/lib/sample-data/executive-dashboard-data';
 import { getSeverityColor } from '@/lib/executive/theme-bridge';
@@ -210,12 +211,13 @@ const StrategicEventFeed: React.FC<StrategicEventFeedProps> = ({
   };
 
   return (
-    <motion.div 
-      className={`h-full flex flex-col ${className}`}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
+    <NeumorphicCard className={`overflow-hidden h-full ${className}`}>
+      <motion.div 
+        className="h-full flex flex-col"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
       {/* Header */}
       <div className="p-4 border-b border-[var(--neumorphic-border)] border-opacity-20">
         <div className="flex items-center justify-between mb-3">
@@ -321,7 +323,8 @@ const StrategicEventFeed: React.FC<StrategicEventFeedProps> = ({
           background: `linear-gradient(transparent, var(--neumorphic-card))`,
         }}
       />
-    </motion.div>
+      </motion.div>
+    </NeumorphicCard>
   );
 };
 

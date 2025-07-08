@@ -22,6 +22,8 @@ import {
   Home,
   Info,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Target,
   Users
 } from 'lucide-react';
@@ -102,9 +104,10 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
   const [viewHistory, setViewHistory] = useState<ViewHistory[]>([{ state: 'director-overview', mode: 'director-centric', timestamp: Date.now() }]);
   const [hoveredNode, setHoveredNode] = useState<NetworkNode | null>(null);
   const [animationPhase, setAnimationPhase] = useState<'idle' | 'transitioning'>('idle');
+  const [isLegendCollapsed, setIsLegendCollapsed] = useState(false);
   
   // Zoom and Pan state
-  const [transform, setTransform] = useState({ scale: 0.8, translateX: 0, translateY: 0 });
+  const [transform, setTransform] = useState({ scale: 1.5, translateX: 0, translateY: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [lastTransform, setLastTransform] = useState({ translateX: 0, translateY: 0 });
@@ -540,12 +543,15 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
 
   // Zoom and Pan functionality
   const zoomIn = useCallback(() => {
+    if (!containerRef.current) return;
+    
     const scaleFactor = 1.2;
     const newScale = Math.min(transform.scale * scaleFactor, 3);
     
-    // Center-point zooming for button clicks
-    const centerX = SVG_WIDTH / 2;
-    const centerY = SVG_HEIGHT / 2;
+    // Use container dimensions for proper centering
+    const rect = containerRef.current.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
     const scaleChange = newScale / transform.scale;
     const newTranslateX = centerX - (centerX - transform.translateX) * scaleChange;
     const newTranslateY = centerY - (centerY - transform.translateY) * scaleChange;
@@ -558,12 +564,15 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
   }, [transform]);
 
   const zoomOut = useCallback(() => {
+    if (!containerRef.current) return;
+    
     const scaleFactor = 1 / 1.2;
     const newScale = Math.max(transform.scale * scaleFactor, 0.5);
     
-    // Center-point zooming for button clicks
-    const centerX = SVG_WIDTH / 2;
-    const centerY = SVG_HEIGHT / 2;
+    // Use container dimensions for proper centering
+    const rect = containerRef.current.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
     const scaleChange = newScale / transform.scale;
     const newTranslateX = centerX - (centerX - transform.translateX) * scaleChange;
     const newTranslateY = centerY - (centerY - transform.translateY) * scaleChange;
@@ -576,7 +585,7 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
   }, [transform]);
 
   const resetZoom = useCallback(() => {
-    setTransform({ scale: 0.8, translateX: 0, translateY: 0 });
+    setTransform({ scale: 1.5, translateX: 0, translateY: 0 });
   }, []);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -919,6 +928,30 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [viewState, navigateBack]);
 
+  // Check if two nodes are connected
+  const areNodesConnected = useCallback((nodeId1: string, nodeId2: string): boolean => {
+    return connections.some(conn => 
+      (conn.source === nodeId1 && conn.target === nodeId2) ||
+      (conn.source === nodeId2 && conn.target === nodeId1)
+    );
+  }, [connections]);
+
+  // Get all connected node IDs for a given node
+  const getConnectedNodeIds = useCallback((nodeId: string): Set<string> => {
+    const connected = new Set<string>();
+    connected.add(nodeId); // Include the node itself
+    
+    connections.forEach(conn => {
+      if (conn.source === nodeId) {
+        connected.add(conn.target);
+      } else if (conn.target === nodeId) {
+        connected.add(conn.source);
+      }
+    });
+    
+    return connected;
+  }, [connections]);
+
   // Generate SVG path for connections
   const getConnectionPath = (sourceId: string, targetId: string) => {
     const source = networkNodes.find(n => n.id === sourceId);
@@ -936,124 +969,76 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
   };
 
   return (
-    <div className={`space-y-4 ${className}`}>
-      {/* Header with navigation */}
-      <div className="flex items-center justify-between">
-        <div>
-          <NeumorphicHeading size="lg" className="flex items-center gap-2">
-            {networkMode === 'director-centric' ? (
-              <Users className="w-6 h-6 text-[var(--neumorphic-accent)]" />
-            ) : (
-              <Building2 className="w-6 h-6 text-[var(--neumorphic-accent)]" />
-            )}
-            {networkMode === 'director-centric' ? 'Director-Centric Risk Network' : 'Supplier-Centric Risk Network'}
-          </NeumorphicHeading>
-          <NeumorphicText variant="secondary" size="sm" className="mt-1">
-            {networkMode === 'director-centric' 
-              ? 'Interactive constellation view of director concentration risks'
-              : 'Interactive constellation view of supplier risk and contract exposure'
-            }
-          </NeumorphicText>
-        </div>
-        
-        {/* Navigation Controls */}
-        <div className="flex items-center gap-2">
-          {/* Mode Toggle */}
-          <NeumorphicButton
-            onClick={toggleNetworkMode}
-            className="px-3 py-2"
-          >
-            {networkMode === 'director-centric' ? (
-              <>
-                <Building2 className="w-4 h-4 mr-1" />
-                Supplier View
-              </>
-            ) : (
-              <>
-                <Users className="w-4 h-4 mr-1" />
-                Director View
-              </>
-            )}
-          </NeumorphicButton>
+    <div className={className}>
+      {/* Combined Header and Visualization Card */}
+      <NeumorphicCard className="overflow-hidden">
+        {/* Header with navigation */}
+        <div className="flex items-center justify-between p-6 border-b border-[var(--neumorphic-border)]">
+          <div>
+            <NeumorphicHeading size="lg" className="flex items-center gap-2">
+              {networkMode === 'director-centric' ? (
+                <Users className="w-6 h-6 text-[var(--neumorphic-accent)]" />
+              ) : (
+                <Building2 className="w-6 h-6 text-[var(--neumorphic-accent)]" />
+              )}
+              {networkMode === 'director-centric' ? 'Director-Centric Risk Network' : 'Supplier-Centric Risk Network'}
+            </NeumorphicHeading>
+            <NeumorphicText variant="secondary" size="sm" className="mt-1">
+              {networkMode === 'director-centric' 
+                ? 'Interactive constellation view of director concentration risks'
+                : 'Interactive constellation view of supplier risk and contract exposure'
+              }
+            </NeumorphicText>
+          </div>
           
-          {(viewState !== 'director-overview' && viewState !== 'supplier-overview') && (
-            <>
-              <NeumorphicButton
-                onClick={navigateBack}
-                className="px-3 py-2"
-                disabled={viewHistory.length <= 1}
-              >
-                <ArrowLeft className="w-4 h-4 mr-1" />
-                Back
-              </NeumorphicButton>
-              <NeumorphicButton
-                onClick={resetView}
-                className="px-3 py-2"
-              >
-                <Home className="w-4 h-4 mr-1" />
-                Overview
-              </NeumorphicButton>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Breadcrumb Navigation */}
-      <AnimatePresence>
-        {(viewState !== 'director-overview' && viewState !== 'supplier-overview') && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="flex items-center gap-2 text-sm"
-          >
-            <span 
-              className="text-[var(--neumorphic-accent)] cursor-pointer hover:underline"
-              onClick={resetView}
+          {/* Navigation Controls */}
+          <div className="flex items-center gap-1.5">
+            {/* Mode Toggle */}
+            <NeumorphicButton
+              onClick={toggleNetworkMode}
+              className="px-3 py-1.5 text-sm min-w-[110px]"
             >
-              {networkMode === 'director-centric' ? 'Director Overview' : 'Supplier Overview'}
-            </span>
-            <ChevronRight className="w-4 h-4 text-[var(--neumorphic-text-secondary)]" />
-            {viewState === 'director-focus' && focusedDirectorId && (
-              <span className="text-[var(--neumorphic-text-primary)]">
-                {directorProfiles.find(p => p.director.id === focusedDirectorId)?.director.name}
-              </span>
+              {networkMode === 'director-centric' ? (
+                <>
+                  <Building2 className="w-3 h-3 mr-1" />
+                  <span>Supplier View</span>
+                </>
+              ) : (
+                <>
+                  <Users className="w-3 h-3 mr-1" />
+                  <span>Director View</span>
+                </>
+              )}
+            </NeumorphicButton>
+            
+            {(viewState !== 'director-overview' && viewState !== 'supplier-overview') && (
+              <>
+                <NeumorphicButton
+                  onClick={navigateBack}
+                  className="px-3 py-1.5 text-sm min-w-[75px]"
+                  disabled={viewHistory.length <= 1}
+                >
+                  <ArrowLeft className="w-3 h-3 mr-1" />
+                  <span>Back</span>
+                </NeumorphicButton>
+                <NeumorphicButton
+                  onClick={resetView}
+                  className="px-3 py-1.5 text-sm min-w-[90px]"
+                >
+                  <Home className="w-3 h-3 mr-1" />
+                  <span>Overview</span>
+                </NeumorphicButton>
+              </>
             )}
-            {viewState === 'supplier-focus' && focusedSupplierId && (
-              <span className="text-[var(--neumorphic-text-primary)]">
-                {supplierProfiles.find(s => s.id === focusedSupplierId)?.name}
-              </span>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Controls */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-[var(--neumorphic-text-secondary)]" />
-          <NeumorphicText size="sm">
-            {activeFilter ? `Filtering by ${activeFilter} risk` : 
-             selectedMineSiteId ? 'Filtered by mine site' :
-             filteredSuppliers.length !== suppliers.length ? 'Filtered view' :
-             'Showing all relationships'} 
-          </NeumorphicText>
+          </div>
         </div>
-        
-        <div className="flex items-center gap-4">
-          <NeumorphicText size="sm" variant="secondary">
-            Concentration Risks: {directorProfiles.filter(d => d.isConcentrationRisk).length}
-          </NeumorphicText>
-        </div>
-      </div>
 
-      {/* SVG Network Visualization */}
-      <motion.div
-        ref={containerRef}
-        className="relative rounded-[var(--neumorphic-radius-lg)] bg-[var(--neumorphic-card)] shadow-[var(--neumorphic-shadow-concave)] overflow-hidden"
-        style={{ height }}
-      >
-        <NeumorphicCard className="p-0 h-full">
+        {/* SVG Network Visualization */}
+        <motion.div
+          ref={containerRef}
+          className="relative"
+          style={{ height }}
+        >
           <svg
             width="100%"
             height="100%"
@@ -1065,7 +1050,7 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
             onMouseLeave={handleMouseUp}
             style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
           >
-            <g transform={`translate(${transform.translateX}, ${transform.translateY}) scale(${transform.scale})`}>
+            <g transform={`translate(${transform.translateX}, ${transform.translateY}) translate(${SVG_WIDTH / 2}, ${SVG_HEIGHT / 2}) scale(${transform.scale}) translate(${-SVG_WIDTH / 2}, ${-SVG_HEIGHT / 2})`}>
             {/* Connections */}
             <g className="connections">
               {connections.map((connection, index) => {
@@ -1073,6 +1058,9 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                 const isHighlighted = 
                   hoveredNode?.id === connection.source || 
                   hoveredNode?.id === connection.target;
+                
+                // Dim connections that don't involve the hovered node
+                const shouldDimConnection = hoveredNode && !isHighlighted;
                 
                 let strokeColor = getCssVariable('--neumorphic-border');
                 let strokeWidth = Math.max(1, connection.strength);
@@ -1100,6 +1088,8 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                 if (isHighlighted) {
                   opacity = 1;
                   strokeWidth *= 1.5;
+                } else if (shouldDimConnection) {
+                  opacity = 0.1; // Heavily dim non-connected lines
                 }
 
                 return (
@@ -1109,9 +1099,11 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                     fill="none"
                     stroke={strokeColor}
                     strokeWidth={strokeWidth}
-                    opacity={opacity}
                     initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
+                    animate={{ 
+                      pathLength: 1,
+                      opacity: opacity 
+                    }}
                     transition={{ duration: 1, delay: index * 0.05 }}
                   />
                 );
@@ -1128,13 +1120,19 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                 const isSelected = selectedSupplierId === originalSupplierId;
                 const isHighlighted = highlightedEntityIds.includes(originalSupplierId);
                 
+                // Determine if this node should be dimmed when another node is hovered
+                const connectedNodeIds = hoveredNode ? getConnectedNodeIds(hoveredNode.id) : new Set();
+                const isConnectedToHovered = hoveredNode ? connectedNodeIds.has(node.id) : false;
+                const shouldDim = hoveredNode && !isConnectedToHovered;
+                
                 return (
                   <motion.g
                     key={node.id}
                     initial={{ scale: 0, opacity: 0 }}
                     animate={{ 
                       scale: animationPhase === 'transitioning' ? 0 : 1, 
-                      opacity: animationPhase === 'transitioning' ? 0 : 1 
+                      opacity: animationPhase === 'transitioning' ? 0 : 
+                               shouldDim ? 0.2 : 1 
                     }}
                     transition={{ duration: 0.5, delay: index * 0.02 }}
                     className="cursor-pointer"
@@ -1290,9 +1288,19 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
             {/* Labels */}
             <g className="labels">
               {networkNodes.map((node) => {
+                // Apply same dimming logic to labels
+                const connectedNodeIds = hoveredNode ? getConnectedNodeIds(hoveredNode.id) : new Set();
+                const isConnectedToHovered = hoveredNode ? connectedNodeIds.has(node.id) : false;
+                const shouldDim = hoveredNode && !isConnectedToHovered;
+                
                 if (node.type === 'director' && (viewState === 'director-overview' || viewState === 'supplier-overview' || node.id === focusedDirectorId)) {
                   return (
-                    <g key={`label-${node.id}`} className="pointer-events-none">
+                    <motion.g 
+                      key={`label-${node.id}`} 
+                      className="pointer-events-none"
+                      animate={{ opacity: shouldDim ? 0.2 : 1 }}
+                      transition={{ duration: 0.3 }}
+                    >
                       <text
                         x={node.x}
                         y={node.y + node.radius + 12}
@@ -1311,12 +1319,17 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                           {node.boardCount} boards
                         </text>
                       )}
-                    </g>
+                    </motion.g>
                   );
                 }
                 if (node.type === 'supplier' && viewState === 'supplier-overview') {
                   return (
-                    <g key={`label-${node.id}`} className="pointer-events-none">
+                    <motion.g 
+                      key={`label-${node.id}`} 
+                      className="pointer-events-none"
+                      animate={{ opacity: shouldDim ? 0.2 : 1 }}
+                      transition={{ duration: 0.3 }}
+                    >
                       <text
                         x={node.x}
                         y={node.y + node.radius + 12}
@@ -1335,7 +1348,7 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                           {node.riskScore}% Risk
                         </text>
                       )}
-                    </g>
+                    </motion.g>
                   );
                 }
                 return null;
@@ -1345,51 +1358,60 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
           </svg>
           
           {/* Zoom Controls */}
-          <div className="absolute top-4 right-4 flex flex-col gap-2">
-            <NeumorphicButton
+          <div className="absolute top-4 right-4 flex flex-col gap-1">
+            <button
               onClick={zoomIn}
-              className="p-2 text-sm"
+              className="w-8 h-8 rounded-md bg-[var(--neumorphic-card)] shadow-[var(--neumorphic-shadow-convex)] border border-[var(--neumorphic-border)] flex items-center justify-center text-xs font-semibold text-[var(--neumorphic-text-primary)] hover:shadow-[var(--neumorphic-shadow-concave)] transition-all duration-200"
               title="Zoom In"
             >
               +
-            </NeumorphicButton>
-            <NeumorphicButton
+            </button>
+            <button
               onClick={zoomOut}
-              className="p-2 text-sm"
+              className="w-8 h-8 rounded-md bg-[var(--neumorphic-card)] shadow-[var(--neumorphic-shadow-convex)] border border-[var(--neumorphic-border)] flex items-center justify-center text-xs font-semibold text-[var(--neumorphic-text-primary)] hover:shadow-[var(--neumorphic-shadow-concave)] transition-all duration-200"
               title="Zoom Out"
             >
-              -
-            </NeumorphicButton>
-            <NeumorphicButton
+              −
+            </button>
+            <button
               onClick={resetZoom}
-              className="p-2 text-sm"
+              className="w-8 h-8 rounded-md bg-[var(--neumorphic-card)] shadow-[var(--neumorphic-shadow-convex)] border border-[var(--neumorphic-border)] flex items-center justify-center text-xs text-[var(--neumorphic-text-primary)] hover:shadow-[var(--neumorphic-shadow-concave)] transition-all duration-200"
               title="Reset Zoom"
             >
               ⌂
-            </NeumorphicButton>
+            </button>
           </div>
           
-          {/* Zoom Level Indicator */}
-          <div className="absolute bottom-4 right-4 px-2 py-1 rounded bg-[var(--neumorphic-card)] shadow-md border border-[var(--neumorphic-border)]">
-            <NeumorphicText size="xs" variant="secondary">
-              {Math.round(transform.scale * 100)}%
-            </NeumorphicText>
-          </div>
           
-          {/* View State Indicator */}
+          {/* View State Indicator with Breadcrumbs */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="absolute top-4 left-4 px-3 py-2 rounded-lg bg-[var(--neumorphic-card)] shadow-md border border-[var(--neumorphic-border)]"
           >
-            <NeumorphicText size="sm" className="flex items-center gap-2">
-              <Target className="w-4 h-4 text-[var(--neumorphic-accent)]" />
-              {viewState === 'director-overview' ? 'Director Overview - Click directors to explore' :
-               viewState === 'supplier-overview' ? 'Supplier Overview - Click suppliers to explore' :
-               viewState === 'director-focus' ? `Analyzing ${directorProfiles.find(p => p.director.id === focusedDirectorId)?.director.name}` :
-               viewState === 'supplier-focus' ? `Analyzing ${supplierProfiles.find(s => s.id === focusedSupplierId)?.name}` :
-               'Detailed View'}
-            </NeumorphicText>
+            {(viewState === 'director-overview' || viewState === 'supplier-overview') ? (
+              <NeumorphicText size="sm" className="flex items-center gap-2">
+                <Target className="w-4 h-4 text-[var(--neumorphic-accent)]" />
+                {viewState === 'director-overview' ? 'Director Overview - Click directors to explore' :
+                 'Supplier Overview - Click suppliers to explore'}
+              </NeumorphicText>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Target className="w-4 h-4 text-[var(--neumorphic-accent)]" />
+                <span 
+                  className="text-[var(--neumorphic-accent)] text-sm cursor-pointer hover:underline"
+                  onClick={resetView}
+                >
+                  {networkMode === 'director-centric' ? 'Director Overview' : 'Supplier Overview'}
+                </span>
+                <ChevronRight className="w-3 h-3 text-[var(--neumorphic-text-secondary)]" />
+                <NeumorphicText size="sm">
+                  {viewState === 'director-focus' ? `Analyzing ${directorProfiles.find(p => p.director.id === focusedDirectorId)?.director.name}` :
+                   viewState === 'supplier-focus' ? `Analyzing ${supplierProfiles.find(s => s.id === focusedSupplierId)?.name}` :
+                   'Detailed View'}
+                </NeumorphicText>
+              </div>
+            )}
           </motion.div>
           
           {/* Hover Tooltip */}
@@ -1487,17 +1509,40 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
           
           {/* Legend */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="absolute top-4 right-4 p-3 rounded-lg bg-[var(--neumorphic-card)] shadow-md border border-[var(--neumorphic-border)] w-56 text-xs"
+            className={`absolute bottom-4 right-4 rounded-lg bg-[var(--neumorphic-card)] shadow-[var(--neumorphic-shadow-convex)] border border-[var(--neumorphic-border)] text-xs ${
+              isLegendCollapsed ? 'w-auto' : 'w-56'
+            }`}
           >
-            <NeumorphicText size="xs" className="font-semibold mb-2 flex items-center gap-1">
-              <Info className="w-3 h-3" />
-              Interactive Guide
-            </NeumorphicText>
-            
-            <div className="space-y-2">
+            <div className="p-3">
+              <div 
+                className="flex items-center justify-between cursor-pointer"
+                onClick={() => setIsLegendCollapsed(!isLegendCollapsed)}
+              >
+                <NeumorphicText size="xs" className="font-semibold flex items-center gap-1">
+                  <Info className="w-3 h-3" />
+                  Interactive Guide
+                </NeumorphicText>
+                <motion.div
+                  animate={{ rotate: isLegendCollapsed ? 0 : 180 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ChevronUp className="w-4 h-4 text-[var(--neumorphic-text-secondary)]" />
+                </motion.div>
+              </div>
+              
+              <AnimatePresence>
+                {!isLegendCollapsed && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="space-y-2 mt-2">
               {viewState === 'director-overview' && (
                 <>
                   <div>
@@ -1514,6 +1559,23 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                       <div className="flex items-center gap-1">
                         <div className="w-3 h-3 rounded-full bg-gray-500" />
                         <NeumorphicText size="xs">Normal (1-2 boards)</NeumorphicText>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t border-[var(--neumorphic-border)]">
+                    <NeumorphicText size="xs" className="font-medium mb-1">Connection Lines</NeumorphicText>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <svg width="30" height="2" className="flex-shrink-0">
+                          <line x1="0" y1="1" x2="30" y2="1" stroke="var(--neumorphic-accent)" strokeWidth="2" opacity="0.6" />
+                        </svg>
+                        <NeumorphicText size="xs">Shared suppliers between directors</NeumorphicText>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <svg width="30" height="2" className="flex-shrink-0">
+                          <line x1="0" y1="1" x2="30" y2="1" stroke="var(--neumorphic-text-secondary)" strokeWidth="1" opacity="0.4" />
+                        </svg>
+                        <NeumorphicText size="xs">Director to supplier</NeumorphicText>
                       </div>
                     </div>
                   </div>
@@ -1545,6 +1607,23 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                       <div className="flex items-center gap-1">
                         <div className="w-3 h-3 rounded-full bg-green-500" />
                         <NeumorphicText size="xs">Low Risk (&lt;25%)</NeumorphicText>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t border-[var(--neumorphic-border)]">
+                    <NeumorphicText size="xs" className="font-medium mb-1">Connection Lines</NeumorphicText>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <svg width="30" height="2" className="flex-shrink-0">
+                          <line x1="0" y1="1" x2="30" y2="1" stroke="var(--neumorphic-accent)" strokeWidth="3" opacity="0.6" />
+                        </svg>
+                        <NeumorphicText size="xs">Shared directors (concentration risk)</NeumorphicText>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <svg width="30" height="2" className="flex-shrink-0">
+                          <line x1="0" y1="1" x2="30" y2="1" stroke="var(--neumorphic-text-secondary)" strokeWidth="1" opacity="0.4" />
+                        </svg>
+                        <NeumorphicText size="xs">Supplier to director</NeumorphicText>
                       </div>
                     </div>
                   </div>
@@ -1609,11 +1688,14 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                   </div>
                 </>
               )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
-        </NeumorphicCard>
-      </motion.div>
-
+        </motion.div>
+      </NeumorphicCard>
     </div>
   );
 };
