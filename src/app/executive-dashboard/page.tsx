@@ -6,6 +6,8 @@ import RiskConcentrationMap from '@/components/executive/RiskConcentrationMap';
 import RiskPostureGauges from '@/components/executive/RiskPostureGauges';
 import ContextualDetailPanel from '@/components/executive/ContextualDetailPanel';
 import SupplierNetworkGraph from '@/components/executive/SupplierNetworkGraph';
+import HierarchicalNetworkTree from '@/components/executive/HierarchicalNetworkTree';
+import DirectorCentricNetwork from '@/components/executive/DirectorCentricNetwork';
 import StrategicEventFeed from '@/components/executive/StrategicEventFeed';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RefreshCw, Filter, X } from 'lucide-react';
@@ -390,9 +392,8 @@ export default function ExecutiveDashboardPage() {
             variants={slideUpVariants}
             initial="hidden"
             animate="visible"
-            {...hoverScaleVariants}
           >
-            <NeumorphicCard className="p-0 overflow-hidden h-[500px] lg:h-[600px]">
+            <NeumorphicCard className="p-0 overflow-hidden h-[375px] lg:h-[450px]">
               <RiskConcentrationMap
                 height="100%"
                 onMineSiteClick={handleMineSiteSelect}
@@ -420,7 +421,6 @@ export default function ExecutiveDashboardPage() {
               <motion.div 
                 className="h-full"
                 variants={slideUpVariants}
-                {...hoverScaleVariants}
               >
                 <NeumorphicCard className="p-4 overflow-hidden h-[450px] lg:h-[500px]">
                   <SupplierNetworkGraph
@@ -446,7 +446,6 @@ export default function ExecutiveDashboardPage() {
               <motion.div 
                 className="w-full"
                 variants={slideInFromRightVariants}
-                {...hoverScaleVariants}
               >
                 <AnimatePresence mode="wait">
                   <NeumorphicCard className="overflow-hidden h-[450px] lg:h-[500px]">
@@ -465,7 +464,6 @@ export default function ExecutiveDashboardPage() {
               <motion.div 
                 className="w-full"
                 variants={slideInFromRightVariants}
-                {...hoverScaleVariants}
               >
                 <NeumorphicCard className="p-0 overflow-hidden h-[400px] lg:h-[450px]">
                   <StrategicEventFeed
@@ -476,6 +474,48 @@ export default function ExecutiveDashboardPage() {
                 </NeumorphicCard>
               </motion.div>
             </div>
+          </motion.div>
+          
+          {/* Row 4: Hierarchical Network Tree - Full Width */}
+          <motion.div 
+            className="w-full"
+            variants={slideUpVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <HierarchicalNetworkTree
+              activeFilter={activeRiskFilter}
+              onNodeClick={handleEntitySelect}
+              onNodeHover={handleSupplierHover}
+              selectedSupplierId={selectedEntity && 'contractValueZAR' in selectedEntity ? selectedEntity.id : null}
+              selectedMineSiteId={selectedMineSite?.id || null}
+              highlightedEntityIds={highlightedEntityIds}
+              hoveredSupplierId={hoveredSupplierId}
+              filteredSuppliers={filteredData.suppliers}
+              height="500px"
+              className="w-full"
+            />
+          </motion.div>
+          
+          {/* Row 5: Director-Centric Network - Full Width */}
+          <motion.div 
+            className="w-full"
+            variants={slideUpVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <DirectorCentricNetwork
+              activeFilter={activeRiskFilter}
+              onNodeClick={handleEntitySelect}
+              onNodeHover={handleSupplierHover}
+              selectedSupplierId={selectedEntity && 'contractValueZAR' in selectedEntity ? selectedEntity.id : null}
+              selectedMineSiteId={selectedMineSite?.id || null}
+              highlightedEntityIds={highlightedEntityIds}
+              hoveredSupplierId={hoveredSupplierId}
+              filteredSuppliers={filteredData.suppliers}
+              height="600px"
+              className="w-full"
+            />
           </motion.div>
         </div>
         

@@ -16,13 +16,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { NeumorphicText, NeumorphicHeading } from '@/components/ui/neumorphic';
 import { 
   RiskCategory,
+  ExecutiveSupplierInfo,
   suppliers,
   directors
 } from '@/lib/sample-data/executive-dashboard-data';
 import { 
   getCssVariable, 
   getThemeColors,
-  applyNeumorphicToCanvas,
   getSeverityColor
 } from '@/lib/executive/theme-bridge';
 import { 
@@ -93,7 +93,7 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
   className = '',
   height = '400px'
 }) => {
-  const graphRef = useRef<any>(null);
+  const graphRef = useRef<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
   const [hoveredNode, setHoveredNode] = useState<GraphNode | null>(null);
   const [clickedNode, setClickedNode] = useState<GraphNode | null>(null);
   const [graphDimensions, setGraphDimensions] = useState({ width: 800, height: 400 });
@@ -129,7 +129,7 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
     };
   }, []);
 
-  // Prepare graph data
+  // Prepare graph data with concentration risk highlighting
   const graphData = useMemo<GraphData>(() => {
     const nodes: GraphNode[] = [];
     const links: GraphLink[] = [];
@@ -145,26 +145,40 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
       );
     }
 
-    // Count connections for each supplier
+    // Count connections for each director and supplier
+    const directorConnections: Record<string, number> = {};
     const supplierConnections: Record<string, number> = {};
+    
     graphSuppliers.forEach(supplier => {
       supplierConnections[supplier.id] = supplier.directorIds.length;
+      supplier.directorIds.forEach(directorId => {
+        directorConnections[directorId] = (directorConnections[directorId] || 0) + 1;
+      });
     });
 
-    // Add supplier nodes with improved sizing and highlighting
+    // Identify concentration risks (directors with 3+ connections)
+    const concentrationRiskDirectors = Object.entries(directorConnections)
+      .filter(([, count]) => count >= 3)
+      .map(([id]) => id);
+
+    // Add supplier nodes with enhanced sizing and highlighting
     graphSuppliers.forEach(supplier => {
       const isSelected = supplier.id === selectedSupplierId;
       const riskLevel = supplier.riskScore >= 75 ? 'Critical' : 
                        supplier.riskScore >= 50 ? 'High' : 
                        supplier.riskScore >= 25 ? 'Medium' : 'Low';
       
-      // Better node sizing: base size + risk factor + contract value factor
-      const baseSize = 8;
+      // Reduced node sizing to prevent overlap while maintaining visibility
+      const baseSize = 8; // Smaller base size for better spacing
       const riskFactor = Math.max(1, supplier.riskScore / 25); // 1-4 multiplier
-      const contractFactor = Math.max(1, supplier.contractValueZAR / 5000000); // 1-20 multiplier
-      const connectionFactor = Math.max(1, supplierConnections[supplier.id] / 2); // 1-5 multiplier
+      const contractFactor = Math.max(0.5, supplier.contractValueZAR / 15000000); // 0.5-8 multiplier
+      const connectionFactor = Math.max(0.5, supplierConnections[supplier.id] * 1); // Reduced emphasis on connections
       
-      const nodeSize = Math.min(25, baseSize + riskFactor + contractFactor + connectionFactor);
+      // Check if supplier has concentration risk directors
+      const hasConcentrationRisk = supplier.directorIds.some(id => concentrationRiskDirectors.includes(id));
+      const concentrationFactor = hasConcentrationRisk ? 2 : 1;
+      
+      const nodeSize = Math.min(20, baseSize + riskFactor + contractFactor + connectionFactor + concentrationFactor);
       
       nodes.push({
         id: supplier.id,
@@ -176,45 +190,56 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
         color: getSeverityColor(riskLevel),
         contractValue: supplier.contractValueZAR,
         connectionsCount: supplierConnections[supplier.id],
-        fx: isSelected ? null : null, // Don't fix position initially
+        fx: isSelected ? null : null,
         fy: isSelected ? null : null
       });
     });
 
-    // Add director nodes and links
+    // Add director nodes with enhanced sizing and concentration risk highlighting
     const relevantDirectorIds = new Set<string>();
-    const directorConnections: Record<string, number> = {};
-    
     graphSuppliers.forEach(supplier => {
       supplier.directorIds.forEach(directorId => {
         relevantDirectorIds.add(directorId);
-        directorConnections[directorId] = (directorConnections[directorId] || 0) + 1;
         links.push({
           source: supplier.id,
           target: directorId,
-          value: 1
+          value: 1.2 // Increased link strength for better visibility
         });
       });
     });
 
-    // Add director nodes with sizing based on connections
     directors
       .filter(d => relevantDirectorIds.has(d.id))
       .forEach(director => {
         const connections = directorConnections[director.id] || 1;
-        const directorSize = Math.min(15, 4 + connections * 2); // 4-15 size range
+        const isConcentrationRisk = concentrationRiskDirectors.includes(director.id);
+        
+        // Reduced director sizing to prevent overlap
+        const baseSize = 6;
+        const connectionMultiplier = isConcentrationRisk ? 2.5 : 1.5; // Smaller multiplier for better spacing
+        const directorSize = Math.min(15, baseSize + connections * connectionMultiplier);
+        
+        // Special colors for concentration risk directors
+        let directorColor = colors.textSecondary;
+        if (director.id === 'DIR_04') { // Sipho Ndlovu - Major risk (4 boards)
+          directorColor = getCssVariable('--neumorphic-severity-critical');
+        } else if (director.id === 'DIR_06') { // Fatima Khan - Secondary risk (3 boards)
+          directorColor = getCssVariable('--neumorphic-severity-high');
+        } else if (isConcentrationRisk) {
+          directorColor = getCssVariable('--neumorphic-severity-medium');
+        }
         
         nodes.push({
           id: director.id,
           name: director.name,
           type: 'director',
           val: directorSize,
-          color: colors.textSecondary,
+          color: directorColor,
           connectionsCount: connections
         });
       });
 
-    // Add supplier-to-supplier links through shared directors (lighter weight)
+    // Enhanced supplier-to-supplier links through shared directors
     const directorToSuppliers: Record<string, string[]> = {};
     graphSuppliers.forEach(supplier => {
       supplier.directorIds.forEach(directorId => {
@@ -225,15 +250,18 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
       });
     });
 
-    // Create weaker links between suppliers with shared directors
-    Object.values(directorToSuppliers).forEach(supplierIds => {
+    // Create stronger links between suppliers with shared concentration risk directors
+    Object.entries(directorToSuppliers).forEach(([directorId, supplierIds]) => {
       if (supplierIds.length > 1) {
+        const isConcentrationDirector = concentrationRiskDirectors.includes(directorId);
+        const linkStrength = isConcentrationDirector ? 0.8 : 0.4; // Stronger for concentration risk
+        
         for (let i = 0; i < supplierIds.length - 1; i++) {
           for (let j = i + 1; j < supplierIds.length; j++) {
             links.push({
               source: supplierIds[i],
               target: supplierIds[j],
-              value: 0.5 // Weaker connection
+              value: linkStrength
             });
           }
         }
@@ -241,9 +269,9 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
     });
 
     return { nodes, links };
-  }, [activeFilter, selectedSupplierId, selectedMineSiteId, filteredSuppliers, graphDimensions.width, graphDimensions.height]);
+  }, [filteredSuppliers, selectedSupplierId, selectedMineSiteId]);
 
-  // Custom node canvas rendering with improved visuals and interactions
+  // Enhanced node canvas rendering with concentration risk indicators
   const nodeCanvasObject = useCallback((node: GraphNode, ctx: CanvasRenderingContext2D, globalScale: number) => {
     const x = node.x || 0;
     const y = node.y || 0;
@@ -254,17 +282,23 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
     const isHighlighted = highlightedEntityIds.includes(node.id);
     const isHoveredFromExternal = hoveredSupplierId === node.id;
     
+    // Check for concentration risk
+    const isConcentrationRisk = (node.type === 'director' && node.connectionsCount && node.connectionsCount >= 3);
+    const isMajorConcentrationRisk = node.id === 'DIR_04'; // Sipho Ndlovu - 4 boards
+    const isSecondaryConcentrationRisk = node.id === 'DIR_06'; // Fatima Khan - 3 boards
+    
     // Scale-dependent sizing
     const scaledRadius = radius / globalScale;
-    const borderWidth = Math.max(1, 2 / globalScale);
+    const borderWidth = Math.max(1, (isConcentrationRisk ? 3 : 2) / globalScale);
     const fontSize = Math.max(10, 12 / globalScale);
     const iconSize = Math.max(8, 10 / globalScale);
     
-    // Enhanced visual feedback with highlighting support
+    // Enhanced visual feedback
     const glowRadius = scaledRadius + (
-      isHovered ? 4 : 
-      isClicked ? 3 : 
-      isSelected ? 3 : 
+      isHovered ? 6 : 
+      isClicked ? 4 : 
+      isSelected ? 4 : 
+      isConcentrationRisk ? 3 :
       isHighlighted ? 2 : 
       isHoveredFromExternal ? 2 : 0
     );
@@ -272,14 +306,37 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
     
     ctx.save();
     
-    // Draw outer glow for interactions and highlighting
+    // Draw concentration risk warning aura
+    if (isMajorConcentrationRisk) {
+      ctx.shadowColor = 'rgba(239, 68, 68, 0.6)';
+      ctx.shadowBlur = 12;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      
+      ctx.beginPath();
+      ctx.arc(x, y, scaledRadius + 6, 0, 2 * Math.PI);
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.1)';
+      ctx.fill();
+    } else if (isSecondaryConcentrationRisk) {
+      ctx.shadowColor = 'rgba(245, 158, 11, 0.5)';
+      ctx.shadowBlur = 10;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      
+      ctx.beginPath();
+      ctx.arc(x, y, scaledRadius + 4, 0, 2 * Math.PI);
+      ctx.fillStyle = 'rgba(245, 158, 11, 0.1)';
+      ctx.fill();
+    }
+    
+    // Draw outer glow for interactions
     if (isHovered || isClicked || isSelected || isHighlighted || isHoveredFromExternal) {
-      const glowColor = isHovered ? 'rgba(79, 172, 254, 0.4)' : 
-                       isClicked ? 'rgba(16, 185, 129, 0.4)' : 
-                       isSelected ? 'rgba(245, 158, 11, 0.4)' :
-                       isHighlighted ? 'rgba(147, 51, 234, 0.3)' :
-                       isHoveredFromExternal ? 'rgba(59, 130, 246, 0.3)' :
-                       'rgba(245, 158, 11, 0.3)';
+      const glowColor = isHovered ? 'rgba(79, 172, 254, 0.5)' : 
+                       isClicked ? 'rgba(16, 185, 129, 0.5)' : 
+                       isSelected ? 'rgba(245, 158, 11, 0.5)' :
+                       isHighlighted ? 'rgba(147, 51, 234, 0.4)' :
+                       isHoveredFromExternal ? 'rgba(59, 130, 246, 0.4)' :
+                       'rgba(245, 158, 11, 0.4)';
       
       ctx.shadowColor = glowColor;
       ctx.shadowBlur = 8;
@@ -293,8 +350,8 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
     }
     
     // Draw main node with neumorphic shadow
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
-    ctx.shadowBlur = 4;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
+    ctx.shadowBlur = 6;
     ctx.shadowOffsetX = shadowOffset;
     ctx.shadowOffsetY = shadowOffset;
     
@@ -304,7 +361,7 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
     ctx.fillStyle = node.color;
     ctx.fill();
     
-    // Node border
+    // Enhanced border with concentration risk highlighting
     ctx.shadowColor = 'transparent';
     ctx.shadowBlur = 0;
     ctx.shadowOffsetX = 0;
@@ -312,41 +369,74 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
     
     ctx.beginPath();
     ctx.arc(x, y, scaledRadius, 0, 2 * Math.PI);
-    ctx.strokeStyle = isSelected ? getCssVariable('--neumorphic-accent') : 
-                     isHovered ? getCssVariable('--neumorphic-text-primary') : 
-                     isHighlighted ? 'rgba(147, 51, 234, 0.8)' :
-                     isHoveredFromExternal ? 'rgba(59, 130, 246, 0.8)' :
-                     'rgba(255, 255, 255, 0.3)';
+    
+    let borderColor = 'rgba(255, 255, 255, 0.3)';
+    if (isSelected) {
+      borderColor = getCssVariable('--neumorphic-accent');
+    } else if (isHovered) {
+      borderColor = getCssVariable('--neumorphic-text-primary');
+    } else if (isMajorConcentrationRisk) {
+      borderColor = 'rgba(239, 68, 68, 0.9)';
+    } else if (isSecondaryConcentrationRisk) {
+      borderColor = 'rgba(245, 158, 11, 0.9)';
+    } else if (isHighlighted) {
+      borderColor = 'rgba(147, 51, 234, 0.8)';
+    } else if (isHoveredFromExternal) {
+      borderColor = 'rgba(59, 130, 246, 0.8)';
+    }
+    
+    ctx.strokeStyle = borderColor;
     ctx.lineWidth = borderWidth;
     ctx.stroke();
     
-    // Draw icons and indicators
+    // Draw enhanced icons and indicators
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
     if (node.type === 'director') {
-      // Director icon
-      ctx.fillStyle = 'white';
-      ctx.font = `${iconSize}px Inter, sans-serif`;
-      ctx.fillText('👤', x, y);
+      // Special icons for concentration risk directors
+      if (isMajorConcentrationRisk) {
+        ctx.fillStyle = 'white';
+        ctx.font = `bold ${iconSize * 1.3}px Inter, sans-serif`;
+        ctx.fillText('⚠️', x, y - 2);
+        ctx.font = `${iconSize * 0.7}px Inter, sans-serif`;
+        ctx.fillText('4', x, y + 6);
+      } else if (isSecondaryConcentrationRisk) {
+        ctx.fillStyle = 'white';
+        ctx.font = `bold ${iconSize * 1.2}px Inter, sans-serif`;
+        ctx.fillText('⚠️', x, y - 2);
+        ctx.font = `${iconSize * 0.7}px Inter, sans-serif`;
+        ctx.fillText('3', x, y + 6);
+      } else {
+        ctx.fillStyle = 'white';
+        ctx.font = `${iconSize}px Inter, sans-serif`;
+        ctx.fillText('👤', x, y);
+      }
     } else if (node.type === 'supplier') {
-      // Risk indicator for suppliers
+      // Enhanced risk indicators for suppliers
       if (node.riskScore && node.riskScore >= 75) {
         ctx.fillStyle = 'white';
-        ctx.font = `${iconSize * 1.2}px Inter, sans-serif`;
+        ctx.font = `bold ${iconSize * 1.3}px Inter, sans-serif`;
         ctx.fillText('⚠️', x, y);
       } else if (node.riskScore && node.riskScore >= 50) {
         ctx.fillStyle = 'white';
-        ctx.font = `${iconSize}px Inter, sans-serif`;
+        ctx.font = `bold ${iconSize * 1.1}px Inter, sans-serif`;
         ctx.fillText('!', x, y);
+      } else {
+        ctx.fillStyle = 'white';
+        ctx.font = `${iconSize * 0.8}px Inter, sans-serif`;
+        ctx.fillText('🏢', x, y);
       }
     }
     
-    // Draw label for hovered or selected nodes
-    if ((isHovered || isSelected) && globalScale > 0.5) {
+    // Persistent labels for concentration risk directors
+    const shouldShowLabel = isHovered || isSelected || 
+                           (node.type === 'director' && isConcentrationRisk && globalScale > 0.4);
+    
+    if (shouldShowLabel && globalScale > 0.3) {
       const label = node.name;
-      const labelFontSize = Math.max(10, fontSize);
-      ctx.font = `${labelFontSize}px Inter, sans-serif`;
+      const labelFontSize = Math.max(9, fontSize * 0.9);
+      ctx.font = `${isConcentrationRisk ? 'bold ' : ''}${labelFontSize}px Inter, sans-serif`;
       
       // Measure text for background
       const textMetrics = ctx.measureText(label);
@@ -356,14 +446,25 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
       // Background positioning
       const bgPadding = 6;
       const bgX = x - (textWidth + bgPadding) / 2;
-      const bgY = y - scaledRadius - textHeight - bgPadding - 5;
+      const bgY = y - scaledRadius - textHeight - bgPadding - 8;
       const bgWidth = textWidth + bgPadding;
       const bgHeight = textHeight + bgPadding;
       
-      // Draw background
-      ctx.fillStyle = getCssVariable('--neumorphic-card');
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
-      ctx.shadowBlur = 4;
+      // Draw background with concentration risk styling
+      let bgColor = getCssVariable('--neumorphic-card');
+      let borderColor = getCssVariable('--neumorphic-border');
+      
+      if (isMajorConcentrationRisk) {
+        bgColor = 'rgba(239, 68, 68, 0.9)';
+        borderColor = 'rgba(239, 68, 68, 1)';
+      } else if (isSecondaryConcentrationRisk) {
+        bgColor = 'rgba(245, 158, 11, 0.9)';
+        borderColor = 'rgba(245, 158, 11, 1)';
+      }
+      
+      ctx.fillStyle = bgColor;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+      ctx.shadowBlur = 6;
       ctx.shadowOffsetX = 1;
       ctx.shadowOffsetY = 1;
       
@@ -376,31 +477,47 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
       ctx.shadowOffsetY = 0;
       
       // Draw border
-      ctx.strokeStyle = getCssVariable('--neumorphic-border');
+      ctx.strokeStyle = borderColor;
       ctx.lineWidth = 1;
       ctx.strokeRect(bgX, bgY, bgWidth, bgHeight);
       
       // Draw text
-      ctx.fillStyle = getCssVariable('--neumorphic-text-primary');
+      ctx.fillStyle = isConcentrationRisk ? 'white' : getCssVariable('--neumorphic-text-primary');
       ctx.fillText(label, x, bgY + bgHeight / 2);
     }
     
     ctx.restore();
   }, [selectedSupplierId, hoveredNode, clickedNode, highlightedEntityIds, hoveredSupplierId]);
 
-  // Custom link canvas rendering with improved visuals
+  // Enhanced link canvas rendering with improved visibility
   const linkCanvasObject = useCallback((link: { source: { x: number; y: number }; target: { x: number; y: number }; value: number }, ctx: CanvasRenderingContext2D, globalScale: number) => {
     const colors = getThemeColors();
-    const lineWidth = Math.max(0.5, link.value / globalScale);
-    const alpha = link.value > 0.5 ? 0.4 : 0.2; // Stronger links more visible
+    const lineWidth = Math.max(1, link.value * 1.5 / globalScale); // Thicker lines
+    
+    // Improved opacity for better visibility
+    const alpha = link.value >= 1.0 ? 0.8 : // Direct connections highly visible
+                  link.value >= 0.7 ? 0.7 : // Concentration risk connections
+                  link.value >= 0.4 ? 0.6 : // Shared director connections
+                  0.4; // Minimum visibility
     
     ctx.save();
-    ctx.strokeStyle = colors.border;
+    
+    // Enhanced colors based on connection strength
+    let strokeColor = colors.border;
+    if (link.value >= 1.0) {
+      strokeColor = colors.textPrimary; // Direct connections
+    } else if (link.value >= 0.7) {
+      strokeColor = getCssVariable('--neumorphic-accent'); // Concentration risk
+    } else if (link.value >= 0.4) {
+      strokeColor = colors.textSecondary; // Shared directors
+    }
+    
+    ctx.strokeStyle = strokeColor;
     ctx.lineWidth = lineWidth;
     ctx.globalAlpha = alpha;
     
-    // Add subtle gradient for stronger connections
-    if (link.value > 0.5 && 
+    // Add enhanced gradient for stronger connections
+    if (link.value >= 0.7 && 
         isFinite(link.source.x) && isFinite(link.source.y) && 
         isFinite(link.target.x) && isFinite(link.target.y)) {
       try {
@@ -408,13 +525,23 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
           link.source.x, link.source.y,
           link.target.x, link.target.y
         );
-        gradient.addColorStop(0, colors.border);
-        gradient.addColorStop(0.5, colors.textSecondary);
-        gradient.addColorStop(1, colors.border);
+        
+        if (link.value >= 1.0) {
+          // Direct connections - strong gradient
+          gradient.addColorStop(0, colors.textPrimary);
+          gradient.addColorStop(0.5, getCssVariable('--neumorphic-accent'));
+          gradient.addColorStop(1, colors.textPrimary);
+        } else {
+          // Concentration risk connections
+          gradient.addColorStop(0, getCssVariable('--neumorphic-accent'));
+          gradient.addColorStop(0.5, colors.textSecondary);
+          gradient.addColorStop(1, getCssVariable('--neumorphic-accent'));
+        }
+        
         ctx.strokeStyle = gradient;
-      } catch (error) {
+      } catch {
         // Fallback to solid color if gradient fails
-        ctx.strokeStyle = colors.border;
+        ctx.strokeStyle = strokeColor;
       }
     }
     
@@ -430,8 +557,11 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
     ctx.restore();
   }, []);
 
-  // Enhanced event handlers with better responsiveness
+  // Enhanced event handlers with improved responsiveness
   const handleNodeClick = useCallback((node: GraphNode) => {
+    // Debug logging to ensure clicks are being detected
+    console.log('Node clicked:', node?.id, node?.name, node?.type);
+    
     setClickedNode(node);
     
     if (node.type === 'supplier') {
@@ -441,27 +571,26 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
       }
     }
     
-    // Visual feedback timeout
-    setTimeout(() => {
+    // Improved visual feedback - removed problematic timeout
+    requestAnimationFrame(() => {
       setClickedNode(null);
-    }, 200);
+    });
   }, [onNodeClick]);
 
   const handleNodeHover = useCallback((node: GraphNode | null) => {
+    // Debug logging to ensure hover is being detected
+    console.log('Node hover:', node?.id, node?.name, node?.type);
+    
+    // Always update hover state for ALL nodes (suppliers and directors)
     setHoveredNode(node);
     
-    // Call parent hover handler for suppliers
+    // Call parent hover handler for suppliers only
     if (node?.type === 'supplier') {
       onNodeHover?.(node.id);
     } else {
       onNodeHover?.(null);
     }
-    
-    // Only reheat simulation if node state changed
-    if (graphRef.current && node !== hoveredNode) {
-      graphRef.current.d3ReheatSimulation();
-    }
-  }, [hoveredNode, onNodeHover]);
+  }, [onNodeHover]);
 
   const handleNodeDragStart = useCallback((node: GraphNode) => {
     setIsDragging(true);
@@ -526,12 +655,16 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
     }
   }, []);
 
-  // Auto-fit on data change
+  // Improved auto-fit on data change with better positioning
   useEffect(() => {
     if (graphRef.current && isInitialized && graphData.nodes.length > 0) {
       const timer = setTimeout(() => {
-        handleFitToScreen();
-      }, 500);
+        // Center the view and apply optimal zoom
+        graphRef.current.centerAt(0, 0, 300);
+        setTimeout(() => {
+          handleFitToScreen();
+        }, 100);
+      }, 600);
       return () => clearTimeout(timer);
     }
   }, [graphData.nodes.length, isInitialized, handleFitToScreen]);
@@ -613,19 +746,27 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
             onNodeDragStart={handleNodeDragStart}
             onNodeDrag={handleNodeDrag}
             onNodeDragEnd={handleNodeDragEnd}
-            nodeRelSize={1}
+            nodeRelSize={4}
             linkDirectionalParticles={0} // Disable for better performance
             backgroundColor={getCssVariable('--neumorphic-card')}
-            cooldownTicks={200}
-            warmupTicks={100}
+            cooldownTicks={200} // More time to settle into proper positions
+            warmupTicks={100}   // More time for initial spreading
+            onEngineStop={() => {
+              // Auto-fit to show all nodes after layout settles
+              if (graphRef.current) {
+                setTimeout(() => {
+                  graphRef.current?.zoomToFit(400, 50);
+                }, 100);
+              }
+            }}
             enableNodeDrag={true}
             enableZoomInteraction={true}
             enablePanInteraction={true}
-            d3Force={{
-              charge: -300,
-              link: 80,
-              center: 0.3,
-              collision: 10
+            d3ForceConfig={{
+              charge: { strength: -2500, distanceMax: 500 }, // Much stronger repulsion to separate nodes
+              link: { distance: 200, iterations: 3 }, // Much longer links to spread nodes far apart
+              center: { strength: 0.05 }, // Very weak centering to allow maximum spreading
+              collide: { strength: 2, radius: 40 }, // Stronger collision with larger radius to prevent overlap
             }}
           />
         )}
@@ -652,14 +793,14 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
           </div>
         )}
 
-        {/* Enhanced Hover Info Panel */}
+        {/* Enhanced Hover Info Panel with Concentration Risk Alerts */}
         <AnimatePresence>
           {hoveredNode && (
             <motion.div
               initial={{ opacity: 0, y: 20, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.9 }}
-              className="absolute bottom-4 left-4 p-4 rounded-[var(--neumorphic-radius-md)] bg-[var(--neumorphic-card)] shadow-[var(--neumorphic-shadow-convex)] max-w-xs border border-[var(--neumorphic-border)]"
+              className="absolute top-4 left-4 p-3 rounded-lg bg-[var(--neumorphic-card)] shadow-lg max-w-xs border border-[var(--neumorphic-border)] z-50"
             >
               <div className="flex items-start gap-3">
                 <div className="p-2 rounded-[var(--neumorphic-radius-sm)] bg-[var(--neumorphic-button)] shadow-[var(--neumorphic-shadow-convex)]">
@@ -685,6 +826,43 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
                       </NeumorphicText>
                     )}
                   </div>
+                  
+                  {/* Concentration Risk Alert */}
+                  {hoveredNode.type === 'director' && hoveredNode.connectionsCount && hoveredNode.connectionsCount >= 3 && (
+                    <div className={`p-2 rounded-[var(--neumorphic-radius-sm)] ${
+                      hoveredNode.id === 'DIR_04' ? 'bg-red-100 border border-red-300' :
+                      hoveredNode.id === 'DIR_06' ? 'bg-yellow-100 border border-yellow-300' :
+                      'bg-orange-100 border border-orange-300'
+                    }`}>
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className={`w-4 h-4 ${
+                          hoveredNode.id === 'DIR_04' ? 'text-red-600' :
+                          hoveredNode.id === 'DIR_06' ? 'text-yellow-600' :
+                          'text-orange-600'
+                        }`} />
+                        <NeumorphicText size="sm" className={`font-medium ${
+                          hoveredNode.id === 'DIR_04' ? 'text-red-800' :
+                          hoveredNode.id === 'DIR_06' ? 'text-yellow-800' :
+                          'text-orange-800'
+                        }`}>
+                          {hoveredNode.id === 'DIR_04' ? 'CRITICAL CONCENTRATION RISK' :
+                           hoveredNode.id === 'DIR_06' ? 'SECONDARY CONCENTRATION RISK' :
+                           'CONCENTRATION RISK'}
+                        </NeumorphicText>
+                      </div>
+                      <NeumorphicText size="xs" className={`mt-1 ${
+                        hoveredNode.id === 'DIR_04' ? 'text-red-700' :
+                        hoveredNode.id === 'DIR_06' ? 'text-yellow-700' :
+                        'text-orange-700'
+                      }`}>
+                        {hoveredNode.id === 'DIR_04' ? 
+                         'Sits on 4 supplier boards - creates unprecedented risk exposure' :
+                         hoveredNode.id === 'DIR_06' ?
+                         'Sits on 3 supplier boards - secondary concentration risk' :
+                         `Sits on ${hoveredNode.connectionsCount} supplier boards - requires monitoring`}
+                      </NeumorphicText>
+                    </div>
+                  )}
                   
                   {hoveredNode.type === 'supplier' && hoveredNode.riskScore !== undefined && (
                     <div className="space-y-1">
@@ -718,6 +896,9 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
                       </div>
                       <NeumorphicText size="sm">
                         {hoveredNode.connectionsCount} connection{hoveredNode.connectionsCount !== 1 ? 's' : ''}
+                        {hoveredNode.type === 'director' && hoveredNode.connectionsCount >= 3 && (
+                          <span className="ml-1 text-red-600 font-medium">⚠️</span>
+                        )}
                       </NeumorphicText>
                     </div>
                   )}
@@ -743,78 +924,67 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
           )}
         </AnimatePresence>
 
-        {/* Enhanced Legend */}
+        {/* Compact Legend */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.5 }}
-          className="absolute top-4 right-4 p-4 rounded-[var(--neumorphic-radius-md)] bg-[var(--neumorphic-card)] shadow-[var(--neumorphic-shadow-convex)] border border-[var(--neumorphic-border)] min-w-[200px]"
+          className="absolute top-4 right-4 p-3 rounded-lg bg-[var(--neumorphic-card)] shadow-md border border-[var(--neumorphic-border)] w-48 max-h-64 overflow-y-auto text-xs"
         >
-          <NeumorphicText size="sm" className="font-semibold mb-3 flex items-center gap-2">
-            <Info className="w-4 h-4" />
+          <NeumorphicText size="xs" className="font-semibold mb-2 flex items-center gap-1">
+            <Info className="w-3 h-3" />
             Legend
           </NeumorphicText>
           
-          <div className="space-y-3">
-            <div className="space-y-2">
-              <NeumorphicText size="xs" variant="secondary" className="font-medium">
-                Risk Levels
-              </NeumorphicText>
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2">
-                  <div 
-                    className="w-4 h-4 rounded-full shadow-sm"
-                    style={{ backgroundColor: getCssVariable('--neumorphic-severity-critical') }}
-                  />
-                  <NeumorphicText size="xs">Critical (75%+) ⚠️</NeumorphicText>
+          <div className="space-y-2">
+            <div>
+              <NeumorphicText size="xs" className="font-medium mb-1">Risk Levels</NeumorphicText>
+              <div className="space-y-1">
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-red-500" />
+                  <NeumorphicText size="xs">Critical (75%+)</NeumorphicText>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div 
-                    className="w-4 h-4 rounded-full shadow-sm"
-                    style={{ backgroundColor: getCssVariable('--neumorphic-severity-high') }}
-                  />
-                  <NeumorphicText size="xs">High (50-74%) !</NeumorphicText>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-orange-500" />
+                  <NeumorphicText size="xs">High (50-74%)</NeumorphicText>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div 
-                    className="w-4 h-4 rounded-full shadow-sm"
-                    style={{ backgroundColor: getCssVariable('--neumorphic-severity-medium') }}
-                  />
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-yellow-500" />
                   <NeumorphicText size="xs">Medium (25-49%)</NeumorphicText>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div 
-                    className="w-4 h-4 rounded-full shadow-sm"
-                    style={{ backgroundColor: getCssVariable('--neumorphic-severity-low') }}
-                  />
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
                   <NeumorphicText size="xs">Low (&lt;25%)</NeumorphicText>
                 </div>
               </div>
             </div>
             
-            <div className="pt-3 border-t border-[var(--neumorphic-border)]">
-              <NeumorphicText size="xs" variant="secondary" className="font-medium mb-2">
-                Node Types
-              </NeumorphicText>
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-[var(--neumorphic-accent)]" />
+            <div className="pt-2 border-t border-[var(--neumorphic-border)]">
+              <NeumorphicText size="xs" className="font-medium mb-1">Nodes</NeumorphicText>
+              <div className="space-y-1">
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-blue-500 rounded" />
                   <NeumorphicText size="xs">Supplier</NeumorphicText>
                 </div>
-                <div className="flex items-center gap-2">
-                  <User className="w-4 h-4 text-[var(--neumorphic-text-secondary)]" />
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-gray-500 rounded-full" />
                   <NeumorphicText size="xs">Director</NeumorphicText>
                 </div>
               </div>
             </div>
             
-            <div className="pt-3 border-t border-[var(--neumorphic-border)]">
-              <NeumorphicText size="xs" variant="secondary" className="font-medium mb-2">
-                Node Size
-              </NeumorphicText>
-              <NeumorphicText size="xs">
-                Based on risk score, contract value, and connections
-              </NeumorphicText>
+            <div className="pt-2 border-t border-[var(--neumorphic-border)]">
+              <NeumorphicText size="xs" className="font-medium mb-1">Concentration</NeumorphicText>
+              <div className="space-y-1">
+                <div className="flex items-center gap-1">
+                  <span className="text-red-500 text-xs">⚠</span>
+                  <NeumorphicText size="xs">Critical (4+ boards)</NeumorphicText>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-orange-500 text-xs">△</span>
+                  <NeumorphicText size="xs">Secondary (3 boards)</NeumorphicText>
+                </div>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -840,9 +1010,12 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
           className="p-4 rounded-[var(--neumorphic-radius-md)] bg-[var(--neumorphic-button)] shadow-[var(--neumorphic-shadow-convex)]"
           whileHover={{ scale: 1.02 }}
         >
-          <NeumorphicText size="sm" variant="secondary">High Risk</NeumorphicText>
-          <NeumorphicText className="text-2xl font-bold text-[var(--neumorphic-severity-high)]">
-            {graphData.nodes.filter(n => n.type === 'supplier' && n.riskScore && n.riskScore >= 50).length}
+          <NeumorphicText size="sm" variant="secondary">Concentration Risks</NeumorphicText>
+          <NeumorphicText className="text-2xl font-bold text-[var(--neumorphic-severity-critical)]">
+            {graphData.nodes.filter(n => n.type === 'director' && n.connectionsCount && n.connectionsCount >= 3).length}
+          </NeumorphicText>
+          <NeumorphicText size="xs" variant="secondary" className="mt-1">
+            Directors on 3+ boards
           </NeumorphicText>
         </motion.div>
       </div>

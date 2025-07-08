@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useCallback } from 'react';
-import { BaseChart } from '@/components/charts/apex/components/BaseChart';
+import CircularProgressRing from '@/components/ui/CircularProgressRing';
 import { 
   NeumorphicText, 
   NeumorphicHeading, 
@@ -98,73 +98,10 @@ const RiskPostureGauges: React.FC<RiskPostureGaugesProps> = ({
     return getCssVariable('--neumorphic-severity-low');
   }, []);
 
-  // Create individual gauge component using proper neumorphic components
+  // Create individual gauge component using CircularProgressRing
   const createGauge = useCallback((config: GaugeConfig, value: number) => {
     const isActive = activeFilter === config.key;
     
-        const series = [Math.round(value)];
-    const options = {
-      chart: {
-        type: 'radialBar' as const,
-        sparkline: {
-          enabled: true,
-        },
-        animations: {
-          enabled: true,
-          easing: 'easeinout',
-          speed: 800,
-          animateGradually: {
-            enabled: true,
-            delay: 150
-          },
-          dynamicAnimation: {
-            enabled: true,
-            speed: 350
-          }
-        }
-      },
-      plotOptions: {
-        radialBar: {
-          startAngle: -90,
-          endAngle: 90,
-          hollow: {
-            size: '45%',
-            background: 'transparent',
-          },
-          track: {
-            background: getCssVariable('--neumorphic-text-secondary'),
-            strokeWidth: '100%',
-            opacity: 0.15,
-            margin: 3,
-          },
-          dataLabels: {
-            name: {
-              show: false,
-            },
-            value: {
-              show: true,
-              fontSize: '18px',
-              fontWeight: '700',
-              color: getCssVariable('--neumorphic-text-primary'),
-              offsetY: 4,
-              formatter: function (val: number) {
-                return val + '%';
-              },
-            },
-          },
-        },
-      },
-      fill: {
-        colors: [getGaugeColor(value)],
-      },
-      stroke: {
-        lineCap: 'round' as const,
-      },
-      tooltip: {
-        enabled: false,
-      },
-    };
-
     return (
       <motion.div
         key={config.key}
@@ -178,20 +115,20 @@ const RiskPostureGauges: React.FC<RiskPostureGaugesProps> = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <NeumorphicCard className={`h-full ${isActive ? 'ring-1 ring-[var(--neumorphic-accent)]' : ''}`}>
+        <NeumorphicCard className={`h-full py-3 px-2 ${isActive ? 'ring-1 ring-[var(--neumorphic-accent)]' : ''}`}>
           {/* Header with Icon and Title */}
-          <div className="flex items-center justify-center gap-2 mb-3">
+          <div className="flex items-center justify-center gap-2 mb-2">
             <div 
-              className="p-2 rounded-full"
+              className="p-1 rounded-full"
               style={{
                 backgroundColor: getGaugeColor(value),
                 color: 'white',
                 opacity: 0.9
               }}
             >
-              {React.cloneElement(config.icon as React.ReactElement, { className: 'w-4 h-4' })}
+              {React.cloneElement(config.icon as React.ReactElement, { className: 'w-3 h-3' })}
             </div>
-            <NeumorphicText>
+            <NeumorphicText className="text-sm">
               {config.title}
             </NeumorphicText>
             {value >= 75 && (
@@ -211,18 +148,18 @@ const RiskPostureGauges: React.FC<RiskPostureGaugesProps> = ({
             )}
           </div>
 
-          {/* Gauge Chart */}
-          <div className="h-20 flex items-center justify-center risk-gauge-container">
-            <BaseChart
-              options={options}
-              series={series}
-              type="radialBar"
-              height={80}
+          {/* Circular Progress Ring */}
+          <div className="flex items-center justify-center mb-2">
+            <CircularProgressRing 
+              percentage={Math.round(value)} 
+              size={50} 
+              strokeWidth={4} 
+              animate={true}
             />
           </div>
 
           {/* Description and Badge */}
-          <div className="mt-3 space-y-2">
+          <div className="space-y-1">
             <NeumorphicText variant="secondary" size="sm" className="text-center text-xs">
               {config.description}
             </NeumorphicText>
@@ -247,24 +184,21 @@ const RiskPostureGauges: React.FC<RiskPostureGaugesProps> = ({
 
   return (
     <motion.div 
-      className={`space-y-4 ${className}`}
+      className={`space-y-2 ${className}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
       {/* Header */}
-      <NeumorphicCard className="text-center">
+      <NeumorphicCard className="text-center py-2">
         <NeumorphicHeading className="flex items-center justify-center gap-2">
           <Shield className="w-5 h-5 text-[var(--neumorphic-accent)]" />
           Risk Posture Overview
         </NeumorphicHeading>
-        <NeumorphicText variant="secondary" size="sm" className="mt-1">
-          Click any gauge to filter dashboard by risk category
-        </NeumorphicText>
       </NeumorphicCard>
 
       {/* KPI Cards Grid - 5 cards horizontally */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
         {/* Risk Category Gauges */}
         {gaugeConfigs.map(config => 
           createGauge(config, staticRiskPosture[`${config.key}Risk` as keyof RiskPosture])
@@ -279,18 +213,18 @@ const RiskPostureGauges: React.FC<RiskPostureGaugesProps> = ({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          <NeumorphicCard className="h-full text-center">
+          <NeumorphicCard className="h-full text-center py-3 px-2">
             {/* Header with Icon and Title */}
-            <div className="flex items-center justify-center gap-2 mb-3">
+            <div className="flex items-center justify-center gap-2 mb-2">
               <div 
-                className="p-2 rounded-full"
+                className="p-1 rounded-full"
                 style={{
                   backgroundColor: getGaugeColor(overallRisk),
                   color: 'white',
                   opacity: 0.9
                 }}
               >
-                <Shield className="w-4 h-4" />
+                <Shield className="w-3 h-3" />
               </div>
               <NeumorphicText className="font-semibold text-sm">
                 Overall Risk
@@ -298,21 +232,17 @@ const RiskPostureGauges: React.FC<RiskPostureGaugesProps> = ({
             </div>
 
             {/* Overall Risk Score Display */}
-            <div className="h-20 flex items-center justify-center">
-              <div className="text-center">
-                <div 
-                  className="text-3xl font-bold"
-                  style={{ 
-                    color: getGaugeColor(overallRisk)
-                  }}
-                >
-                  {overallRisk}%
-                </div>
-              </div>
+            <div className="flex items-center justify-center mb-2">
+              <CircularProgressRing 
+                percentage={overallRisk} 
+                size={50} 
+                strokeWidth={4} 
+                animate={true}
+              />
             </div>
 
                          {/* Description and Trend */}
-             <div className="mt-3 space-y-2">
+             <div className="space-y-1">
                <NeumorphicText variant="secondary" size="sm" className="text-center text-xs">
                  Weighted average across all categories
                </NeumorphicText>
@@ -337,14 +267,14 @@ const RiskPostureGauges: React.FC<RiskPostureGaugesProps> = ({
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
         >
-          <NeumorphicCard className="text-center">
-            <div className="flex items-center justify-center gap-3">
+          <NeumorphicCard className="text-center py-2">
+            <div className="flex items-center justify-center gap-2">
               <NeumorphicText size="sm" className="font-medium">
                 Filtering by {gaugeConfigs.find(g => g.key === activeFilter)?.title}
               </NeumorphicText>
                              <NeumorphicButton
                  onClick={() => onFilterChange?.(null)}
-                 className="px-3 py-1 text-xs"
+                 className="px-2 py-1 text-xs"
                >
                  <X className="w-3 h-3 mr-1" />
                  Clear

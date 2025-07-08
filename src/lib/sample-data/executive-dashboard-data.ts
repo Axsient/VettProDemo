@@ -92,9 +92,13 @@ export const directors: Director[] = [
   { id: 'DIR_01', name: 'Jabulani Zuma' },
   { id: 'DIR_02', name: 'Pieter van der Merwe' },
   { id: 'DIR_03', name: 'Naledi Molefe' },
-  { id: 'DIR_04', name: 'Sipho Ndlovu' }, // Sits on multiple boards
+  { id: 'DIR_04', name: 'Sipho Ndlovu' }, // MAJOR CONCENTRATION RISK - sits on 4 boards
   { id: 'DIR_05', name: 'Liam O\'Connell' },
-  { id: 'DIR_06', name: 'Fatima Khan' },
+  { id: 'DIR_06', name: 'Fatima Khan' }, // SECONDARY CONCENTRATION RISK - sits on 3 boards
+  { id: 'DIR_07', name: 'Thabo Mthembu' },
+  { id: 'DIR_08', name: 'Sarah Mitchell' },
+  { id: 'DIR_09', name: 'Ahmed Hassan' },
+  { id: 'DIR_10', name: 'Nomsa Dlamini' },
 ];
 
 
@@ -122,7 +126,7 @@ export interface ExecutiveSupplierInfo {
 }
 
 export const suppliers: ExecutiveSupplierInfo[] = [
-  // --- High Risk Suppliers (around Marikana/Rustenburg) ---
+  // === HIGH RISK CLUSTER 1: North West Operations (DIR_04 Concentration Risk) ===
   {
     id: 'SUP_101',
     name: 'Rustenburg Explosives Inc.',
@@ -130,7 +134,7 @@ export const suppliers: ExecutiveSupplierInfo[] = [
     coordinates: [-25.6, 27.3],
     riskScore: 88.0,
     contractValueZAR: 50000000,
-    directorIds: ['DIR_01', 'DIR_04'], // Sipho is here
+    directorIds: ['DIR_01', 'DIR_04'], // Sipho sits here
     linkedMineSiteIds: ['MS_01', 'MS_02'],
     riskFactors: { financial: 90, compliance: 85, operational: 70, reputational: 95 },
   },
@@ -141,7 +145,7 @@ export const suppliers: ExecutiveSupplierInfo[] = [
     coordinates: [-25.7, 27.5],
     riskScore: 75.0,
     contractValueZAR: 75000000,
-    directorIds: ['DIR_02'],
+    directorIds: ['DIR_02', 'DIR_04'], // Sipho sits here too
     linkedMineSiteIds: ['MS_01'],
     riskFactors: { financial: 80, compliance: 90, operational: 60, reputational: 50 },
   },
@@ -152,12 +156,34 @@ export const suppliers: ExecutiveSupplierInfo[] = [
     coordinates: [-25.5, 27.6],
     riskScore: 68.0,
     contractValueZAR: 30000000,
-    directorIds: ['DIR_04', 'DIR_06'], // Sipho is also here - a key link
+    directorIds: ['DIR_04', 'DIR_06'], // Sipho sits here as well - MAJOR CONCENTRATION
     linkedMineSiteIds: ['MS_01', 'MS_02'],
     riskFactors: { financial: 50, compliance: 75, operational: 85, reputational: 60 },
   },
+  {
+    id: 'SUP_104',
+    name: 'North West Mining Supplies',
+    category: 'General Supplies',
+    coordinates: [-25.75, 27.35],
+    riskScore: 71.0,
+    contractValueZAR: 45000000,
+    directorIds: ['DIR_01', 'DIR_04'], // Sipho's 4th board position - CRITICAL CONCENTRATION
+    linkedMineSiteIds: ['MS_01', 'MS_02'],
+    riskFactors: { financial: 75, compliance: 68, operational: 70, reputational: 72 },
+  },
+  {
+    id: 'SUP_105',
+    name: 'Platinum Province Chemicals',
+    category: 'Chemical Supplies',
+    coordinates: [-25.68, 27.42],
+    riskScore: 78.0,
+    contractValueZAR: 65000000,
+    directorIds: ['DIR_02', 'DIR_05'], // Bridge connection to other clusters
+    linkedMineSiteIds: ['MS_01', 'MS_02'],
+    riskFactors: { financial: 82, compliance: 88, operational: 72, reputational: 70 },
+  },
 
-  // --- Medium Risk Suppliers (around Gauteng) ---
+  // === MEDIUM RISK CLUSTER 2: Gauteng Operations (DIR_06 Secondary Concentration) ===
   {
     id: 'SUP_201',
     name: 'Gauteng Gold Refiners',
@@ -165,7 +191,7 @@ export const suppliers: ExecutiveSupplierInfo[] = [
     coordinates: [-26.3, 27.5],
     riskScore: 55.0,
     contractValueZAR: 120000000,
-    directorIds: ['DIR_03'],
+    directorIds: ['DIR_03', 'DIR_06'], // Fatima sits here
     linkedMineSiteIds: ['MS_03', 'MS_04'],
     riskFactors: { financial: 60, compliance: 40, operational: 50, reputational: 70 },
   },
@@ -176,12 +202,23 @@ export const suppliers: ExecutiveSupplierInfo[] = [
     coordinates: [-26.45, 27.4],
     riskScore: 48.0,
     contractValueZAR: 25000000,
-    directorIds: ['DIR_05'],
+    directorIds: ['DIR_05', 'DIR_06'], // Fatima sits here too
     linkedMineSiteIds: ['MS_03'],
     riskFactors: { financial: 30, compliance: 65, operational: 60, reputational: 30 },
   },
+  {
+    id: 'SUP_203',
+    name: 'Johannesburg Engineering Services',
+    category: 'Engineering & Maintenance',
+    coordinates: [-26.35, 27.55],
+    riskScore: 42.0,
+    contractValueZAR: 85000000,
+    directorIds: ['DIR_03', 'DIR_06'], // Fatima's 3rd board position - SECONDARY CONCENTRATION
+    linkedMineSiteIds: ['MS_03', 'MS_04'],
+    riskFactors: { financial: 45, compliance: 35, operational: 48, reputational: 40 },
+  },
 
-  // --- Low Risk Suppliers (around Free State & others) ---
+  // === LOW RISK CLUSTER 3: Free State Operations (Diversified Risk) ===
   {
     id: 'SUP_301',
     name: 'Welkom Safety Gear Pty Ltd',
@@ -189,7 +226,7 @@ export const suppliers: ExecutiveSupplierInfo[] = [
     coordinates: [-28.2, 26.8],
     riskScore: 15.0,
     contractValueZAR: 15000000,
-    directorIds: ['DIR_06'],
+    directorIds: ['DIR_07'], // Isolated director
     linkedMineSiteIds: ['MS_05'],
     riskFactors: { financial: 10, compliance: 5, operational: 20, reputational: 10 },
   },
@@ -200,44 +237,44 @@ export const suppliers: ExecutiveSupplierInfo[] = [
     coordinates: [-28.3, 26.7],
     riskScore: 22.0,
     contractValueZAR: 8000000,
-    directorIds: [],
+    directorIds: ['DIR_08'], // Another isolated director
     linkedMineSiteIds: ['MS_05'],
     riskFactors: { financial: 25, compliance: 15, operational: 30, reputational: 5 },
   },
-  
-  // Additional suppliers for density
   {
-    id: 'SUP_104',
-    name: 'North West Mining Supplies',
-    category: 'General Supplies',
-    coordinates: [-25.75, 27.35],
-    riskScore: 62.0,
-    contractValueZAR: 45000000,
-    directorIds: ['DIR_01', 'DIR_05'],
-    linkedMineSiteIds: ['MS_01', 'MS_02'],
-    riskFactors: { financial: 70, compliance: 55, operational: 65, reputational: 58 },
+    id: 'SUP_303',
+    name: 'Free State Transportation Hub',
+    category: 'Transportation',
+    coordinates: [-28.15, 26.85],
+    riskScore: 28.0,
+    contractValueZAR: 18000000,
+    directorIds: ['DIR_07', 'DIR_08'], // Bridge between isolated suppliers
+    linkedMineSiteIds: ['MS_05'],
+    riskFactors: { financial: 35, compliance: 25, operational: 32, reputational: 20 },
   },
+
+  // === ISOLATED SUPPLIERS (No Concentration Risk) ===
   {
-    id: 'SUP_203',
-    name: 'Johannesburg Engineering Services',
-    category: 'Engineering & Maintenance',
-    coordinates: [-26.35, 27.55],
-    riskScore: 42.0,
-    contractValueZAR: 85000000,
-    directorIds: ['DIR_03', 'DIR_06'],
+    id: 'SUP_401',
+    name: 'Cape Town Tech Solutions',
+    category: 'IT Services',
+    coordinates: [-26.2, 27.8], // Positioned between clusters
+    riskScore: 35.0,
+    contractValueZAR: 22000000,
+    directorIds: ['DIR_09'], // Completely isolated
     linkedMineSiteIds: ['MS_03', 'MS_04'],
-    riskFactors: { financial: 45, compliance: 35, operational: 48, reputational: 40 },
+    riskFactors: { financial: 30, compliance: 40, operational: 35, reputational: 35 },
   },
   {
-    id: 'SUP_105',
-    name: 'Platinum Province Chemicals',
-    category: 'Chemical Supplies',
-    coordinates: [-25.68, 27.42],
-    riskScore: 78.0,
-    contractValueZAR: 65000000,
-    directorIds: ['DIR_02', 'DIR_04'],
-    linkedMineSiteIds: ['MS_01', 'MS_02'],
-    riskFactors: { financial: 82, compliance: 88, operational: 72, reputational: 70 },
+    id: 'SUP_402',
+    name: 'Independent Security Services',
+    category: 'Security',
+    coordinates: [-25.9, 27.7], // Between North West and Gauteng
+    riskScore: 52.0,
+    contractValueZAR: 38000000,
+    directorIds: ['DIR_10'], // Another isolated director
+    linkedMineSiteIds: ['MS_01', 'MS_03'],
+    riskFactors: { financial: 55, compliance: 50, operational: 52, reputational: 50 },
   },
 ];
 
@@ -254,10 +291,10 @@ export interface RiskPosture {
 }
 
 export const overallRiskPosture: RiskPosture = {
-  financialRisk: 65.7, // Average of all financial risk factors
-  complianceRisk: 72.1, // Average of all compliance risk factors
-  operationalRisk: 58.4, // Average of all operational risk factors
-  reputationalRisk: 45.9, // Average of all reputational risk factors
+  financialRisk: 66.3, // Recalculated average from enhanced supplier dataset
+  complianceRisk: 72.1, // Recalculated average from enhanced supplier dataset  
+  operationalRisk: 58.1, // Recalculated average from enhanced supplier dataset
+  reputationalRisk: 46.8, // Recalculated average from enhanced supplier dataset
 };
 
 
@@ -283,10 +320,10 @@ export const strategicEvents: StrategicEvent[] = [
   {
     id: 'EVT_001',
     timestamp: new Date().toISOString(),
-    title: 'Concentration Risk Detected',
-    description: "Director Sipho Ndlovu (DIR_04) now sits on the boards of both 'Rustenburg Explosives Inc.' and 'Limpopo Logistix', two high-risk suppliers in a critical supply chain.",
+    title: 'CRITICAL: Director Concentration Risk',
+    description: "Director Sipho Ndlovu (DIR_04) sits on FOUR high-risk supplier boards: Rustenburg Explosives, Marikana Heavy Machinery, Limpopo Logistix, and North West Mining Supplies. This creates unprecedented concentration risk in North West operations.",
     severity: 'Critical',
-    relatedEntityIds: ['DIR_04', 'SUP_101', 'SUP_103'],
+    relatedEntityIds: ['DIR_04', 'SUP_101', 'SUP_102', 'SUP_103', 'SUP_104'],
     action: { label: 'View Network Impact', type: 'DRILL_DOWN' },
   },
   {
