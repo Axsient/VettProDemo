@@ -15,7 +15,7 @@ const ReactApexChart = dynamic(() => import('react-apexcharts'), {
 export interface BaseChartProps {
   options: ApexOptions;
   series: ApexOptions['series'];
-  type: 'line' | 'area' | 'bar' | 'pie' | 'donut' | 'scatter' | 'bubble' | 'heatmap' | 'candlestick';
+  type: 'line' | 'area' | 'bar' | 'pie' | 'donut' | 'radialBar' | 'scatter' | 'bubble' | 'heatmap' | 'candlestick';
   height?: number;
   width?: string | number;
   title?: string;
@@ -131,8 +131,8 @@ export const BaseChart: React.FC<BaseChartProps> = ({
   console.log('BaseChart options:', options);
   
   // Create properly merged options with theme integration
-  // For pie/donut charts, avoid axis configurations that can cause offsetY errors
-  const isPieOrDonut = type === 'pie' || type === 'donut';
+  // For pie/donut/radialBar charts, avoid axis configurations that can cause offsetY errors
+  const isPieOrDonut = type === 'pie' || type === 'donut' || type === 'radialBar';
   
   const mergedOptions: ApexOptions = {
     // Start with theme options as base

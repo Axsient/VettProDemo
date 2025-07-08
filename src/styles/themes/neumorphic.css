@@ -1791,4 +1791,139 @@ div.glow-subtle-blue {
   border-color: var(--neumorphic-border) !important;
   box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3) !important;
   outline: none !important;
+}
+
+/* ====================================================================== */
+/* EXECUTIVE DASHBOARD OVERRIDES                                         */
+/* ====================================================================== */
+
+/* MapLibre GL overrides for neumorphic theme */
+.maplibregl-control-container {
+  button {
+    background: var(--neumorphic-button) !important;
+    border: none !important;
+    border-radius: var(--neumorphic-radius-md) !important;
+    box-shadow: var(--neumorphic-shadow-convex) !important;
+    color: var(--neumorphic-text-primary) !important;
+  }
+  
+  button:hover {
+    background: var(--neumorphic-accent) !important;
+    color: white !important;
+    box-shadow: var(--neumorphic-shadow-concave) !important;
+  }
+}
+
+.maplibregl-popup {
+  .maplibregl-popup-content {
+    background: var(--neumorphic-card) !important;
+    border: 1px solid var(--neumorphic-border) !important;
+    border-radius: var(--neumorphic-radius-lg) !important;
+    box-shadow: var(--neumorphic-shadow-convex) !important;
+    color: var(--neumorphic-text-primary) !important;
+    backdrop-filter: blur(10px);
+  }
+  
+  .maplibregl-popup-tip {
+    border-top-color: var(--neumorphic-card) !important;
+  }
+}
+
+/* Force Graph canvas styling */
+.force-graph-container {
+  background: transparent !important;
+  border-radius: var(--neumorphic-radius-lg);
+}
+
+.force-graph-container canvas {
+  border-radius: var(--neumorphic-radius-lg);
+}
+
+/* Executive Dashboard layout */
+.executive-dashboard-grid {
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+}
+
+/* Custom scrollbar for strategic event feed */
+.strategic-event-feed {
+  scrollbar-width: thin;
+  scrollbar-color: var(--neumorphic-accent) transparent;
+}
+
+.strategic-event-feed::-webkit-scrollbar {
+  width: 6px;
+}
+
+.strategic-event-feed::-webkit-scrollbar-track {
+  background: var(--neumorphic-bg);
+  border-radius: var(--neumorphic-radius-sm);
+}
+
+.strategic-event-feed::-webkit-scrollbar-thumb {
+  background: var(--neumorphic-accent);
+  border-radius: var(--neumorphic-radius-sm);
+  opacity: 0.5;
+}
+
+.strategic-event-feed::-webkit-scrollbar-thumb:hover {
+  opacity: 0.8;
+}
+
+/* Deck.gl tooltip overrides */
+.deck-tooltip {
+  background: var(--neumorphic-card) !important;
+  border: 1px solid var(--neumorphic-border) !important;
+  border-radius: var(--neumorphic-radius-md) !important;
+  box-shadow: var(--neumorphic-shadow-convex) !important;
+  color: var(--neumorphic-text-primary) !important;
+  font-family: inherit !important;
+  backdrop-filter: blur(10px);
+  z-index: 9999 !important;
+}
+
+/* Risk gauge specific enhancements - Comprehensive ApexCharts container cleanup */
+.risk-gauge-container .apexcharts-canvas,
+.risk-gauge-container .apexcharts-inner,
+.risk-gauge-container .apexcharts-graphical,
+.risk-gauge-container .apexcharts-svg,
+.risk-gauge-container > div,
+.risk-gauge-container [class*="apexcharts"] {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* Target the main ApexCharts container div */
+.risk-gauge-container .apexcharts-radialbar-track {
+  opacity: 0.3 !important;
+}
+
+/* Eliminate any ApexCharts wrapper artifacts */
+.risk-gauge-container [id*="apexcharts"] {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Force transparent background on all ApexCharts elements in gauge containers */
+.risk-gauge-container * {
+  background-color: transparent !important;
+}
+
+/* Executive dashboard mobile optimizations */
+@media (max-width: 1024px) {
+  .executive-dashboard-grid {
+    height: auto;
+    min-height: 100vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .executive-dashboard-grid {
+    padding: 8px;
+    gap: 8px;
+  }
 } 

@@ -1,0 +1,358 @@
+'use client';
+
+import React, { useMemo, useCallback } from 'react';
+import { BaseChart } from '@/components/charts/apex/components/BaseChart';
+import { NeumorphicText, NeumorphicHeading } from '@/components/ui/neumorphic';
+import { motion } from 'framer-motion';
+import { 
+  RiskPosture, 
+  RiskCategory,
+  ExecutiveSupplierInfo,
+  suppliers
+} from '@/lib/sample-data/executive-dashboard-data';
+import { getCssVariable, getSeverityColor } from '@/lib/executive/theme-bridge';
+import { TrendingUp, AlertTriangle, Shield, DollarSign, FileCheck, Cog, Users } from 'lucide-react';
+
+interface RiskPostureGaugesProps {
+  riskPosture: RiskPosture;
+  activeFilter?: RiskCategory | null;
+  onFilterChange?: (category: RiskCategory | null) => void;
+  filteredSuppliers?: ExecutiveSupplierInfo[];
+  className?: string;
+}
+
+interface GaugeConfig {
+  key: RiskCategory;
+  title: string;
+  icon: React.ReactNode;
+  color: string;
+  description: string;
+}
+
+const RiskPostureGauges: React.FC<RiskPostureGaugesProps> = ({
+  riskPosture,
+  activeFilter,
+  onFilterChange,
+  filteredSuppliers = suppliers,
+  className = '',
+}) => {
+  // Calculate dynamic risk posture based on filtered suppliers
+  const dynamicRiskPosture = useMemo(() => {
+    if (filteredSuppliers.length === 0) {
+      return riskPosture;
+    }
+    
+    const totalSuppliers = filteredSuppliers.length;
+    const financialRisk = filteredSuppliers.reduce((sum, s) => sum + s.riskFactors.financial, 0) / totalSuppliers;
+    const complianceRisk = filteredSuppliers.reduce((sum, s) => sum + s.riskFactors.compliance, 0) / totalSuppliers;
+    const operationalRisk = filteredSuppliers.reduce((sum, s) => sum + s.riskFactors.operational, 0) / totalSuppliers;
+    const reputationalRisk = filteredSuppliers.reduce((sum, s) => sum + s.riskFactors.reputational, 0) / totalSuppliers;
+    
+    return {
+      financialRisk,
+      complianceRisk,
+      operationalRisk,
+      reputationalRisk,
+    };
+  }, [filteredSuppliers, riskPosture]);
+
+  // Gauge configurations
+  const gaugeConfigs: GaugeConfig[] = useMemo(() => [
+    {
+      key: 'financial',
+      title: 'Financial Risk',
+      icon: <DollarSign className="w-5 h-5" />,
+      color: getCssVariable('--neumorphic-severity-high'),
+      description: 'Contract values & payment risks',
+    },
+    {
+      key: 'compliance',
+      title: 'Compliance Risk',
+      icon: <FileCheck className="w-5 h-5" />,
+      color: getCssVariable('--neumorphic-severity-critical'),
+      description: 'Regulatory & certification status',
+    },
+    {
+      key: 'operational',
+      title: 'Operational Risk',
+      icon: <Cog className="w-5 h-5" />,
+      color: getCssVariable('--neumorphic-severity-medium'),
+      description: 'Service delivery & performance',
+    },
+    {
+      key: 'reputational',
+      title: 'Reputational Risk',
+      icon: <Users className="w-5 h-5" />,
+      color: getCssVariable('--neumorphic-severity-low'),
+      description: 'Media coverage & public perception',
+    },
+  ], []);
+
+  // Create individual gauge component
+  const createGauge = useCallback((config: GaugeConfig, value: number) => {
+    const isActive = activeFilter === config.key;
+    
+    // Dynamic color based on risk level
+    const getGaugeColor = (riskValue: number): string => {
+      if (riskValue >= 75) return getCssVariable('--neumorphic-severity-critical');
+      if (riskValue >= 50) return getCssVariable('--neumorphic-severity-high');
+      if (riskValue >= 25) return getCssVariable('--neumorphic-severity-medium');
+      return getCssVariable('--neumorphic-severity-low');
+    };
+
+    const gaugeColor = getGaugeColor(value);
+
+    const options = {
+      chart: {
+        type: 'radialBar' as const,
+        toolbar: { show: false },
+        sparkline: { enabled: true },
+      },
+      plotOptions: {
+        radialBar: {
+          startAngle: -90,
+          endAngle: 90,
+          hollow: {
+            size: '50%',
+            background: 'transparent',
+          },
+          track: {
+            background: getCssVariable('--neumorphic-text-secondary'),
+            strokeWidth: '100%',
+            opacity: 0.2,
+            margin: 5,
+          },
+          dataLabels: {
+            name: {
+              show: false,
+            },
+            value: {
+              show: true,
+              fontSize: '20px',
+              fontWeight: 'bold',
+              color: getCssVariable('--neumorphic-text-primary'),
+              offsetY: 5,
+              formatter: (val: number) => `${Math.round(val)}%`,
+            },
+          },
+        },
+      },
+      colors: [gaugeColor],
+      fill: {
+        type: 'gradient',
+        gradient: {
+          shade: 'dark',
+          type: 'horizontal',
+          shadeIntensity: 0.5,
+          gradientToColors: [gaugeColor],
+          inverseColors: true,
+          opacityFrom: 1,
+          opacityTo: 1,
+          stops: [0, 100],
+        },
+      },
+      stroke: {
+        lineCap: 'round' as const,
+      },
+    };
+
+    const series = [value];
+
+    return (
+      <motion.div
+        key={config.key}
+        className={`
+          p-4 rounded-[var(--neumorphic-radius-lg)] cursor-pointer transition-all duration-300
+          ${isActive 
+            ? 'bg-[var(--neumorphic-accent)] bg-opacity-10 shadow-[var(--neumorphic-shadow-concave)]' 
+            : 'bg-[var(--neumorphic-button)] bg-opacity-30 shadow-[var(--neumorphic-shadow-convex)]'
+          }
+          hover:shadow-[var(--neumorphic-shadow-concave)] hover:scale-[1.02]
+        `}
+        onClick={() => onFilterChange?.(isActive ? null : config.key)}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ duration: 0.2 }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <div 
+              className="p-2 rounded-[var(--neumorphic-radius-md)]"
+              style={{ 
+                backgroundColor: gaugeColor,
+                color: 'white',
+                opacity: 0.9,
+              }}
+            >
+              {config.icon}
+            </div>
+            <div>
+              <NeumorphicText className="font-semibold text-sm">
+                {config.title}
+              </NeumorphicText>
+              {isActive && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  className="text-xs text-[var(--neumorphic-text-secondary)] mt-1"
+                >
+                  Active Filter
+                </motion.div>
+              )}
+            </div>
+          </div>
+          {value >= 75 && (
+            <motion.div
+              animate={{ 
+                scale: [1, 1.1, 1],
+                opacity: [0.7, 1, 0.7] 
+              }}
+              transition={{ 
+                duration: 2, 
+                repeat: Infinity,
+                ease: "easeInOut" 
+              }}
+            >
+              <AlertTriangle className="w-4 h-4 text-[var(--neumorphic-severity-critical)]" />
+            </motion.div>
+          )}
+        </div>
+
+        {/* Gauge Chart */}
+        <div className="h-24">
+          <BaseChart
+            options={options}
+            series={series}
+            type="radialBar"
+            height="100%"
+          />
+        </div>
+
+        {/* Footer */}
+        <div className="mt-2">
+          <NeumorphicText 
+            variant="secondary" 
+            size="sm" 
+            className="text-center leading-tight"
+          >
+            {config.description}
+          </NeumorphicText>
+        </div>
+
+        {/* Risk Level Indicator */}
+        <div className="mt-2 flex justify-center">
+          <div 
+            className="px-2 py-1 rounded-full text-xs font-medium"
+            style={{
+              backgroundColor: gaugeColor,
+              color: 'white',
+              opacity: 0.8,
+            }}
+          >
+            {value >= 75 ? 'Critical' : 
+             value >= 50 ? 'High' : 
+             value >= 25 ? 'Medium' : 'Low'}
+          </div>
+        </div>
+      </motion.div>
+    );
+  }, [activeFilter, onFilterChange]);
+
+  return (
+    <div className={`space-y-4 ${className}`}>
+      <div className="text-center">
+        <NeumorphicHeading size="lg" className="flex items-center justify-center gap-2">
+          <Shield className="w-6 h-6 text-[var(--neumorphic-accent)]" />
+          Risk Posture Overview
+        </NeumorphicHeading>
+        <NeumorphicText variant="secondary" size="sm" className="mt-1">
+          Click any gauge to filter dashboard by risk category
+        </NeumorphicText>
+      </div>
+
+      {/* Filter Status */}
+      {filteredSuppliers.length !== suppliers.length && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center p-3 rounded-[var(--neumorphic-radius-md)] bg-[var(--neumorphic-accent)] bg-opacity-10"
+        >
+          <NeumorphicText size="sm" className="font-medium">
+            Showing risk data for {filteredSuppliers.length} filtered suppliers
+          </NeumorphicText>
+          <NeumorphicText size="xs" variant="secondary">
+            (vs {suppliers.length} total suppliers)
+          </NeumorphicText>
+        </motion.div>
+      )}
+
+      {/* Gauges Grid */}
+      <div className="grid grid-cols-2 gap-3">
+        {gaugeConfigs.map(config => 
+          createGauge(config, dynamicRiskPosture[`${config.key}Risk` as keyof RiskPosture])
+        )}
+      </div>
+
+      {/* Overall Risk Summary */}
+      <motion.div 
+        className="p-4 rounded-[var(--neumorphic-radius-lg)] bg-[var(--neumorphic-card)] shadow-[var(--neumorphic-shadow-convex)]"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <NeumorphicText className="font-semibold">Overall Risk Score</NeumorphicText>
+            <NeumorphicText variant="secondary" size="sm">
+              Weighted average across all categories
+            </NeumorphicText>
+          </div>
+          <div className="text-right">
+            <div 
+              className="text-2xl font-bold"
+              style={{ 
+                color: getSeverityColor(
+                  (dynamicRiskPosture.financialRisk + dynamicRiskPosture.complianceRisk + 
+                   dynamicRiskPosture.operationalRisk + dynamicRiskPosture.reputationalRisk) / 4 >= 75 ? 'Critical' :
+                  (dynamicRiskPosture.financialRisk + dynamicRiskPosture.complianceRisk + 
+                   dynamicRiskPosture.operationalRisk + dynamicRiskPosture.reputationalRisk) / 4 >= 50 ? 'High' :
+                  (dynamicRiskPosture.financialRisk + dynamicRiskPosture.complianceRisk + 
+                   dynamicRiskPosture.operationalRisk + dynamicRiskPosture.reputationalRisk) / 4 >= 25 ? 'Medium' : 'Low'
+                )
+              }}
+            >
+              {Math.round((dynamicRiskPosture.financialRisk + dynamicRiskPosture.complianceRisk + 
+                          dynamicRiskPosture.operationalRisk + dynamicRiskPosture.reputationalRisk) / 4)}%
+            </div>
+            <div className="flex items-center gap-1 text-sm">
+              <TrendingUp className="w-3 h-3" />
+              <span className="text-[var(--neumorphic-text-secondary)]">+2.3% this week</span>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Active Filter Indicator */}
+      {activeFilter && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center p-2 rounded-[var(--neumorphic-radius-md)] bg-[var(--neumorphic-accent)] bg-opacity-10"
+        >
+          <NeumorphicText size="sm" className="font-medium">
+            Filtering by {gaugeConfigs.find(g => g.key === activeFilter)?.title}
+          </NeumorphicText>
+          <button
+            onClick={() => onFilterChange?.(null)}
+            className="text-xs text-[var(--neumorphic-accent)] hover:underline mt-1"
+          >
+            Clear filter
+          </button>
+        </motion.div>
+      )}
+    </motion.div>
+  );
+};
+
+export default RiskPostureGauges;
