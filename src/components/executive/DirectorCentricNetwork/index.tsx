@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useMemo, useCallback, useState, useRef, useEffect } from 'react';
+import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { NeumorphicText, NeumorphicHeading, NeumorphicCard, NeumorphicButton, NeumorphicBadge } from '@/components/ui/neumorphic';
+import { NeumorphicText, NeumorphicHeading, NeumorphicCard, NeumorphicButton } from '@/components/ui/neumorphic';
 import { 
   RiskCategory,
   ExecutiveSupplierInfo,
@@ -12,19 +12,13 @@ import {
 } from '@/lib/sample-data/executive-dashboard-data';
 import { getCssVariable, getSeverityColor } from '@/lib/executive/theme-bridge';
 import { 
-  Network, 
   Building2, 
   User, 
   AlertTriangle,
   Filter,
   MousePointer,
-  Zap,
-  Package,
   ArrowLeft,
   Home,
-  Eye,
-  Maximize2,
-  X,
   Info,
   ChevronRight,
   Target,
@@ -74,6 +68,14 @@ interface DirectorProfile {
 type ViewState = 'director-overview' | 'supplier-overview' | 'director-focus' | 'supplier-focus';
 type NetworkMode = 'director-centric' | 'supplier-centric';
 
+// SVG dimensions for collision detection
+const SVG_WIDTH = 800;
+const SVG_HEIGHT = 600;
+
+// Layout constants
+const CENTER_X = SVG_WIDTH / 2;
+const CENTER_Y = SVG_HEIGHT / 2;
+
 interface ViewHistory {
   state: ViewState;
   mode: NetworkMode;
@@ -88,7 +90,6 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
   selectedSupplierId,
   selectedMineSiteId,
   highlightedEntityIds = [],
-  hoveredSupplierId,
   filteredSuppliers = suppliers,
   className = '',
   height = '600px'
@@ -100,10 +101,17 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
   const [viewHistory, setViewHistory] = useState<ViewHistory[]>([{ state: 'director-overview', mode: 'director-centric', timestamp: Date.now() }]);
   const [hoveredNode, setHoveredNode] = useState<NetworkNode | null>(null);
   const [animationPhase, setAnimationPhase] = useState<'idle' | 'transitioning'>('idle');
+  
+  // Zoom and Pan state
+  const [transform, setTransform] = useState({ scale: 0.8, translateX: 0, translateY: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [lastTransform, setLastTransform] = useState({ translateX: 0, translateY: 0 });
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // SVG dimensions
-  const SVG_WIDTH = 900;
-  const SVG_HEIGHT = 600;
+  const SVG_WIDTH = 1600;
+  const SVG_HEIGHT = 1200;
   const CENTER_X = SVG_WIDTH / 2;
   const CENTER_Y = SVG_HEIGHT / 2;
 
@@ -275,68 +283,83 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
         color: getCssVariable('--neumorphic-accent')
       });
 
-      // Supplier nodes arranged by risk level in concentric circles
-      const riskLevels = ['Critical', 'High', 'Medium', 'Low'];
-      const ringRadii = [130, 200, 270, 340];
+      // Dynamic supplier node layout with proper spacing
+      const allSuppliers = [...supplierProfiles];
+      const baseRingRadius = 200;
+      const ringSpacing = 150;
+      let currentRing = 0;
+      let currentRingNodes = 0;
       
-      riskLevels.forEach((riskLevel, ringIndex) => {
-        const suppliersInRing = supplierProfiles.filter(s => s.riskLevel === riskLevel);
-        const ringRadius = ringRadii[ringIndex];
+      allSuppliers.forEach((supplier, index) => {
+        // Calculate required space for this node (node + label + margins)
+        const nodeRadius = 15 + ((supplier.contractValueZAR / Math.max(...supplierProfiles.map(s => s.contractValueZAR))) * 20);
+        const labelWidth = supplier.name.length * 8; // Approximate label width
+        const requiredSpace = Math.max(nodeRadius * 2 + 40, labelWidth + 20); // Space needed including margins
         
-        suppliersInRing.forEach((supplier, index) => {
-          const angle = (index / suppliersInRing.length) * 2 * Math.PI;
-          const x = CENTER_X + ringRadius * Math.cos(angle);
-          const y = CENTER_Y + ringRadius * Math.sin(angle);
+        // Calculate current ring radius and circumference
+        const ringRadius = baseRingRadius + (currentRing * ringSpacing);
+        const circumference = 2 * Math.PI * ringRadius;
+        
+        // Calculate maximum nodes that can fit in current ring
+        const maxNodesInRing = Math.floor(circumference / requiredSpace);
+        
+        // If current ring is full, move to next ring
+        if (currentRingNodes >= maxNodesInRing) {
+          currentRing++;
+          currentRingNodes = 0;
+        }
+        
+        // Calculate position in current ring
+        const finalRingRadius = baseRingRadius + (currentRing * ringSpacing);
+        const angle = (currentRingNodes / Math.max(maxNodesInRing, 1)) * 2 * Math.PI;
+        const x = CENTER_X + finalRingRadius * Math.cos(angle);
+        const y = CENTER_Y + finalRingRadius * Math.sin(angle);
+        
+        currentRingNodes++;
+        
+        // Create supplier node with calculated position
+        nodes.push({
+          id: supplier.id,
+          name: supplier.name,
+          type: 'supplier',
+          riskScore: supplier.riskScore,
+          riskLevel: supplier.riskLevel,
+          contractValue: supplier.contractValueZAR,
+          category: supplier.category,
+          directorIds: supplier.directorIds,
+          x,
+          y,
+          radius: nodeRadius,
+          color: getSeverityColor(supplier.riskLevel)
+        });
+
+        // Add connected directors as smaller nodes around suppliers
+        supplier.connectedDirectors.forEach((director, dIndex) => {
+          const directorRadius = nodeRadius + 70;
+          const directorAngle = angle + ((dIndex - (supplier.connectedDirectors.length - 1) / 2) * 1.0);
+          const dx = x + directorRadius * Math.cos(directorAngle);
+          const dy = y + directorRadius * Math.sin(directorAngle);
+
+          // Check if this director is a concentration risk
+          const directorProfile = directorProfiles.find(p => p.director.id === director.id);
+          const isConcentrationRisk = directorProfile?.isConcentrationRisk || false;
+
+          // Use composite ID to avoid duplicates
+          const directorNodeId = `${director.id}-${supplier.id}`;
           
-          // Node size based on contract value
-          const maxContract = Math.max(...supplierProfiles.map(s => s.contractValueZAR));
-          const minRadius = 15;
-          const maxRadius = 35;
-          const radius = minRadius + ((supplier.contractValueZAR / maxContract) * (maxRadius - minRadius));
-
           nodes.push({
-            id: supplier.id,
-            name: supplier.name,
-            type: 'supplier',
-            riskScore: supplier.riskScore,
-            riskLevel: supplier.riskLevel,
-            contractValue: supplier.contractValueZAR,
-            category: supplier.category,
-            directorIds: supplier.directorIds,
-            x,
-            y,
-            radius,
-            color: getSeverityColor(supplier.riskLevel)
-          });
-
-          // Add connected directors as smaller nodes around suppliers
-          supplier.connectedDirectors.forEach((director, dIndex) => {
-            const directorRadius = radius + 25;
-            const directorAngle = angle + ((dIndex - (supplier.connectedDirectors.length - 1) / 2) * 0.3);
-            const dx = x + directorRadius * Math.cos(directorAngle);
-            const dy = y + directorRadius * Math.sin(directorAngle);
-
-            // Check if this director is a concentration risk
-            const directorProfile = directorProfiles.find(p => p.director.id === director.id);
-            const isConcentrationRisk = directorProfile?.isConcentrationRisk || false;
-
-            // Use composite ID to avoid duplicates
-            const directorNodeId = `${director.id}-${supplier.id}`;
-            
-            nodes.push({
-              id: directorNodeId,
-              name: director.name,
-              type: 'director',
-              boardCount: directorProfile?.boardCount || 1,
-              riskScore: directorProfile?.avgRiskScore || 0,
-              x: dx,
-              y: dy,
-              radius: isConcentrationRisk ? 12 : 8,
-              color: isConcentrationRisk ? 
-                getCssVariable('--neumorphic-severity-critical') : 
-                getCssVariable('--neumorphic-text-secondary'),
-              isConcentrationRisk
-            });
+            id: directorNodeId,
+            name: director.name,
+            type: 'director',
+            boardCount: directorProfile?.boardCount || 1,
+            riskScore: directorProfile?.avgRiskScore || 0,
+            x: dx,
+            y: dy,
+            radius: isConcentrationRisk ? 12 : 8,
+            color: isConcentrationRisk ? 
+              getCssVariable('--neumorphic-severity-critical') : 
+              getCssVariable('--neumorphic-text-secondary'),
+            isConcentrationRisk
           });
         });
       });
@@ -502,7 +525,113 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
     }
 
     return nodes;
-  }, [viewState, focusedDirectorId, directorProfiles]);
+  }, [viewState, focusedDirectorId, focusedSupplierId, directorProfiles, supplierProfiles]);
+
+  // Zoom and Pan functionality
+  const zoomIn = useCallback(() => {
+    const scaleFactor = 1.2;
+    const newScale = Math.min(transform.scale * scaleFactor, 3);
+    
+    // Center-point zooming for button clicks
+    const centerX = SVG_WIDTH / 2;
+    const centerY = SVG_HEIGHT / 2;
+    const scaleChange = newScale / transform.scale;
+    const newTranslateX = centerX - (centerX - transform.translateX) * scaleChange;
+    const newTranslateY = centerY - (centerY - transform.translateY) * scaleChange;
+    
+    setTransform({
+      scale: newScale,
+      translateX: newTranslateX,
+      translateY: newTranslateY
+    });
+  }, [transform]);
+
+  const zoomOut = useCallback(() => {
+    const scaleFactor = 1 / 1.2;
+    const newScale = Math.max(transform.scale * scaleFactor, 0.5);
+    
+    // Center-point zooming for button clicks
+    const centerX = SVG_WIDTH / 2;
+    const centerY = SVG_HEIGHT / 2;
+    const scaleChange = newScale / transform.scale;
+    const newTranslateX = centerX - (centerX - transform.translateX) * scaleChange;
+    const newTranslateY = centerY - (centerY - transform.translateY) * scaleChange;
+    
+    setTransform({
+      scale: newScale,
+      translateX: newTranslateX,
+      translateY: newTranslateY
+    });
+  }, [transform]);
+
+  const resetZoom = useCallback(() => {
+    setTransform({ scale: 0.8, translateX: 0, translateY: 0 });
+  }, []);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    setIsDragging(true);
+    setDragStart({ x: e.clientX, y: e.clientY });
+    setLastTransform({ translateX: transform.translateX, translateY: transform.translateY });
+  }, [transform]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isDragging) return;
+    
+    const deltaX = e.clientX - dragStart.x;
+    const deltaY = e.clientY - dragStart.y;
+    
+    setTransform(prev => ({
+      ...prev,
+      translateX: lastTransform.translateX + deltaX,
+      translateY: lastTransform.translateY + deltaY
+    }));
+  }, [isDragging, dragStart, lastTransform]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  // Proper wheel event handling to prevent page scrolling
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      if (!containerRef.current) return;
+      
+      // Check if the mouse is over the container
+      const rect = containerRef.current.getBoundingClientRect();
+      const isOverContainer = e.clientX >= rect.left && e.clientX <= rect.right && 
+                             e.clientY >= rect.top && e.clientY <= rect.bottom;
+      
+      if (isOverContainer) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const scaleFactor = e.deltaY > 0 ? 0.9 : 1.1;
+        const newScale = Math.min(Math.max(transform.scale * scaleFactor, 0.5), 3);
+        
+        // Calculate center-point zooming
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        // Adjust translation to keep zoom centered
+        const scaleChange = newScale / transform.scale;
+        const newTranslateX = centerX - (centerX - transform.translateX) * scaleChange;
+        const newTranslateY = centerY - (centerY - transform.translateY) * scaleChange;
+        
+        setTransform({
+          scale: newScale,
+          translateX: newTranslateX,
+          translateY: newTranslateY
+        });
+      }
+    };
+
+    // Add wheel event listener to document to capture all wheel events
+    document.addEventListener('wheel', handleWheel, { passive: false });
+    
+    return () => {
+      document.removeEventListener('wheel', handleWheel);
+    };
+  }, [transform]);
 
   // Generate connections between nodes
   const connections = useMemo(() => {
@@ -909,6 +1038,7 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
 
       {/* SVG Network Visualization */}
       <motion.div
+        ref={containerRef}
         className="relative rounded-[var(--neumorphic-radius-lg)] bg-[var(--neumorphic-card)] shadow-[var(--neumorphic-shadow-concave)] overflow-hidden"
         style={{ height }}
       >
@@ -917,8 +1047,14 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
             width="100%"
             height="100%"
             viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
-            className="overflow-visible"
+            className="overflow-hidden cursor-grab"
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
           >
+            <g transform={`translate(${transform.translateX}, ${transform.translateY}) scale(${transform.scale})`}>
             {/* Connections */}
             <g className="connections">
               {connections.map((connection, index) => {
@@ -1140,7 +1276,7 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
               })}
             </g>
             
-            {/* Director Labels - Separate group for higher z-index */}
+            {/* Labels */}
             <g className="labels">
               {networkNodes.map((node) => {
                 if (node.type === 'director' && (viewState === 'director-overview' || viewState === 'supplier-overview' || node.id === focusedDirectorId)) {
@@ -1167,10 +1303,67 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                     </g>
                   );
                 }
+                if (node.type === 'supplier' && viewState === 'supplier-overview') {
+                  return (
+                    <g key={`label-${node.id}`} className="pointer-events-none">
+                      <text
+                        x={node.x}
+                        y={node.y + node.radius + 12}
+                        textAnchor="middle"
+                        className="text-xs fill-[var(--neumorphic-text-primary)] font-medium"
+                      >
+                        {node.name.length > 15 ? node.name.substring(0, 15) + '...' : node.name}
+                      </text>
+                      {node.riskScore && (
+                        <text
+                          x={node.x}
+                          y={node.y + node.radius + 24}
+                          textAnchor="middle"
+                          className="text-xs fill-[var(--neumorphic-text-secondary)]"
+                        >
+                          {node.riskScore}% Risk
+                        </text>
+                      )}
+                    </g>
+                  );
+                }
                 return null;
               })}
             </g>
+            </g>
           </svg>
+          
+          {/* Zoom Controls */}
+          <div className="absolute top-4 right-4 flex flex-col gap-2">
+            <NeumorphicButton
+              onClick={zoomIn}
+              className="p-2 text-sm"
+              title="Zoom In"
+            >
+              +
+            </NeumorphicButton>
+            <NeumorphicButton
+              onClick={zoomOut}
+              className="p-2 text-sm"
+              title="Zoom Out"
+            >
+              -
+            </NeumorphicButton>
+            <NeumorphicButton
+              onClick={resetZoom}
+              className="p-2 text-sm"
+              title="Reset Zoom"
+            >
+              ⌂
+            </NeumorphicButton>
+          </div>
+          
+          {/* Zoom Level Indicator */}
+          <div className="absolute bottom-4 right-4 px-2 py-1 rounded bg-[var(--neumorphic-card)] shadow-md border border-[var(--neumorphic-border)]">
+            <NeumorphicText size="xs" variant="secondary">
+              {Math.round(transform.scale * 100)}%
+            </NeumorphicText>
+          </div>
           
           {/* View State Indicator */}
           <motion.div
