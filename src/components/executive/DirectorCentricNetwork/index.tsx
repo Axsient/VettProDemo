@@ -16,13 +16,11 @@ import {
   Building2, 
   User, 
   AlertTriangle,
-  Filter,
   MousePointer,
   ArrowLeft,
   Home,
   Info,
   ChevronRight,
-  ChevronDown,
   ChevronUp,
   Target,
   Users
@@ -869,41 +867,95 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
     }, 300);
   }, [networkMode]);
 
+  // Get all connected node IDs for a given node
+  const getConnectedNodeIds = useCallback((nodeId: string): Set<string> => {
+    const connected = new Set<string>();
+    connected.add(nodeId); // Include the node itself
+    
+    connections.forEach(conn => {
+      if (conn.source === nodeId) {
+        connected.add(conn.target);
+      } else if (conn.target === nodeId) {
+        connected.add(conn.source);
+      }
+    });
+    
+    return connected;
+  }, [connections]);
+
+  // Check if a node can be navigated to from current view
+  const isNodeNavigable = useCallback((node: NetworkNode): boolean => {
+    // Company node always navigates to overview
+    if (node.type === 'company') return true;
+    
+    // In overview modes, all nodes are navigable
+    if (viewState === 'director-overview' || viewState === 'supplier-overview') return true;
+    
+    // In focus modes, only connected nodes are navigable
+    if (viewState === 'director-focus' || viewState === 'supplier-focus') {
+      // Get the currently focused node ID
+      const focusedId = viewState === 'director-focus' ? focusedDirectorId : focusedSupplierId;
+      if (!focusedId) return false;
+      
+      // Check if this node is connected to the focused node
+      const connectedNodeIds = getConnectedNodeIds(focusedId);
+      const nodeId = node.id.includes('-') ? node.id.split('-')[0] : node.id;
+      return connectedNodeIds.has(nodeId) || connectedNodeIds.has(node.id);
+    }
+    
+    return false;
+  }, [viewState, focusedDirectorId, focusedSupplierId, getConnectedNodeIds]);
+
   // Event handlers
   const handleNodeClick = useCallback((node: NetworkNode) => {
-    if (node.type === 'director') {
-      if (networkMode === 'director-centric' && viewState === 'director-overview') {
-        navigateTo('director-focus', node.id);
-      } else if (networkMode === 'supplier-centric' && viewState === 'supplier-overview') {
-        // In supplier-centric mode, clicking a director switches to director-centric mode
-        setNetworkMode('director-centric');
-        navigateTo('director-focus', node.id.includes('-') ? node.id.split('-')[0] : node.id);
+    // Check if node is navigable
+    if (!isNodeNavigable(node)) {
+      // If not navigable but has external handler, still call it
+      if (node.type === 'supplier' && onNodeClick) {
+        const originalSupplierId = node.id.includes('-') ? node.id.split('-')[0] : node.id;
+        const supplier = filteredSuppliers.find(s => s.id === originalSupplierId);
+        if (supplier) {
+          onNodeClick({
+            ...node,
+            id: originalSupplierId
+          });
+        }
       }
+      return;
+    }
+
+    if (node.type === 'director') {
+      const directorId = node.id.includes('-') ? node.id.split('-')[0] : node.id;
+      
+      // If we're in supplier-centric mode, switch to director-centric for director focus
+      if (networkMode === 'supplier-centric') {
+        setNetworkMode('director-centric');
+      }
+      navigateTo('director-focus', directorId);
+      
     } else if (node.type === 'supplier') {
-      if (networkMode === 'supplier-centric' && viewState === 'supplier-overview') {
-        navigateTo('supplier-focus', node.id);
-      } else if (networkMode === 'director-centric' && viewState === 'director-overview') {
-        // In director-centric mode, clicking a supplier switches to supplier-centric mode
+      const supplierId = node.id.includes('-') ? node.id.split('-')[0] : node.id;
+      
+      // If we're in director-centric mode, switch to supplier-centric for supplier focus
+      if (networkMode === 'director-centric') {
         setNetworkMode('supplier-centric');
-        navigateTo('supplier-focus', node.id.includes('-') ? node.id.split('-')[0] : node.id);
-      } else {
-        // Always handle external click events for suppliers
-        if (onNodeClick) {
-          // Extract the original supplier ID from composite ID
-          const originalSupplierId = node.id.includes('-') ? node.id.split('-')[0] : node.id;
-          const supplier = filteredSuppliers.find(s => s.id === originalSupplierId);
-          if (supplier) {
-            onNodeClick({
-              ...node,
-              id: originalSupplierId // Use original ID for external handlers
-            });
-          }
+      }
+      navigateTo('supplier-focus', supplierId);
+      
+      // Also handle external click events for suppliers
+      if (onNodeClick) {
+        const supplier = filteredSuppliers.find(s => s.id === supplierId);
+        if (supplier) {
+          onNodeClick({
+            ...node,
+            id: supplierId
+          });
         }
       }
     } else if (node.type === 'company') {
       resetView();
     }
-  }, [networkMode, viewState, navigateTo, resetView, onNodeClick, filteredSuppliers]);
+  }, [isNodeNavigable, networkMode, navigateTo, resetView, onNodeClick, filteredSuppliers]);
 
   const handleNodeHover = useCallback((node: NetworkNode | null) => {
     setHoveredNode(node);
@@ -934,22 +986,6 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
       (conn.source === nodeId1 && conn.target === nodeId2) ||
       (conn.source === nodeId2 && conn.target === nodeId1)
     );
-  }, [connections]);
-
-  // Get all connected node IDs for a given node
-  const getConnectedNodeIds = useCallback((nodeId: string): Set<string> => {
-    const connected = new Set<string>();
-    connected.add(nodeId); // Include the node itself
-    
-    connections.forEach(conn => {
-      if (conn.source === nodeId) {
-        connected.add(conn.target);
-      } else if (conn.target === nodeId) {
-        connected.add(conn.source);
-      }
-    });
-    
-    return connected;
   }, [connections]);
 
   // Generate SVG path for connections
@@ -1125,6 +1161,9 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                 const isConnectedToHovered = hoveredNode ? connectedNodeIds.has(node.id) : false;
                 const shouldDim = hoveredNode && !isConnectedToHovered;
                 
+                // Check if this node is navigable for visual styling
+                const isNavigable = isNodeNavigable(node);
+                
                 return (
                   <motion.g
                     key={node.id}
@@ -1135,7 +1174,7 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                                shouldDim ? 0.2 : 1 
                     }}
                     transition={{ duration: 0.5, delay: index * 0.02 }}
-                    className="cursor-pointer"
+                    className={isNavigable ? "cursor-pointer" : "cursor-default"}
                     onClick={() => handleNodeClick(node)}
                     onMouseEnter={() => handleNodeHover(node)}
                     onMouseLeave={() => handleNodeHover(null)}
@@ -1161,14 +1200,30 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                       />
                     )}
                     
+                    {/* Navigation indicator for clickable nodes */}
+                    {isNavigable && !isHovered && !isSelected && (
+                      <circle
+                        cx={node.x}
+                        cy={node.y}
+                        r={node.radius + 2}
+                        fill="none"
+                        stroke={getCssVariable('--neumorphic-accent')}
+                        strokeWidth="1"
+                        opacity="0.5"
+                        strokeDasharray="3,3"
+                      />
+                    )}
+                    
                     {/* Main node */}
                     <circle
                       cx={node.x}
                       cy={node.y}
                       r={node.radius}
                       fill={node.color}
-                      stroke={isSelected ? getCssVariable('--neumorphic-accent') : 'rgba(255,255,255,0.3)'}
-                      strokeWidth={isSelected ? 3 : 1}
+                      stroke={isSelected ? getCssVariable('--neumorphic-accent') : 
+                              isNavigable && isHovered ? getCssVariable('--neumorphic-accent') :
+                              'rgba(255,255,255,0.3)'}
+                      strokeWidth={isSelected ? 3 : isNavigable && isHovered ? 2 : 1}
                       filter="drop-shadow(0 2px 4px rgba(0,0,0,0.2))"
                     />
                     
@@ -1256,28 +1311,6 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                             <Building2 className="w-3 h-3" />
                           </div>
                         </foreignObject>
-                        
-                        <text
-                          x={node.x}
-                          y={node.y + node.radius + 12}
-                          textAnchor="middle"
-                          className="text-xs fill-[var(--neumorphic-text-primary)] pointer-events-none"
-                        >
-                          {node.name.length > 15 ? node.name.substring(0, 15) + '...' : node.name}
-                        </text>
-                        <text
-                          x={node.x}
-                          y={node.y + node.radius + 24}
-                          textAnchor="middle"
-                          className={`text-xs font-bold pointer-events-none ${
-                            node.riskLevel === 'Critical' ? 'fill-red-500' :
-                            node.riskLevel === 'High' ? 'fill-orange-500' :
-                            node.riskLevel === 'Medium' ? 'fill-yellow-500' :
-                            'fill-green-500'
-                          }`}
-                        >
-                          {node.riskScore}% Risk
-                        </text>
                       </>
                     )}
                   </motion.g>
@@ -1293,12 +1326,31 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                 const isConnectedToHovered = hoveredNode ? connectedNodeIds.has(node.id) : false;
                 const shouldDim = hoveredNode && !isConnectedToHovered;
                 
-                if (node.type === 'director' && (viewState === 'director-overview' || viewState === 'supplier-overview' || node.id === focusedDirectorId)) {
+                // Calculate label opacity based on focus state and hover
+                const getFocusOpacity = () => {
+                  // In focus modes, dim non-connected nodes more
+                  if (viewState === 'director-focus' || viewState === 'supplier-focus') {
+                    const focusedId = viewState === 'director-focus' ? focusedDirectorId : focusedSupplierId;
+                    if (focusedId) {
+                      const connectedToFocused = getConnectedNodeIds(focusedId);
+                      const nodeId = node.id.includes('-') ? node.id.split('-')[0] : node.id;
+                      if (!connectedToFocused.has(nodeId) && !connectedToFocused.has(node.id)) {
+                        return 0.3; // Dim but still visible
+                      }
+                    }
+                  }
+                  return 1;
+                };
+                
+                const baseOpacity = getFocusOpacity();
+                const finalOpacity = shouldDim ? Math.min(baseOpacity, 0.2) : baseOpacity;
+                
+                if (node.type === 'director') {
                   return (
                     <motion.g 
                       key={`label-${node.id}`} 
                       className="pointer-events-none"
-                      animate={{ opacity: shouldDim ? 0.2 : 1 }}
+                      animate={{ opacity: finalOpacity }}
                       transition={{ duration: 0.3 }}
                     >
                       <text
@@ -1322,12 +1374,12 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                     </motion.g>
                   );
                 }
-                if (node.type === 'supplier' && viewState === 'supplier-overview') {
+                if (node.type === 'supplier') {
                   return (
                     <motion.g 
                       key={`label-${node.id}`} 
                       className="pointer-events-none"
-                      animate={{ opacity: shouldDim ? 0.2 : 1 }}
+                      animate={{ opacity: finalOpacity }}
                       transition={{ duration: 0.3 }}
                     >
                       <text
@@ -1383,33 +1435,77 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
           </div>
           
           
-          {/* View State Indicator with Breadcrumbs */}
+          {/* View State Indicator with Enhanced Breadcrumbs */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="absolute top-4 left-4 px-3 py-2 rounded-lg bg-[var(--neumorphic-card)] shadow-md border border-[var(--neumorphic-border)]"
+            className="absolute top-4 left-4 px-3 py-2 rounded-lg bg-[var(--neumorphic-card)] shadow-md border border-[var(--neumorphic-border)] max-w-md"
           >
             {(viewState === 'director-overview' || viewState === 'supplier-overview') ? (
               <NeumorphicText size="sm" className="flex items-center gap-2">
                 <Target className="w-4 h-4 text-[var(--neumorphic-accent)]" />
-                {viewState === 'director-overview' ? 'Director Overview - Click directors to explore' :
-                 'Supplier Overview - Click suppliers to explore'}
+                {viewState === 'director-overview' ? 'Director Overview - Click nodes to explore network' :
+                 'Supplier Overview - Click nodes to explore network'}
               </NeumorphicText>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Target className="w-4 h-4 text-[var(--neumorphic-accent)]" />
-                <span 
-                  className="text-[var(--neumorphic-accent)] text-sm cursor-pointer hover:underline"
-                  onClick={resetView}
-                >
-                  {networkMode === 'director-centric' ? 'Director Overview' : 'Supplier Overview'}
+                
+                {/* Build breadcrumb trail from history */}
+                {viewHistory.length > 1 && (
+                  <>
+                    <span 
+                      className="text-[var(--neumorphic-accent)] text-sm cursor-pointer hover:underline"
+                      onClick={resetView}
+                    >
+                      {viewHistory[0].mode === 'director-centric' ? 'Director Overview' : 'Supplier Overview'}
+                    </span>
+                    
+                    {viewHistory.slice(1).map((historyItem, index) => (
+                      <React.Fragment key={`${historyItem.focusId}-${historyItem.timestamp}`}>
+                        <ChevronRight className="w-3 h-3 text-[var(--neumorphic-text-secondary)]" />
+                        {index === viewHistory.length - 2 ? (
+                          // Current (last) item - not clickable
+                          <NeumorphicText size="sm" className="font-medium">
+                            {historyItem.state === 'director-focus' ? 
+                              directorProfiles.find(p => p.director.id === historyItem.focusId)?.director.name :
+                              supplierProfiles.find(s => s.id === historyItem.focusId)?.name
+                            }
+                          </NeumorphicText>
+                        ) : (
+                          // Previous items - clickable to navigate back to
+                          <span 
+                            className="text-[var(--neumorphic-accent)] text-sm cursor-pointer hover:underline"
+                            onClick={() => {
+                              // Navigate back to this point in history
+                              const targetHistory = viewHistory.slice(0, index + 2);
+                              const targetState = targetHistory[targetHistory.length - 1];
+                              setViewHistory(targetHistory);
+                              setViewState(targetState.state);
+                              if (targetState.state === 'director-focus') {
+                                setFocusedDirectorId(targetState.focusId || null);
+                                setFocusedSupplierId(null);
+                              } else if (targetState.state === 'supplier-focus') {
+                                setFocusedSupplierId(targetState.focusId || null);
+                                setFocusedDirectorId(null);
+                              }
+                            }}
+                          >
+                            {historyItem.state === 'director-focus' ? 
+                              directorProfiles.find(p => p.director.id === historyItem.focusId)?.director.name :
+                              supplierProfiles.find(s => s.id === historyItem.focusId)?.name
+                            }
+                          </span>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </>
+                )}
+                
+                {/* Help text */}
+                <span className="text-[var(--neumorphic-text-secondary)] text-xs ml-2">
+                  Click connected nodes to explore
                 </span>
-                <ChevronRight className="w-3 h-3 text-[var(--neumorphic-text-secondary)]" />
-                <NeumorphicText size="sm">
-                  {viewState === 'director-focus' ? `Analyzing ${directorProfiles.find(p => p.director.id === focusedDirectorId)?.director.name}` :
-                   viewState === 'supplier-focus' ? `Analyzing ${supplierProfiles.find(s => s.id === focusedSupplierId)?.name}` :
-                   'Detailed View'}
-                </NeumorphicText>
               </div>
             )}
           </motion.div>
@@ -1452,7 +1548,7 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                     )}
                     <NeumorphicText size="xs" variant="secondary" className="flex items-center gap-1">
                       <MousePointer className="w-3 h-3" />
-                      {viewState === 'overview' ? 'Click to analyze network' : 'Director profile'}
+                      {isNodeNavigable(hoveredNode) ? 'Click to analyze network' : 'Director profile'}
                     </NeumorphicText>
                   </div>
                 )}
@@ -1488,7 +1584,7 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                     )}
                     <NeumorphicText size="xs" variant="secondary" className="flex items-center gap-1">
                       <MousePointer className="w-3 h-3" />
-                      Click to view full details
+                      {isNodeNavigable(hoveredNode) ? 'Click to explore connections' : 'View details'}
                     </NeumorphicText>
                   </div>
                 )}
