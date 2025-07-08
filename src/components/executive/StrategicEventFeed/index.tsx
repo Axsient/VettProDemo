@@ -291,7 +291,7 @@ const StrategicEventFeed: React.FC<StrategicEventFeedProps> = ({
       </div>
 
       {/* Events List */}
-      <div className="flex-1 overflow-hidden relative">
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--neumorphic-text-secondary)] scrollbar-track-[var(--neumorphic-bg)] hover:scrollbar-thumb-[var(--neumorphic-accent)] relative">
         {filteredEvents.length === 0 ? (
           <div className="p-8 text-center">
             <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-[var(--neumorphic-text-secondary)] opacity-50" />

@@ -61,6 +61,7 @@ interface ContextualDetailPanelProps {
   selectedEvent?: StrategicEvent | null;
   suppliers?: ExecutiveSupplierInfo[];
   events?: StrategicEvent[];
+  activeFilter?: string | null;
   className?: string;
 }
 
@@ -70,6 +71,7 @@ const ContextualDetailPanel: React.FC<ContextualDetailPanelProps> = ({
   selectedEvent,
   suppliers = [],
   events = [],
+  activeFilter,
   className = '',
 }) => {
   // Calculate stats for mine site
@@ -215,7 +217,7 @@ const ContextualDetailPanel: React.FC<ContextualDetailPanelProps> = ({
           <NeumorphicHeading size="md" className="mb-3">
             Top Risk Suppliers
           </NeumorphicHeading>
-          <div className="space-y-2 max-h-48 overflow-y-auto">
+          <div className="space-y-2">
             {mineSiteStats.topSuppliers.map((supplier, index) => (
               <motion.div
                 key={supplier.id}
@@ -536,7 +538,7 @@ const ContextualDetailPanel: React.FC<ContextualDetailPanelProps> = ({
   };
 
   return (
-    <div className={`h-full overflow-hidden ${className}`}>
+    <div className={`h-full overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--neumorphic-text-secondary)] scrollbar-track-[var(--neumorphic-bg)] hover:scrollbar-thumb-[var(--neumorphic-accent)] ${className}`}>
       <AnimatePresence mode="wait">
         {selectedEvent ? (
           <div key="event">{renderEventContent()}</div>

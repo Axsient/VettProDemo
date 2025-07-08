@@ -7,6 +7,7 @@ interface CircularProgressRingProps {
   strokeWidth?: number;
   className?: string;
   animate?: boolean;
+  colorMode?: 'performance' | 'risk'; // performance: higher = green, risk: higher = red
 }
 
 const CircularProgressRing: React.FC<CircularProgressRingProps> = ({
@@ -15,6 +16,7 @@ const CircularProgressRing: React.FC<CircularProgressRingProps> = ({
   strokeWidth = 4,
   className,
   animate = true,
+  colorMode = 'performance',
 }) => {
   const [animatedPercentage, setAnimatedPercentage] = useState(0);
   const radius = (size - strokeWidth) / 2;
@@ -22,17 +24,35 @@ const CircularProgressRing: React.FC<CircularProgressRingProps> = ({
   const offset = circumference - (animatedPercentage / 100) * circumference;
 
   const getRingColor = () => {
-    if (percentage >= 90) return 'var(--neumorphic-severity-low)'; // Green for excellent scores
-    if (percentage >= 75) return 'var(--neumorphic-severity-medium)'; // Yellow for good scores
-    if (percentage >= 50) return 'var(--neumorphic-severity-high)'; // Orange for caution
-    return 'var(--neumorphic-severity-critical)'; // Red for critical scores
+    if (colorMode === 'risk') {
+      // For risk indicators: higher percentage = worse (more red)
+      if (percentage >= 75) return 'var(--neumorphic-severity-critical)'; // Red for high risk
+      if (percentage >= 50) return 'var(--neumorphic-severity-high)'; // Orange for medium-high risk
+      if (percentage >= 25) return 'var(--neumorphic-severity-medium)'; // Yellow for medium risk
+      return 'var(--neumorphic-severity-low)'; // Green for low risk
+    } else {
+      // For performance indicators: higher percentage = better (more green)
+      if (percentage >= 90) return 'var(--neumorphic-severity-low)'; // Green for excellent scores
+      if (percentage >= 75) return 'var(--neumorphic-severity-medium)'; // Yellow for good scores
+      if (percentage >= 50) return 'var(--neumorphic-severity-high)'; // Orange for caution
+      return 'var(--neumorphic-severity-critical)'; // Red for critical scores
+    }
   };
 
   const getGlowColor = () => {
-    if (percentage >= 90) return 'rgba(13, 212, 66, 0.3)'; // Custom green glow
-    if (percentage >= 75) return 'rgba(234, 179, 8, 0.3)'; // Yellow glow
-    if (percentage >= 50) return 'rgba(249, 115, 22, 0.3)'; // Orange glow
-    return 'rgba(239, 68, 68, 0.3)'; // Red glow
+    if (colorMode === 'risk') {
+      // For risk indicators: higher percentage = worse (more red)
+      if (percentage >= 75) return 'rgba(239, 68, 68, 0.3)'; // Red glow for high risk
+      if (percentage >= 50) return 'rgba(249, 115, 22, 0.3)'; // Orange glow for medium-high risk
+      if (percentage >= 25) return 'rgba(234, 179, 8, 0.3)'; // Yellow glow for medium risk
+      return 'rgba(13, 212, 66, 0.3)'; // Green glow for low risk
+    } else {
+      // For performance indicators: higher percentage = better (more green)
+      if (percentage >= 90) return 'rgba(13, 212, 66, 0.3)'; // Green glow for excellent scores
+      if (percentage >= 75) return 'rgba(234, 179, 8, 0.3)'; // Yellow glow for good scores
+      if (percentage >= 50) return 'rgba(249, 115, 22, 0.3)'; // Orange glow for caution
+      return 'rgba(239, 68, 68, 0.3)'; // Red glow for critical scores
+    }
   };
 
   useEffect(() => {
@@ -125,7 +145,7 @@ const CircularProgressRing: React.FC<CircularProgressRingProps> = ({
       </div>
       
       {/* Subtle glow animation for critical scores */}
-      {percentage < 50 && (
+      {((colorMode === 'risk' && percentage >= 75) || (colorMode === 'performance' && percentage < 50)) && (
         <div
           className="absolute inset-0 rounded-full pointer-events-none"
           style={{

@@ -11,6 +11,7 @@ import {
   directors
 } from '@/lib/sample-data/executive-dashboard-data';
 import { getCssVariable, getSeverityColor } from '@/lib/executive/theme-bridge';
+import { applyRiskScoring } from '@/lib/executive/apply-risk-scoring';
 import { 
   Building2, 
   User, 
@@ -115,6 +116,11 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
   const CENTER_X = SVG_WIDTH / 2;
   const CENTER_Y = SVG_HEIGHT / 2;
 
+  // Calculate proper risk scores using the risk scoring engine
+  const riskScoringResults = useMemo(() => {
+    return applyRiskScoring();
+  }, []);
+
   // Process directors and their relationships
   const directorProfiles = useMemo<DirectorProfile[]>(() => {
     let processSuppliers = filteredSuppliers;
@@ -143,7 +149,12 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
 
       const boardCount = dirSuppliers.length;
       const totalExposure = dirSuppliers.reduce((sum, s) => sum + s.contractValueZAR, 0);
-      const avgRiskScore = dirSuppliers.reduce((sum, s) => sum + s.riskScore, 0) / dirSuppliers.length;
+      
+      // Use risk scoring engine result instead of simple average
+      const directorRiskResult = riskScoringResults.directors.find(d => d.id === directorId);
+      const avgRiskScore = directorRiskResult ? directorRiskResult.riskScore : 
+                          dirSuppliers.reduce((sum, s) => sum + s.riskScore, 0) / dirSuppliers.length;
+      
       const maxRiskScore = Math.max(...dirSuppliers.map(s => s.riskScore));
 
       profiles.push({
@@ -158,7 +169,7 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
     });
 
     return profiles.sort((a, b) => b.boardCount - a.boardCount);
-  }, [filteredSuppliers, selectedMineSiteId]);
+  }, [filteredSuppliers, selectedMineSiteId, riskScoringResults]);
 
   // Process suppliers for supplier-centric view
   const supplierProfiles = useMemo(() => {
@@ -1603,43 +1614,6 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
         </NeumorphicCard>
       </motion.div>
 
-      {/* Summary Statistics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <motion.div 
-          className="p-4 rounded-[var(--neumorphic-radius-md)] bg-[var(--neumorphic-button)] shadow-[var(--neumorphic-shadow-convex)]"
-          whileHover={{ scale: 1.02 }}
-        >
-          <NeumorphicText size="sm" variant="secondary">Total Directors</NeumorphicText>
-          <NeumorphicText className="text-2xl font-bold">{directorProfiles.length}</NeumorphicText>
-        </motion.div>
-        <motion.div 
-          className="p-4 rounded-[var(--neumorphic-radius-md)] bg-[var(--neumorphic-button)] shadow-[var(--neumorphic-shadow-convex)]"
-          whileHover={{ scale: 1.02 }}
-        >
-          <NeumorphicText size="sm" variant="secondary">Concentration Risks</NeumorphicText>
-          <NeumorphicText className="text-2xl font-bold text-[var(--neumorphic-severity-critical)]">
-            {directorProfiles.filter(d => d.isConcentrationRisk).length}
-          </NeumorphicText>
-        </motion.div>
-        <motion.div 
-          className="p-4 rounded-[var(--neumorphic-radius-md)] bg-[var(--neumorphic-button)] shadow-[var(--neumorphic-shadow-convex)]"
-          whileHover={{ scale: 1.02 }}
-        >
-          <NeumorphicText size="sm" variant="secondary">Max Board Count</NeumorphicText>
-          <NeumorphicText className="text-2xl font-bold">
-            {Math.max(...directorProfiles.map(d => d.boardCount), 0)}
-          </NeumorphicText>
-        </motion.div>
-        <motion.div 
-          className="p-4 rounded-[var(--neumorphic-radius-md)] bg-[var(--neumorphic-button)] shadow-[var(--neumorphic-shadow-convex)]"
-          whileHover={{ scale: 1.02 }}
-        >
-          <NeumorphicText size="sm" variant="secondary">Total Exposure</NeumorphicText>
-          <NeumorphicText className="text-2xl font-bold">
-            R{(directorProfiles.reduce((sum, d) => sum + d.totalExposure, 0) / 1000000).toFixed(0)}M
-          </NeumorphicText>
-        </motion.div>
-      </div>
     </div>
   );
 };

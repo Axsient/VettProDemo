@@ -132,7 +132,7 @@ export const suppliers: ExecutiveSupplierInfo[] = [
     name: 'Rustenburg Explosives Inc.',
     category: 'Explosives & Blasting',
     coordinates: [-25.6, 27.3],
-    riskScore: 88.0,
+    riskScore: 100.0, // CRITICAL: High base risk + Sipho concentration + adverse media
     contractValueZAR: 50000000,
     directorIds: ['DIR_01', 'DIR_04'], // Sipho sits here
     linkedMineSiteIds: ['MS_01', 'MS_02'],
@@ -143,7 +143,7 @@ export const suppliers: ExecutiveSupplierInfo[] = [
     name: 'Marikana Heavy Machinery Lease',
     category: 'Heavy Equipment Leasing',
     coordinates: [-25.7, 27.5],
-    riskScore: 75.0,
+    riskScore: 100.0, // CRITICAL: High base risk + Sipho concentration
     contractValueZAR: 75000000,
     directorIds: ['DIR_02', 'DIR_04'], // Sipho sits here too
     linkedMineSiteIds: ['MS_01'],
@@ -154,7 +154,7 @@ export const suppliers: ExecutiveSupplierInfo[] = [
     name: 'Limpopo Logistix',
     category: 'Logistics',
     coordinates: [-25.5, 27.6],
-    riskScore: 68.0,
+    riskScore: 100.0, // CRITICAL: Bridge position + Sipho concentration + Fatima concentration
     contractValueZAR: 30000000,
     directorIds: ['DIR_04', 'DIR_06'], // Sipho sits here as well - MAJOR CONCENTRATION
     linkedMineSiteIds: ['MS_01', 'MS_02'],
@@ -165,7 +165,7 @@ export const suppliers: ExecutiveSupplierInfo[] = [
     name: 'North West Mining Supplies',
     category: 'General Supplies',
     coordinates: [-25.75, 27.35],
-    riskScore: 71.0,
+    riskScore: 100.0, // CRITICAL: Sipho's 4th board position + Jabulani adverse media
     contractValueZAR: 45000000,
     directorIds: ['DIR_01', 'DIR_04'], // Sipho's 4th board position - CRITICAL CONCENTRATION
     linkedMineSiteIds: ['MS_01', 'MS_02'],
@@ -176,7 +176,7 @@ export const suppliers: ExecutiveSupplierInfo[] = [
     name: 'Platinum Province Chemicals',
     category: 'Chemical Supplies',
     coordinates: [-25.68, 27.42],
-    riskScore: 78.0,
+    riskScore: 100.0, // CRITICAL: High base risk + geographic concentration + network effect
     contractValueZAR: 65000000,
     directorIds: ['DIR_02', 'DIR_05'], // Bridge connection to other clusters
     linkedMineSiteIds: ['MS_01', 'MS_02'],
@@ -189,7 +189,7 @@ export const suppliers: ExecutiveSupplierInfo[] = [
     name: 'Gauteng Gold Refiners',
     category: 'Refining Services',
     coordinates: [-26.3, 27.5],
-    riskScore: 55.0,
+    riskScore: 91.0, // CRITICAL: Highest contract value + Fatima concentration + reputational issues
     contractValueZAR: 120000000,
     directorIds: ['DIR_03', 'DIR_06'], // Fatima sits here
     linkedMineSiteIds: ['MS_03', 'MS_04'],
@@ -200,7 +200,7 @@ export const suppliers: ExecutiveSupplierInfo[] = [
     name: 'West Rand Water Purification',
     category: 'Water Treatment',
     coordinates: [-26.45, 27.4],
-    riskScore: 48.0,
+    riskScore: 70.0, // HIGH: Fatima concentration + medium geographic risk
     contractValueZAR: 25000000,
     directorIds: ['DIR_05', 'DIR_06'], // Fatima sits here too
     linkedMineSiteIds: ['MS_03'],
@@ -211,7 +211,7 @@ export const suppliers: ExecutiveSupplierInfo[] = [
     name: 'Johannesburg Engineering Services',
     category: 'Engineering & Maintenance',
     coordinates: [-26.35, 27.55],
-    riskScore: 42.0,
+    riskScore: 66.0, // HIGH: Fatima's 3rd board position + high contract value
     contractValueZAR: 85000000,
     directorIds: ['DIR_03', 'DIR_06'], // Fatima's 3rd board position - SECONDARY CONCENTRATION
     linkedMineSiteIds: ['MS_03', 'MS_04'],
@@ -224,7 +224,7 @@ export const suppliers: ExecutiveSupplierInfo[] = [
     name: 'Welkom Safety Gear Pty Ltd',
     category: 'Personal Protective Equipment',
     coordinates: [-28.2, 26.8],
-    riskScore: 15.0,
+    riskScore: 28.0, // MEDIUM: Low base risk + isolated director + network effect
     contractValueZAR: 15000000,
     directorIds: ['DIR_07'], // Isolated director
     linkedMineSiteIds: ['MS_05'],
@@ -235,7 +235,7 @@ export const suppliers: ExecutiveSupplierInfo[] = [
     name: 'Free State Catering Co.',
     category: 'Catering Services',
     coordinates: [-28.3, 26.7],
-    riskScore: 22.0,
+    riskScore: 32.0, // MEDIUM: Low base risk + isolated director + network effect
     contractValueZAR: 8000000,
     directorIds: ['DIR_08'], // Another isolated director
     linkedMineSiteIds: ['MS_05'],
@@ -246,7 +246,7 @@ export const suppliers: ExecutiveSupplierInfo[] = [
     name: 'Free State Transportation Hub',
     category: 'Transportation',
     coordinates: [-28.15, 26.85],
-    riskScore: 28.0,
+    riskScore: 40.0, // MEDIUM: Shared directors + low geographic risk + network effect
     contractValueZAR: 18000000,
     directorIds: ['DIR_07', 'DIR_08'], // Bridge between isolated suppliers
     linkedMineSiteIds: ['MS_05'],
@@ -259,7 +259,7 @@ export const suppliers: ExecutiveSupplierInfo[] = [
     name: 'Cape Town Tech Solutions',
     category: 'IT Services',
     coordinates: [-26.2, 27.8], // Positioned between clusters
-    riskScore: 35.0,
+    riskScore: 35.0, // MEDIUM: Isolated director + medium geographic risk
     contractValueZAR: 22000000,
     directorIds: ['DIR_09'], // Completely isolated
     linkedMineSiteIds: ['MS_03', 'MS_04'],
@@ -270,7 +270,7 @@ export const suppliers: ExecutiveSupplierInfo[] = [
     name: 'Independent Security Services',
     category: 'Security',
     coordinates: [-25.9, 27.7], // Between North West and Gauteng
-    riskScore: 52.0,
+    riskScore: 53.0, // HIGH: Isolated but moderate base risk + medium geographic risk
     contractValueZAR: 38000000,
     directorIds: ['DIR_10'], // Another isolated director
     linkedMineSiteIds: ['MS_01', 'MS_03'],

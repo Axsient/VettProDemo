@@ -5,8 +5,6 @@ import { NeumorphicBackground, NeumorphicCard, NeumorphicButton } from '@/compon
 import RiskConcentrationMap from '@/components/executive/RiskConcentrationMap';
 import RiskPostureGauges from '@/components/executive/RiskPostureGauges';
 import ContextualDetailPanel from '@/components/executive/ContextualDetailPanel';
-import SupplierNetworkGraph from '@/components/executive/SupplierNetworkGraph';
-import HierarchicalNetworkTree from '@/components/executive/HierarchicalNetworkTree';
 import DirectorCentricNetwork from '@/components/executive/DirectorCentricNetwork';
 import StrategicEventFeed from '@/components/executive/StrategicEventFeed';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -24,6 +22,7 @@ import { DashboardSkeleton } from '@/components/ui/skeleton';
 import { 
   suppliers, 
   mineSites,
+  directors,
   overallRiskPosture, 
   strategicEvents,
   type MineSite,
@@ -305,6 +304,19 @@ export default function ExecutiveDashboardPage() {
     return !!(selectedMineSite || selectedEntity || selectedEvent || activeRiskFilter);
   }, [selectedMineSite, selectedEntity, selectedEvent, activeRiskFilter]);
 
+  // Calculate totals for KPI cards
+  const dashboardTotals = useMemo(() => {
+    const totalDirectors = directors.length;
+    const totalSuppliers = suppliers.length;
+    const totalExposureZAR = suppliers.reduce((sum, supplier) => sum + supplier.contractValueZAR, 0);
+    
+    return {
+      totalDirectors,
+      totalSuppliers,
+      totalExposureZAR
+    };
+  }, []);
+
   if (isLoading) {
     return (
       <ToastProvider>
@@ -335,15 +347,16 @@ export default function ExecutiveDashboardPage() {
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-[var(--neumorphic-radius-md)] bg-[var(--neumorphic-card)] shadow-[var(--neumorphic-shadow-convex)]"
                 >
                   <Filter className="w-4 h-4 text-[var(--neumorphic-accent)]" />
-                  <span className="text-sm text-[var(--neumorphic-text-secondary)]">
+                  <span className="text-sm text-[var(--neumorphic-text-primary)] font-medium">
                     Filters Active
                   </span>
                   <NeumorphicButton 
                     onClick={handleClearAll}
-                    className="px-3 py-1 text-sm"
+                    className="px-2 py-1 text-xs"
+                    variant="outline"
                   >
                     <X className="w-3 h-3 mr-1" />
                     Clear All
@@ -382,33 +395,14 @@ export default function ExecutiveDashboardPage() {
               riskPosture={overallRiskPosture}
               activeFilter={activeRiskFilter}
               onFilterChange={handleRiskFilterChange}
+              totalDirectors={dashboardTotals.totalDirectors}
+              totalSuppliers={dashboardTotals.totalSuppliers}
+              totalExposureZAR={dashboardTotals.totalExposureZAR}
               filteredSuppliers={filteredData.suppliers}
             />
           </motion.div>
           
-          {/* Row 2: Risk Concentration Map - Full Width */}
-          <motion.div
-            className="w-full"
-            variants={slideUpVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            <NeumorphicCard className="p-0 overflow-hidden h-[375px] lg:h-[450px]">
-              <RiskConcentrationMap
-                height="100%"
-                onMineSiteClick={handleMineSiteSelect}
-                onSupplierClick={handleEntitySelect}
-                selectedMineSiteId={selectedMineSite?.id || null}
-                selectedSupplierId={selectedEntity && 'contractValueZAR' in selectedEntity ? selectedEntity.id : null}
-                highlightedSupplierIds={highlightedEntityIds}
-                filteredMineSites={filteredData.mineSites}
-                filteredSuppliers={filteredData.suppliers}
-                activeRiskFilter={activeRiskFilter}
-              />
-            </NeumorphicCard>
-          </motion.div>
-          
-          {/* Row 3: Bottom Components Grid */}
+          {/* Row 2: Map and Executive Intelligence Grid */}
           <motion.div 
             className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6"
             variants={staggerContainerVariants}
@@ -416,106 +410,86 @@ export default function ExecutiveDashboardPage() {
             animate="visible"
           >
             
-            {/* Left: Supplier Network Graph */}
-            <div className="col-span-1 lg:col-span-8">
-              <motion.div 
-                className="h-full"
-                variants={slideUpVariants}
-              >
-                <NeumorphicCard className="p-4 overflow-hidden h-[450px] lg:h-[500px]">
-                  <SupplierNetworkGraph
-                    activeFilter={activeRiskFilter}
-                    onNodeClick={handleEntitySelect}
-                    onNodeHover={handleSupplierHover}
-                    selectedSupplierId={selectedEntity && 'contractValueZAR' in selectedEntity ? selectedEntity.id : null}
-                    selectedMineSiteId={selectedMineSite?.id || null}
-                    highlightedEntityIds={highlightedEntityIds}
-                    hoveredSupplierId={hoveredSupplierId}
-                    filteredSuppliers={filteredData.suppliers}
-                    height="400px"
-                    className="h-full"
-                  />
-                </NeumorphicCard>
-              </motion.div>
-            </div>
+            {/* Left: Risk Concentration Map - 65% Width */}
+            <motion.div
+              className="w-full lg:col-span-8"
+              variants={slideUpVariants}
+            >
+              <NeumorphicCard className="p-0 overflow-hidden h-[375px] lg:h-[450px]">
+                <RiskConcentrationMap
+                  height="100%"
+                  onMineSiteClick={handleMineSiteSelect}
+                  onSupplierClick={handleEntitySelect}
+                  selectedMineSiteId={selectedMineSite?.id || null}
+                  selectedSupplierId={selectedEntity && 'contractValueZAR' in selectedEntity ? selectedEntity.id : null}
+                  highlightedSupplierIds={highlightedEntityIds}
+                  filteredMineSites={filteredData.mineSites}
+                  filteredSuppliers={filteredData.suppliers}
+                  activeRiskFilter={activeRiskFilter}
+                />
+              </NeumorphicCard>
+            </motion.div>
             
-            {/* Right Column: Detail Panel and Event Feed */}
-            <div className="col-span-1 lg:col-span-4 space-y-4 lg:space-y-6">
-              
-              {/* Contextual Detail Panel */}
-              <motion.div 
-                className="w-full"
-                variants={slideInFromRightVariants}
-              >
-                <AnimatePresence mode="wait">
-                  <NeumorphicCard className="overflow-hidden h-[450px] lg:h-[500px]">
-                    <ContextualDetailPanel
-                      selectedMineSite={selectedMineSite}
-                      selectedEntity={selectedEntity}
-                      selectedEvent={selectedEvent}
-                      suppliers={suppliers}
-                      events={strategicEvents}
-                    />
-                  </NeumorphicCard>
-                </AnimatePresence>
-              </motion.div>
-              
-              {/* Strategic Event Feed */}
-              <motion.div 
-                className="w-full"
-                variants={slideInFromRightVariants}
-              >
-                <NeumorphicCard className="p-0 overflow-hidden h-[400px] lg:h-[450px]">
-                  <StrategicEventFeed
-                    events={strategicEvents}
+            {/* Right: Executive Intelligence - 35% Width */}
+            <motion.div 
+              className="w-full lg:col-span-4"
+              variants={slideInFromRightVariants}
+            >
+              <AnimatePresence mode="wait">
+                <NeumorphicCard className="h-[375px] lg:h-[450px]">
+                  <ContextualDetailPanel
+                    selectedMineSite={selectedMineSite}
+                    selectedEntity={selectedEntity}
                     selectedEvent={selectedEvent}
-                    onEventSelect={handleEventSelect}
+                    suppliers={filteredData.suppliers}
+                    events={filteredData.events}
+                    activeFilter={activeRiskFilter}
                   />
                 </NeumorphicCard>
-              </motion.div>
-            </div>
+              </AnimatePresence>
+            </motion.div>
           </motion.div>
           
-          {/* Row 4: Hierarchical Network Tree - Full Width */}
+          {/* Row 3: Director-Centric Network and Strategic Events Grid */}
           <motion.div 
-            className="w-full"
-            variants={slideUpVariants}
+            className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6"
+            variants={staggerContainerVariants}
             initial="hidden"
             animate="visible"
           >
-            <HierarchicalNetworkTree
-              activeFilter={activeRiskFilter}
-              onNodeClick={handleEntitySelect}
-              onNodeHover={handleSupplierHover}
-              selectedSupplierId={selectedEntity && 'contractValueZAR' in selectedEntity ? selectedEntity.id : null}
-              selectedMineSiteId={selectedMineSite?.id || null}
-              highlightedEntityIds={highlightedEntityIds}
-              hoveredSupplierId={hoveredSupplierId}
-              filteredSuppliers={filteredData.suppliers}
-              height="500px"
-              className="w-full"
-            />
-          </motion.div>
-          
-          {/* Row 5: Director-Centric Network - Full Width */}
-          <motion.div 
-            className="w-full"
-            variants={slideUpVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            <DirectorCentricNetwork
-              activeFilter={activeRiskFilter}
-              onNodeClick={handleEntitySelect}
-              onNodeHover={handleSupplierHover}
-              selectedSupplierId={selectedEntity && 'contractValueZAR' in selectedEntity ? selectedEntity.id : null}
-              selectedMineSiteId={selectedMineSite?.id || null}
-              highlightedEntityIds={highlightedEntityIds}
-              hoveredSupplierId={hoveredSupplierId}
-              filteredSuppliers={filteredData.suppliers}
-              height="600px"
-              className="w-full"
-            />
+            
+            {/* Left: Director-Centric Network - 65% Width */}
+            <motion.div 
+              className="w-full lg:col-span-8"
+              variants={slideUpVariants}
+            >
+              <DirectorCentricNetwork
+                activeFilter={activeRiskFilter}
+                onNodeClick={handleEntitySelect}
+                onNodeHover={handleSupplierHover}
+                selectedSupplierId={selectedEntity && 'contractValueZAR' in selectedEntity ? selectedEntity.id : null}
+                selectedMineSiteId={selectedMineSite?.id || null}
+                highlightedEntityIds={highlightedEntityIds}
+                hoveredSupplierId={hoveredSupplierId}
+                filteredSuppliers={filteredData.suppliers}
+                height="600px"
+                className="w-full"
+              />
+            </motion.div>
+            
+            {/* Right: Strategic Events - 35% Width */}
+            <motion.div 
+              className="w-full lg:col-span-4"
+              variants={slideInFromRightVariants}
+            >
+              <NeumorphicCard className="p-0 h-[600px]">
+                <StrategicEventFeed
+                  events={strategicEvents}
+                  selectedEvent={selectedEvent}
+                  onEventSelect={handleEventSelect}
+                />
+              </NeumorphicCard>
+            </motion.div>
           </motion.div>
         </div>
         

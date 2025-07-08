@@ -6,8 +6,7 @@ import {
   NeumorphicText, 
   NeumorphicHeading, 
   NeumorphicCard,
-  NeumorphicBadge,
-  NeumorphicButton
+  NeumorphicBadge
 } from '@/components/ui/neumorphic';
 import { motion } from 'framer-motion';
 import { 
@@ -15,12 +14,16 @@ import {
   RiskCategory
 } from '@/lib/sample-data/executive-dashboard-data';
 import { getCssVariable } from '@/lib/executive/theme-bridge';
-import { TrendingUp, AlertTriangle, Shield, DollarSign, FileCheck, Cog, Users, X } from 'lucide-react';
+import { TrendingUp, AlertTriangle, Shield, DollarSign, FileCheck, Cog, Users, Building, Wallet } from 'lucide-react';
 
 interface RiskPostureGaugesProps {
   riskPosture: RiskPosture;
   activeFilter?: RiskCategory | null;
   onFilterChange?: (category: RiskCategory | null) => void;
+  totalDirectors?: number;
+  totalSuppliers?: number;
+  totalExposureZAR?: number;
+  filteredSuppliers?: ExecutiveSupplierInfo[];
   className?: string;
 }
 
@@ -36,6 +39,10 @@ const RiskPostureGauges: React.FC<RiskPostureGaugesProps> = ({
   riskPosture,
   activeFilter,
   onFilterChange,
+  totalDirectors = 0,
+  totalSuppliers = 0,
+  totalExposureZAR = 0,
+  filteredSuppliers = [],
   className = '',
 }) => {
   // KPI cards should always show static overall risk posture, not dynamic filtered values
@@ -90,12 +97,72 @@ const RiskPostureGauges: React.FC<RiskPostureGaugesProps> = ({
     return 'Low';
   };
 
+  // Format ZAR values for display
+  const formatZAR = (amount: number): string => {
+    if (amount >= 1000000000) {
+      return `R${(amount / 1000000000).toFixed(1)}B`;
+    } else if (amount >= 1000000) {
+      return `R${(amount / 1000000).toFixed(1)}M`;
+    } else if (amount >= 1000) {
+      return `R${(amount / 1000).toFixed(1)}K`;
+    } else {
+      return `R${amount.toFixed(0)}`;
+    }
+  };
+
   // Dynamic color based on risk level
   const getGaugeColor = useCallback((riskValue: number): string => {
     if (riskValue >= 75) return getCssVariable('--neumorphic-severity-critical');
     if (riskValue >= 50) return getCssVariable('--neumorphic-severity-high');
     if (riskValue >= 25) return getCssVariable('--neumorphic-severity-medium');
     return getCssVariable('--neumorphic-severity-low');
+  }, []);
+
+  // Create metric card for non-risk KPIs
+  const createMetricCard = useCallback((title: string, value: string, icon: React.ReactNode, color: string, description: string) => {
+    return (
+      <motion.div
+        className="cursor-pointer transition-all duration-300"
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+      >
+        <NeumorphicCard className="h-full py-3 px-2 text-center">
+          {/* Header with Icon and Title */}
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <div 
+              className="p-1 rounded-full"
+              style={{
+                backgroundColor: color,
+                color: 'white',
+                opacity: 0.9
+              }}
+            >
+              {React.cloneElement(icon as React.ReactElement, { className: 'w-3 h-3' })}
+            </div>
+            <NeumorphicText className="text-sm">
+              {title}
+            </NeumorphicText>
+          </div>
+
+          {/* Value Display */}
+          <div className="mb-2">
+            <NeumorphicText className="text-2xl font-bold text-[var(--neumorphic-text-primary)]">
+              {value}
+            </NeumorphicText>
+          </div>
+
+          {/* Description */}
+          <div className="space-y-1">
+            <NeumorphicText variant="secondary" size="sm" className="text-center text-xs">
+              {description}
+            </NeumorphicText>
+          </div>
+        </NeumorphicCard>
+      </motion.div>
+    );
   }, []);
 
   // Create individual gauge component using CircularProgressRing
@@ -155,6 +222,7 @@ const RiskPostureGauges: React.FC<RiskPostureGaugesProps> = ({
               size={50} 
               strokeWidth={4} 
               animate={true}
+              colorMode="risk"
             />
           </div>
 
@@ -197,11 +265,38 @@ const RiskPostureGauges: React.FC<RiskPostureGaugesProps> = ({
         </NeumorphicHeading>
       </NeumorphicCard>
 
-      {/* KPI Cards Grid - 5 cards horizontally */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+      {/* KPI Cards Grid - 8 cards horizontally */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-8 gap-3">
         {/* Risk Category Gauges */}
         {gaugeConfigs.map(config => 
           createGauge(config, staticRiskPosture[`${config.key}Risk` as keyof RiskPosture])
+        )}
+
+        {/* Total Directors Card */}
+        {createMetricCard(
+          'Total Directors',
+          totalDirectors.toString(),
+          <Users className="w-5 h-5" />,
+          getCssVariable('--neumorphic-accent'),
+          'Board members across all suppliers'
+        )}
+
+        {/* Total Suppliers Card */}
+        {createMetricCard(
+          'Total Suppliers',
+          totalSuppliers.toString(),
+          <Building className="w-5 h-5" />,
+          getCssVariable('--neumorphic-info'),
+          'Active suppliers in portfolio'
+        )}
+
+        {/* Total Exposure Card */}
+        {createMetricCard(
+          'Total Exposure',
+          formatZAR(totalExposureZAR),
+          <Wallet className="w-5 h-5" />,
+          getCssVariable('--neumorphic-success'),
+          'Combined contract value'
         )}
         
         {/* Overall Risk Summary Card */}
@@ -238,6 +333,7 @@ const RiskPostureGauges: React.FC<RiskPostureGaugesProps> = ({
                 size={50} 
                 strokeWidth={4} 
                 animate={true}
+                colorMode="risk"
               />
             </div>
 
@@ -260,29 +356,6 @@ const RiskPostureGauges: React.FC<RiskPostureGaugesProps> = ({
         </motion.div>
       </div>
 
-      {/* Active Filter Indicator */}
-      {activeFilter && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-        >
-          <NeumorphicCard className="text-center py-2">
-            <div className="flex items-center justify-center gap-2">
-              <NeumorphicText size="sm" className="font-medium">
-                Filtering by {gaugeConfigs.find(g => g.key === activeFilter)?.title}
-              </NeumorphicText>
-                             <NeumorphicButton
-                 onClick={() => onFilterChange?.(null)}
-                 className="px-2 py-1 text-xs"
-               >
-                 <X className="w-3 h-3 mr-1" />
-                 Clear
-               </NeumorphicButton>
-            </div>
-          </NeumorphicCard>
-        </motion.div>
-      )}
     </motion.div>
   );
 };
