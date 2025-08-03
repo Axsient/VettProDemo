@@ -100,7 +100,7 @@ const columns: TableColumn<User>[] = [
     cell: (value: unknown, row: User) => (
       <div className="flex items-center space-x-3">
         <Avatar className="h-8 w-8">
-          <AvatarImage src={row.avatar} alt={row.name} />
+          {row.avatar && <AvatarImage src={row.avatar} alt={row.name} />}
           <AvatarFallback className="text-xs">
             {row.name.split(' ').map((n: string) => n[0]).join('')}
           </AvatarFallback>
@@ -295,7 +295,7 @@ const UserDetailsComponent: React.FC<{ row: User; onClose: () => void }> = ({ ro
   <div className="space-y-4">
     <div className="flex items-center space-x-4">
       <Avatar className="h-16 w-16">
-        <AvatarImage src={row.avatar} alt={row.name} />
+        {row.avatar && <AvatarImage src={row.avatar} alt={row.name} />}
         <AvatarFallback className="text-lg">
           {row.name.split(' ').map((n: string) => n[0]).join('')}
         </AvatarFallback>

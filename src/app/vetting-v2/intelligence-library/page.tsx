@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { NeumorphicCard, NeumorphicText } from '@/components/ui/neumorphic';
 import { CompletedReportsTable } from '@/components/vetting/CompletedReportsTable';
 import { sampleCompletedReports } from '@/lib/sample-data/completedReportsSample';
+import { RiskLevel } from '@/types/reports';
 import { 
   Library, 
   Database,
@@ -17,8 +18,8 @@ export default function IntelligenceLibraryPage() {
   // Calculate summary stats from completed reports
   const stats = {
     totalReports: sampleCompletedReports.length,
-    criticalRisk: sampleCompletedReports.filter(r => r.overallRiskLevel === 'CRITICAL').length,
-    highRisk: sampleCompletedReports.filter(r => r.overallRiskLevel === 'HIGH').length,
+    criticalRisk: sampleCompletedReports.filter(r => r.overallRiskLevel === RiskLevel.CRITICAL).length,
+    highRisk: sampleCompletedReports.filter(r => r.overallRiskLevel === RiskLevel.HIGH).length,
     averageRiskScore: Math.round(
       sampleCompletedReports.reduce((sum, r) => sum + r.overallRiskScore, 0) / sampleCompletedReports.length
     ),

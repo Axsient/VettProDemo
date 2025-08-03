@@ -5,6 +5,7 @@ import { NeumorphicCard, NeumorphicText } from '@/components/ui/neumorphic';
 import { Badge } from '@/components/ui/badge';
 import { ConsentManagementTable } from '@/components/vetting/ConsentManagementTable';
 import { sampleConsentRequests } from '@/lib/sample-data/consentRequestsSample';
+import { ConsentRequestStatus } from '@/types/consent';
 import { 
   MessageSquare, 
   Shield, 
@@ -21,15 +22,15 @@ export default function ConsentHubPage() {
   const stats = {
     total: sampleConsentRequests.length,
     pending: sampleConsentRequests.filter(r => 
-      r.status === 'PENDING_SENT' || 
-      r.status === 'LINK_OPENED' || 
-      r.status === 'FORM_VIEWED'
+      r.status === ConsentRequestStatus.PENDING_SENT || 
+      r.status === ConsentRequestStatus.LINK_OPENED || 
+      r.status === ConsentRequestStatus.FORM_VIEWED
     ).length,
     completed: sampleConsentRequests.filter(r => 
-      r.status === 'VERIFIED_APPROVED'
+      r.status === ConsentRequestStatus.VERIFIED_APPROVED
     ).length,
     expired: sampleConsentRequests.filter(r => 
-      r.status === 'EXPIRED'
+      r.status === ConsentRequestStatus.EXPIRED
     ).length,
     avgResponseTime: '4.2 hours',
     signatureAccuracy: '98.7%'

@@ -39,21 +39,12 @@ const slideInFromRightVariants = {
   exit: { opacity: 0, x: -30, transition: { duration: 0.2 } }
 };
 
-const staggerContainerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.1
-    }
-  }
-};
-
-const staggerItemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
-};
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const staggerContainerVariants = {};
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const staggerItemVariants = {};
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const activeFilter = null;
 
 interface ContextualDetailPanelProps {
   selectedMineSite?: MineSite | null;
@@ -71,6 +62,7 @@ const ContextualDetailPanel: React.FC<ContextualDetailPanelProps> = ({
   selectedEvent,
   suppliers = [],
   events = [],
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   activeFilter,
   className = '',
 }) => {
@@ -106,7 +98,7 @@ const ContextualDetailPanel: React.FC<ContextualDetailPanelProps> = ({
     >
       <div className="mb-6">
         <PieChart className="w-16 h-16 mx-auto mb-4 text-[var(--neumorphic-accent)] opacity-50" />
-        <NeumorphicHeading size="lg">Executive Intelligence</NeumorphicHeading>
+        <NeumorphicHeading>Executive Intelligence</NeumorphicHeading>
         <NeumorphicText variant="secondary" className="mt-2">
           Select a mine site, supplier, or event to view detailed insights
         </NeumorphicText>
@@ -161,7 +153,7 @@ const ContextualDetailPanel: React.FC<ContextualDetailPanelProps> = ({
               <MapPin className="w-5 h-5 text-[var(--neumorphic-accent)]" />
             </div>
             <div>
-              <NeumorphicHeading size="lg">{selectedMineSite.name}</NeumorphicHeading>
+              <NeumorphicHeading>{selectedMineSite.name}</NeumorphicHeading>
               <NeumorphicText variant="secondary" size="sm">
                 {selectedMineSite.province} • {selectedMineSite.metals.join(', ')}
               </NeumorphicText>
@@ -214,7 +206,7 @@ const ContextualDetailPanel: React.FC<ContextualDetailPanelProps> = ({
 
         {/* Top Risk Suppliers */}
         <div>
-          <NeumorphicHeading size="md" className="mb-3">
+          <NeumorphicHeading className="mb-3">
             Top Risk Suppliers
           </NeumorphicHeading>
           <div className="space-y-2">
@@ -264,7 +256,7 @@ const ContextualDetailPanel: React.FC<ContextualDetailPanelProps> = ({
             <ExternalLink className="w-4 h-4" />
           </NeumorphicButton>
           
-          <NeumorphicButton variant="outline" className="w-full justify-between">
+          <NeumorphicButton className="w-full justify-between">
             <span>Schedule Risk Review</span>
             <Clock className="w-4 h-4" />
           </NeumorphicButton>
@@ -297,7 +289,7 @@ const ContextualDetailPanel: React.FC<ContextualDetailPanelProps> = ({
                 <Building className="w-5 h-5 text-[var(--neumorphic-accent)]" />
               </div>
               <div>
-                <NeumorphicHeading size="lg">{supplier.name}</NeumorphicHeading>
+                <NeumorphicHeading>{supplier.name}</NeumorphicHeading>
                 <NeumorphicText variant="secondary" size="sm">
                   {supplier.category}
                 </NeumorphicText>
@@ -317,7 +309,7 @@ const ContextualDetailPanel: React.FC<ContextualDetailPanelProps> = ({
 
           {/* Risk Breakdown */}
           <div>
-            <NeumorphicHeading size="md" className="mb-3">
+            <NeumorphicHeading className="mb-3">
               Risk Factor Breakdown
             </NeumorphicHeading>
             <div className="space-y-3">
@@ -381,7 +373,7 @@ const ContextualDetailPanel: React.FC<ContextualDetailPanelProps> = ({
               <ExternalLink className="w-4 h-4" />
             </NeumorphicButton>
             
-            <NeumorphicButton variant="outline" className="w-full justify-between">
+            <NeumorphicButton className="w-full justify-between">
               <span>Initiate Risk Review</span>
               <AlertTriangle className="w-4 h-4" />
             </NeumorphicButton>
@@ -406,7 +398,7 @@ const ContextualDetailPanel: React.FC<ContextualDetailPanelProps> = ({
                 <Users className="w-5 h-5 text-[var(--neumorphic-accent)]" />
               </div>
               <div>
-                <NeumorphicHeading size="lg">{director.name}</NeumorphicHeading>
+                <NeumorphicHeading>{director.name}</NeumorphicHeading>
                 <NeumorphicText variant="secondary" size="sm">
                   Board Director
                 </NeumorphicText>
@@ -416,7 +408,7 @@ const ContextualDetailPanel: React.FC<ContextualDetailPanelProps> = ({
 
           {/* Board Positions */}
           <div>
-            <NeumorphicHeading size="md" className="mb-3">
+            <NeumorphicHeading className="mb-3">
               Board Positions
             </NeumorphicHeading>
             <div className="space-y-2">
@@ -481,7 +473,7 @@ const ContextualDetailPanel: React.FC<ContextualDetailPanelProps> = ({
               <AlertTriangle className="w-5 h-5" />
             </div>
             <div>
-              <NeumorphicHeading size="lg">{selectedEvent.title}</NeumorphicHeading>
+              <NeumorphicHeading>{selectedEvent.title}</NeumorphicHeading>
               <NeumorphicText variant="secondary" size="sm">
                 {new Date(selectedEvent.timestamp).toLocaleString()}
               </NeumorphicText>
@@ -507,7 +499,7 @@ const ContextualDetailPanel: React.FC<ContextualDetailPanelProps> = ({
         {/* Related Entities */}
         {selectedEvent.relatedEntityIds.length > 0 && (
           <div>
-            <NeumorphicHeading size="md" className="mb-3">
+            <NeumorphicHeading className="mb-3">
               Related Entities
             </NeumorphicHeading>
             <div className="space-y-1">

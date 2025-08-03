@@ -1,15 +1,38 @@
 import React, { useState } from 'react';
 import SupplierNetworkGraph from './index';
-import { RiskCategory, ExecutiveSupplierInfo } from '@/lib/sample-data/executive-dashboard-data';
+import { RiskCategory, ExecutiveSupplierInfo, suppliers } from '@/lib/sample-data/executive-dashboard-data';
 import { NeumorphicHeading, NeumorphicText } from '@/components/ui/neumorphic';
 import { motion } from 'framer-motion';
+
+// Define GraphNode interface to match the component's expected type
+interface GraphNode {
+  id: string;
+  name: string;
+  type: 'supplier' | 'director';
+  riskScore?: number;
+  riskCategory?: string;
+  val: number;
+  color: string;
+  fx?: number | null;
+  fy?: number | null;
+  x?: number;
+  y?: number;
+  vx?: number;
+  vy?: number;
+  contractValue?: number;
+  connectionsCount?: number;
+}
 
 const SupplierNetworkGraphExample: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<RiskCategory | null>(null);
   const [selectedSupplier, setSelectedSupplier] = useState<ExecutiveSupplierInfo | null>(null);
 
-  const handleNodeClick = (supplier: ExecutiveSupplierInfo) => {
-    setSelectedSupplier(supplier);
+  const handleNodeClick = (nodeData: GraphNode) => {
+    // Find the supplier data from the node ID
+    const supplier = suppliers.find(s => s.id === nodeData.id);
+    if (supplier) {
+      setSelectedSupplier(supplier);
+    }
   };
 
   const filterOptions: { value: RiskCategory | null; label: string }[] = [
@@ -25,7 +48,7 @@ const SupplierNetworkGraphExample: React.FC = () => {
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center">
-          <NeumorphicHeading size="xl">
+          <NeumorphicHeading>
             Supplier Network Graph Demo
           </NeumorphicHeading>
           <NeumorphicText variant="secondary" className="mt-2">
@@ -72,7 +95,7 @@ const SupplierNetworkGraphExample: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             className="p-6 bg-[var(--neumorphic-card)] rounded-[var(--neumorphic-radius-lg)] shadow-[var(--neumorphic-shadow-convex)]"
           >
-            <NeumorphicHeading size="md" className="mb-4">
+            <NeumorphicHeading className="mb-4">
               Selected Supplier Details
             </NeumorphicHeading>
             <div className="grid grid-cols-2 gap-4">
@@ -101,19 +124,19 @@ const SupplierNetworkGraphExample: React.FC = () => {
               <NeumorphicText variant="secondary" size="sm">Risk Breakdown</NeumorphicText>
               <div className="grid grid-cols-4 gap-2 mt-2">
                 <div className="text-center p-2 bg-[var(--neumorphic-button)] rounded-[var(--neumorphic-radius-sm)]">
-                  <NeumorphicText size="xs">Financial</NeumorphicText>
+                  <NeumorphicText size="sm">Financial</NeumorphicText>
                   <NeumorphicText className="font-bold">{selectedSupplier.riskFactors.financial}%</NeumorphicText>
                 </div>
                 <div className="text-center p-2 bg-[var(--neumorphic-button)] rounded-[var(--neumorphic-radius-sm)]">
-                  <NeumorphicText size="xs">Compliance</NeumorphicText>
+                  <NeumorphicText size="sm">Compliance</NeumorphicText>
                   <NeumorphicText className="font-bold">{selectedSupplier.riskFactors.compliance}%</NeumorphicText>
                 </div>
                 <div className="text-center p-2 bg-[var(--neumorphic-button)] rounded-[var(--neumorphic-radius-sm)]">
-                  <NeumorphicText size="xs">Operational</NeumorphicText>
+                  <NeumorphicText size="sm">Operational</NeumorphicText>
                   <NeumorphicText className="font-bold">{selectedSupplier.riskFactors.operational}%</NeumorphicText>
                 </div>
                 <div className="text-center p-2 bg-[var(--neumorphic-button)] rounded-[var(--neumorphic-radius-sm)]">
-                  <NeumorphicText size="xs">Reputational</NeumorphicText>
+                  <NeumorphicText size="sm">Reputational</NeumorphicText>
                   <NeumorphicText className="font-bold">{selectedSupplier.riskFactors.reputational}%</NeumorphicText>
                 </div>
               </div>

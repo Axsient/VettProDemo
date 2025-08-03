@@ -10,7 +10,6 @@ import {
   NeumorphicCard 
 } from '@/components/ui/neumorphic';
 import { StrategicEvent } from '@/lib/sample-data/executive-dashboard-data';
-import { getSeverityColor } from '@/lib/executive/theme-bridge';
 import { 
   AlertTriangle, 
   Clock, 
@@ -87,13 +86,12 @@ const EventItem: React.FC<EventItemProps> = ({
             <NeumorphicText className="font-semibold text-sm">
               {event.title}
             </NeumorphicText>
-            <NeumorphicBadge 
+                        <NeumorphicBadge
               variant={
                 event.severity === 'Critical' ? 'danger' :
                 event.severity === 'High' ? 'warning' :
                 event.severity === 'Medium' ? 'info' : 'default'
               }
-              size="sm"
             >
               {event.severity}
             </NeumorphicBadge>
@@ -120,8 +118,6 @@ const EventItem: React.FC<EventItemProps> = ({
           {/* Action Button */}
           <div className="mt-3">
             <NeumorphicButton
-              variant="outline" 
-              size="sm"
               className="text-xs flex items-center gap-1"
             >
               {event.action.type === 'DRILL_DOWN' ? (
@@ -167,6 +163,7 @@ const StrategicEventFeed: React.FC<StrategicEventFeedProps> = ({
   events,
   selectedEvent,
   onEventSelect,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   maxHeight = '600px',
   showFilters = true,
   className = '',
@@ -221,7 +218,7 @@ const StrategicEventFeed: React.FC<StrategicEventFeedProps> = ({
       {/* Header */}
       <div className="p-4 border-b border-[var(--neumorphic-border)] border-opacity-20">
         <div className="flex items-center justify-between mb-3">
-          <NeumorphicHeading size="lg" className="flex items-center gap-2">
+          <NeumorphicHeading className="flex items-center gap-2">
             <Zap className="w-6 h-6 text-[var(--neumorphic-accent)]" />
             Strategic Events
           </NeumorphicHeading>

@@ -436,15 +436,15 @@ export const PERFORMANCE_SETTINGS = {
   
   // Battery optimization
   lowPowerMode: typeof navigator !== 'undefined' && 
-    // @ts-ignore - experimental API
-    navigator.getBattery?.().then((battery: any) => !battery.charging && battery.level < 0.2),
+    // @ts-expect-error - experimental API
+    navigator.getBattery?.().then((battery: { charging: boolean; level: number }) => !battery.charging && battery.level < 0.2),
 } as const;
 
 // Conditional animation wrapper
 export const withConditionalAnimation = <T extends object>(
   config: T,
   condition: boolean = true
-): T | {} => {
+): T | Record<string, never> => {
   if (PERFORMANCE_SETTINGS.reducedMotion || !condition) {
     return {};
   }

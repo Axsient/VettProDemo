@@ -81,7 +81,7 @@ export const SignatureAnalysisModal: React.FC<SignatureAnalysisModalProps> = ({
 
       return () => clearTimeout(timer);
     }
-  }, [open]);
+  }, [open, runAnalysisAnimation]);
 
   const runAnalysisAnimation = async () => {
     setAnalysisStage('analyzing');

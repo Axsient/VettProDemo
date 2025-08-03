@@ -127,7 +127,7 @@ export function InitiateVettingForm({
         selectedPackage
       });
     }
-  }, [selectedChecks, entityType, selectionType, selectedPackage]);
+  }, [selectedChecks, entityType, selectionType, selectedPackage, onStateChange]);
 
   // Calculate total cost and turnaround (helper function for future use)
   // const getCurrentChecks = () => {

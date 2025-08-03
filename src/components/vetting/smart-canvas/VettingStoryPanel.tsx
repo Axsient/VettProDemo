@@ -522,7 +522,8 @@ const ConsentFootprintSVG: React.FC<{
 // Main component
 export const VettingStoryPanel: React.FC<VettingStoryPanelProps> = ({
   selectedChecks,
-  selectedPackage: _selectedPackage,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  selectedPackage,
   entityType,
   className,
   onCheckInteraction,

@@ -200,6 +200,7 @@ export const NeumorphicSelect: React.FC<NeumorphicSelectProps> = ({
         onBlur={() => setIsFocused(false)}
         tabIndex={disabled ? -1 : 0}
         role="combobox"
+        aria-controls="select-dropdown"
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-label={label}

@@ -190,7 +190,7 @@ const HierarchicalNetworkTree: React.FC<HierarchicalNetworkTreeProps> = ({
     });
 
     return positionedNodes;
-  }, [filteredSuppliers, selectedMineSiteId]);
+  }, [filteredSuppliers, selectedMineSiteId, CENTER_X, CENTER_Y, RISK_RINGS]);
 
   // Generate director connections
   const directorConnections = useMemo<DirectorConnection[]>(() => {
@@ -232,6 +232,7 @@ const HierarchicalNetworkTree: React.FC<HierarchicalNetworkTreeProps> = ({
           
           for (let i = 1; i < supplierPositions.length; i++) {
             const curr = supplierPositions[i];
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const prev = supplierPositions[i - 1];
             
             // Create curved connection through center area
@@ -260,7 +261,7 @@ const HierarchicalNetworkTree: React.FC<HierarchicalNetworkTreeProps> = ({
     });
 
     return connections;
-  }, [supplierNodes]);
+  }, [supplierNodes, CENTER_X, CENTER_Y]);
 
   // Event handlers
   const handleNodeClick = useCallback((node: SupplierNode) => {
@@ -280,7 +281,7 @@ const HierarchicalNetworkTree: React.FC<HierarchicalNetworkTreeProps> = ({
     <div className={`space-y-4 ${className}`}>
       {/* Header */}
       <div className="text-center">
-        <NeumorphicHeading size="lg" className="flex items-center justify-center gap-2">
+        <NeumorphicHeading className="flex items-center justify-center gap-2">
           <Network className="w-6 h-6 text-[var(--neumorphic-accent)]" />
           Hierarchical Risk Network
         </NeumorphicHeading>
@@ -515,7 +516,7 @@ const HierarchicalNetworkTree: React.FC<HierarchicalNetworkTreeProps> = ({
                   </div>
                   
                   <div className="pt-2 border-t border-[var(--neumorphic-border)]">
-                    <NeumorphicText size="xs" variant="secondary" className="flex items-center gap-1">
+                    <NeumorphicText size="sm" variant="secondary" className="flex items-center gap-1">
                       <MousePointer className="w-3 h-3" />
                       Click to select and view details
                     </NeumorphicText>
@@ -562,7 +563,7 @@ const HierarchicalNetworkTree: React.FC<HierarchicalNetworkTreeProps> = ({
                               CONCENTRATION RISK
                             </NeumorphicText>
                           </div>
-                          <NeumorphicText size="xs" className="mt-1 text-red-700">
+                          <NeumorphicText size="sm" className="mt-1 text-red-700">
                             Sits on {connection.connectionCount} supplier boards
                           </NeumorphicText>
                         </div>
@@ -588,49 +589,49 @@ const HierarchicalNetworkTree: React.FC<HierarchicalNetworkTreeProps> = ({
           transition={{ delay: 0.5 }}
           className="absolute bottom-4 right-4 p-3 rounded-lg bg-[var(--neumorphic-card)] shadow-md border border-[var(--neumorphic-border)] w-48 text-xs"
         >
-          <NeumorphicText size="xs" className="font-semibold mb-2 flex items-center gap-1">
+          <NeumorphicText size="sm" className="font-semibold mb-2 flex items-center gap-1">
             <Info className="w-3 h-3" />
             Risk Proximity
           </NeumorphicText>
           
           <div className="space-y-2">
             <div>
-              <NeumorphicText size="xs" className="font-medium mb-1">Distance from Center</NeumorphicText>
+              <NeumorphicText size="sm" className="font-medium mb-1">Distance from Center</NeumorphicText>
               <div className="space-y-1">
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-red-500" />
-                  <NeumorphicText size="xs">Critical (Closest)</NeumorphicText>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-orange-500" />
-                  <NeumorphicText size="xs">High Risk</NeumorphicText>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-yellow-500" />
-                  <NeumorphicText size="xs">Medium Risk</NeumorphicText>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-green-500" />
-                  <NeumorphicText size="xs">Low (Farthest)</NeumorphicText>
-                </div>
+                                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-red-500" />
+                    <NeumorphicText size="sm">Critical (Closest)</NeumorphicText>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-orange-500" />
+                    <NeumorphicText size="sm">High Risk</NeumorphicText>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                    <NeumorphicText size="sm">Medium Risk</NeumorphicText>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-green-500" />
+                    <NeumorphicText size="sm">Low (Farthest)</NeumorphicText>
+                  </div>
               </div>
             </div>
             
             <div className="pt-2 border-t border-[var(--neumorphic-border)]">
-              <NeumorphicText size="xs" className="font-medium mb-1">Connections</NeumorphicText>
+              <NeumorphicText size="sm" className="font-medium mb-1">Connections</NeumorphicText>
               <div className="space-y-1">
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-0.5 bg-red-500" />
-                  <NeumorphicText size="xs">Critical (4+ boards)</NeumorphicText>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-0.5 bg-orange-500" />
-                  <NeumorphicText size="xs">High (3 boards)</NeumorphicText>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-0.5 bg-gray-500" />
-                  <NeumorphicText size="xs">Normal (2 boards)</NeumorphicText>
-                </div>
+                                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-0.5 bg-red-500" />
+                    <NeumorphicText size="sm">Critical (4+ boards)</NeumorphicText>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-0.5 bg-orange-500" />
+                    <NeumorphicText size="sm">High (3 boards)</NeumorphicText>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-0.5 bg-gray-500" />
+                    <NeumorphicText size="sm">Normal (2 boards)</NeumorphicText>
+                  </div>
               </div>
             </div>
           </div>
@@ -661,7 +662,7 @@ const HierarchicalNetworkTree: React.FC<HierarchicalNetworkTreeProps> = ({
           <NeumorphicText className="text-2xl font-bold text-[var(--neumorphic-severity-critical)]">
             {directorConnections.filter(c => c.isConcentrationRisk).length}
           </NeumorphicText>
-          <NeumorphicText size="xs" variant="secondary" className="mt-1">
+          <NeumorphicText size="sm" variant="secondary" className="mt-1">
             Directors on 3+ boards
           </NeumorphicText>
         </motion.div>
@@ -673,7 +674,7 @@ const HierarchicalNetworkTree: React.FC<HierarchicalNetworkTreeProps> = ({
           <NeumorphicText className="text-2xl font-bold text-[var(--neumorphic-severity-critical)]">
             {supplierNodes.filter(n => n.riskLevel === 'Critical').length}
           </NeumorphicText>
-          <NeumorphicText size="xs" variant="secondary" className="mt-1">
+          <NeumorphicText size="sm" variant="secondary" className="mt-1">
             High-risk suppliers near center
           </NeumorphicText>
         </motion.div>

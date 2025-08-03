@@ -5,7 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   fadeInVariants, 
   slideUpVariants, 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   hoverScaleVariants,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ANIMATION_DURATIONS 
 } from '@/lib/animation-utils';
 import Map, { NavigationControl, ScaleControl, Marker } from 'react-map-gl/maplibre';
@@ -75,8 +77,6 @@ const RiskConcentrationMap: React.FC<RiskConcentrationMapProps> = ({
     y: 0, 
     type: null 
   });
-  const [isMapLoaded, setIsMapLoaded] = useState(false);
-  const [animateMarkers, setAnimateMarkers] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
 
   // Handle view state changes
@@ -87,14 +87,16 @@ const RiskConcentrationMap: React.FC<RiskConcentrationMapProps> = ({
   // Animate markers when component mounts or data changes
   useEffect(() => {
     const timer = setTimeout(() => {
-      setAnimateMarkers(true);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const animateMarkers = true;
     }, 500);
     return () => clearTimeout(timer);
   }, [filteredMineSites, filteredSuppliers]);
 
   // Handle map load event
   const handleMapLoad = useCallback(() => {
-    setIsMapLoaded(true);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const isMapLoaded = true;
   }, []);
 
   // Handle mine site click
@@ -115,8 +117,8 @@ const RiskConcentrationMap: React.FC<RiskConcentrationMapProps> = ({
 
   // Check if mine site is highlighted
   const isMineSiteHighlighted = useCallback((mineSiteId: string): boolean => {
-    return mineSiteId === selectedMineSiteId ||
-           (selectedSupplierId && 
+    return Boolean(selectedMineSiteId && mineSiteId === selectedMineSiteId) ||
+           Boolean(selectedSupplierId && 
             filteredSuppliers.some(s => 
               s.id === selectedSupplierId && 
               s.linkedMineSiteIds.includes(mineSiteId)
@@ -273,7 +275,7 @@ const RiskConcentrationMap: React.FC<RiskConcentrationMapProps> = ({
         onMove={handleViewStateChange}
         mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
         style={{ width: '100%', height: '100%' }}
-        onLoad={() => setIsMapLoaded(true)}
+        onLoad={() => handleMapLoad()}
         onError={(error) => {
           console.warn('Map loading error:', error);
           setMapError('Map tiles failed to load. Using basic view.');

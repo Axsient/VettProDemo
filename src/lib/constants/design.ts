@@ -62,8 +62,9 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     children: [
       { id: '1.1', title: 'Overview', icon: 'PieChart', href: '/dashboard/overview', type: 'link' },
       { id: '1.2', title: 'Executive Dashboard', icon: 'Crown', href: '/executive-dashboard', type: 'link' },
-      { id: '1.3', title: 'My Tasks & Approvals', icon: 'CheckSquare', href: '/dashboard/tasks-approvals', type: 'link' },
-      { id: '1.4', title: 'UI Elements', icon: 'Palette', href: '/dashboard/ui-elements', type: 'link' },
+      { id: '1.3', title: 'Operations Dashboard', icon: 'Command', href: '/dashboard/operations', type: 'link' },
+      { id: '1.4', title: 'My Tasks & Approvals', icon: 'CheckSquare', href: '/dashboard/tasks-approvals', type: 'link' },
+      { id: '1.5', title: 'UI Elements', icon: 'Palette', href: '/dashboard/ui-elements', type: 'link' },
     ],
   },
   {

@@ -324,7 +324,7 @@ export function applyRiskScoring(): {
     name: string;
     riskScore: number;
     riskLevel: 'Low' | 'Medium' | 'High' | 'Critical';
-    breakdown: any;
+    breakdown: Record<string, number | string>;
   }>;
   directors: Array<{
     id: string;
@@ -334,7 +334,10 @@ export function applyRiskScoring(): {
     boardCount: number;
     isConcentrationRisk: boolean;
   }>;
-  concentrationRisks: any;
+  concentrationRisks: {
+    directors: { id: string; boardCount: number; riskScore: number }[];
+    suppliers: { id: string; sharedDirectorCount: number; riskScore: number }[];
+  };
   summary: {
     totalSuppliers: number;
     totalDirectors: number;

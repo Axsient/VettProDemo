@@ -4,16 +4,12 @@ import * as React from 'react';
 import { toast as sonnerToast, Toaster } from 'sonner';
 import { motion } from 'framer-motion';
 import { 
+  X, 
   CheckCircle, 
   AlertTriangle, 
   Info, 
-  XCircle, 
-  X,
-  Filter,
-  Eye,
-  RotateCcw
+  AlertCircle 
 } from 'lucide-react';
-import { getCssVariable } from '@/lib/executive/theme-bridge';
 
 // Toast types and configuration
 export type ToastType = 'success' | 'error' | 'warning' | 'info' | 'loading';
@@ -49,7 +45,7 @@ const CustomToast = ({
       case 'success':
         return <CheckCircle className="w-5 h-5 text-green-500" />;
       case 'error':
-        return <XCircle className="w-5 h-5 text-red-500" />;
+        return <AlertCircle className="w-5 h-5 text-red-500" />;
       case 'warning':
         return <AlertTriangle className="w-5 h-5 text-orange-500" />;
       case 'info':

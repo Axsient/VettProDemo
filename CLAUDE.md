@@ -114,6 +114,7 @@ src/components/
 - Tailwind CSS for utility classes
 - Component-specific styles in component files
 - Global styles in `src/styles/themes/`
+- Some components use a CSS bridge, follow that pattern where needed.
 
 #### Error Handling
 - Error boundaries around complex components

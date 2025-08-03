@@ -40,17 +40,7 @@ const AnimatedKPI: React.FC<{
   return (
     <NeumorphicStatsCard
       title={title}
-      value={
-        typeof value === 'number' ? (
-          <CountUp
-            end={numericValue}
-            duration={focused ? 1.5 : 0.5}
-            preserveValue
-          />
-        ) : (
-          value
-        )
-      }
+      value={value}
       icon={icon}
       className={focused ? 'ring-2 ring-purple-400 shadow-lg' : ''}
     />

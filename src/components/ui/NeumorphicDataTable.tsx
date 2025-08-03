@@ -264,6 +264,7 @@ export function NeumorphicDataTable<T extends Record<string, unknown>>({
   return (
     <div className={`space-y-4 ${className}`}>
       {/* Toolbar */}
+      {!features.hideToolbar && (
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         {/* Left side - Search and Filters */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -422,6 +423,7 @@ export function NeumorphicDataTable<T extends Record<string, unknown>>({
           )}
         </div>
       </div>
+      )}
 
       {/* Table */}
       <div className={`neumorphic-card overflow-hidden ${tableClassName}`}>
@@ -740,6 +742,102 @@ export function NeumorphicDataTable<T extends Record<string, unknown>>({
             </div>
 
             <div className="flex items-center gap-2">
+              {features.customFooterControls && (
+                <>
+                  {/* Column Visibility */}
+                  {features.columnVisibility && (
+                    <Popover open={columnVisibilityOpen} onOpenChange={setColumnVisibilityOpen}>
+                      <PopoverTrigger asChild>
+                        <Button variant="neumorphic-outline" size="sm" className="h-8">
+                          <Eye className="w-4 h-4 mr-1" />
+                          Columns
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-48 p-3 neumorphic-card">
+                        <div className="space-y-2">
+                          <h4 className="font-medium text-sm">Toggle Columns</h4>
+                          {table.allColumns.map((column) => (
+                            <label key={column.id} className="flex items-center space-x-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={table.state.columnVisibility[column.id] !== false}
+                                onChange={(e) => {
+                                  table.setColumnVisibility({
+                                    ...table.state.columnVisibility,
+                                    [column.id]: e.target.checked,
+                                  });
+                                }}
+                                className="rounded neumorphic-checkbox"
+                              />
+                              <span className="text-sm">{column.header}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+
+                  {/* Density Control */}
+                  {features.density && (
+                    <Popover open={densityMenuOpen} onOpenChange={setDensityMenuOpen}>
+                      <PopoverTrigger asChild>
+                        <Button variant="neumorphic-outline" size="sm" className="h-8">
+                          <Settings className="w-4 h-4 mr-1" />
+                          Density
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-40 p-3 neumorphic-card">
+                        <div className="space-y-2">
+                          <h4 className="font-medium text-sm">Row Density</h4>
+                          {['compact', 'normal', 'comfortable'].map((density) => (
+                            <label key={density} className="flex items-center space-x-2 cursor-pointer">
+                              <input
+                                type="radio"
+                                name="density"
+                                checked={table.state.density.mode === density}
+                                onChange={() => table.setDensity(density as 'compact' | 'normal' | 'comfortable')}
+                                className="neumorphic-radio"
+                              />
+                              <span className="text-sm capitalize">{density}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+
+                  {/* Export */}
+                  {features.export && exportOptions && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="neumorphic-outline" size="sm" className="h-8">
+                          <Download className="w-4 h-4 mr-1" />
+                          Export
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-40 p-3 neumorphic-card">
+                        <div className="space-y-2">
+                          <h4 className="font-medium text-sm">Export Format</h4>
+                          {(exportOptions.formats || ['csv', 'json']).map((format) => (
+                            <Button
+                              key={format}
+                              variant="neumorphic-outline"
+                              size="sm"
+                              onClick={() => handleExport(format)}
+                              className="w-full justify-start h-8"
+                            >
+                              {format.toUpperCase()}
+                            </Button>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                  
+                  <div className="mx-2 border-l border-border h-6" />
+                </>
+              )}
+              
               <Button
                 variant="neumorphic-outline"
                 size="sm"

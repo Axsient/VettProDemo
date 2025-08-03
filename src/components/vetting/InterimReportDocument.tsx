@@ -16,7 +16,7 @@ import {
   TrendingUp,
   Zap
 } from 'lucide-react';
-import { ActiveVettingCase } from '@/lib/sample-data/activeVettingCasesSample';
+import { ActiveVettingCase } from '@/types/vetting';
 import { IndividualDetails, CompanyDetails, VettingEntityType } from '@/types/vetting';
 
 interface InterimReportDocumentProps {

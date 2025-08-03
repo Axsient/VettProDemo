@@ -8,463 +8,266 @@
  * @version 1.0.0
  */
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useDebouncedCallback } from 'use-debounce';
-import {
+import { useState, useEffect } from 'react';
+import { 
+  ActiveVettingCase, 
   VettingEntityType,
-  VettingCheckDefinition,
-  VettingPackage,
+  CheckCategory,
+  VettingStatus
 } from '@/types/vetting';
-import {
-  allVettingChecks,
-  vettingPackages,
-  calculateTotalCost,
-  calculateMaxTurnaround,
-} from '@/lib/sample-data/vettingChecksSample';
-import {
-  calculateProviderPerformance,
-  suggestCostOptimizations,
-  CostOptimization,
-} from '@/lib/vetting-intelligence';
 
-// Hook configuration interface
-export interface VettingCalculatorOptions {
-  enableRealTimeUpdates?: boolean;
-  debounceDelay?: number;
-  includeProviderMetrics?: boolean;
-  enableOptimizations?: boolean;
-  trackChanges?: boolean;
+interface CheckConfiguration {
+  id: string;
+  name: string;
+  category: CheckCategory;
+  estimatedCost: number;
+  estimatedTurnaroundDays: number;
+  isSelected: boolean;
+  isRequired: boolean;
+  applicableTo: VettingEntityType[];
 }
 
-// Calculation result interface
-export interface VettingCalculation {
-  // Basic calculations
+interface CalculatorResult {
   totalCost: number;
   totalTurnaroundDays: number;
-  totalChecks: number;
-  
-  // Breakdown by category
-  costByCategory: Record<string, number>;
-  turnaroundByCategory: Record<string, number>;
-  checksByCategory: Record<string, number>;
-  
-  // Provider analysis
-  providerBreakdown: {
-    provider: string;
-    checkCount: number;
-    totalCost: number;
-    averageTurnaround: number;
-    performanceScore?: number;
-  }[];
-  
-  // Package analysis
-  packageSavings?: {
-    potentialSavings: number;
-    recommendedPackage?: VettingPackage;
-    applicableChecks: string[];
-  };
-  
-  // Cost optimization
-  optimization?: CostOptimization;
-  
-  // Performance metrics
-  costPerCheck: number;
-  costPerDay: number;
-  efficiency: number; // 0-100 score
-  
-  // Risk assessment
-  riskCoverage: {
-    high: number;
-    medium: number;
-    low: number;
-    total: number;
-  };
-  
-  // Validation
-  errors: string[];
-  warnings: string[];
-  
-  // Metadata
-  lastUpdated: Date;
-  calculationId: string;
+  selectedChecks: CheckConfiguration[];
+  riskProfile: 'Low' | 'Medium' | 'High';
+  complianceScore: number;
 }
 
-// Change tracking interface
-export interface CalculationChange {
-  timestamp: Date;
-  changeType: 'add' | 'remove' | 'replace';
-  checkId?: string;
-  packageId?: string;
-  costDelta: number;
-  turnaroundDelta: number;
-  description: string;
+interface UseVettingCalculatorProps {
+  entityType: VettingEntityType;
+  initialChecks?: CheckConfiguration[];
 }
 
-// Main hook
-export function useVettingCalculator(
-  selectedChecks: string[],
-  selectedPackage: string | null,
-  entityType: VettingEntityType,
-  options: VettingCalculatorOptions = {}
-) {
-  const {
-    enableRealTimeUpdates = true,
-    debounceDelay = 300,
-    includeProviderMetrics = true,
-    enableOptimizations = true,
-    trackChanges = false,
-  } = options;
+// Default check configurations - moved outside component to avoid dependency issues
+const defaultChecks: CheckConfiguration[] = [
+  {
+    id: 'id_verification',
+    name: 'SA ID Verification',
+    category: CheckCategory.IDENTITY,
+    estimatedCost: 150,
+    estimatedTurnaroundDays: 1,
+    isSelected: true,
+    isRequired: true,
+    applicableTo: [VettingEntityType.INDIVIDUAL]
+  },
+  {
+    id: 'criminal_check',
+    name: 'Criminal Record Check',
+    category: CheckCategory.CRIMINAL,
+    estimatedCost: 300,
+    estimatedTurnaroundDays: 3,
+    isSelected: false,
+    isRequired: false,
+    applicableTo: [VettingEntityType.INDIVIDUAL]
+  },
+  {
+    id: 'credit_check',
+    name: 'Credit Bureau Check',
+    category: CheckCategory.FINANCIAL,
+    estimatedCost: 250,
+    estimatedTurnaroundDays: 2,
+    isSelected: false,
+    isRequired: false,
+    applicableTo: [VettingEntityType.INDIVIDUAL]
+  },
+  {
+    id: 'cipc_check',
+    name: 'CIPC Company Check',
+    category: CheckCategory.COMPLIANCE,
+    estimatedCost: 200,
+    estimatedTurnaroundDays: 2,
+    isSelected: true,
+    isRequired: true,
+    applicableTo: [VettingEntityType.COMPANY]
+  },
+  {
+    id: 'sars_check',
+    name: 'SARS Tax Compliance',
+    category: CheckCategory.COMPLIANCE,
+    estimatedCost: 180,
+    estimatedTurnaroundDays: 2,
+    isSelected: false,
+    isRequired: false,
+    applicableTo: [VettingEntityType.COMPANY, VettingEntityType.INDIVIDUAL]
+  }
+];
 
-  // State
-  const [calculation, setCalculation] = useState<VettingCalculation | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [changes, setChanges] = useState<CalculationChange[]>([]);
-  const [optimizationsApplied, setOptimizationsApplied] = useState<string[]>([]);
+export const useVettingCalculator = ({ 
+  entityType, 
+  initialChecks = [] 
+}: UseVettingCalculatorProps) => {
+  const [availableChecks, setAvailableChecks] = useState<CheckConfiguration[]>(initialChecks);
+  const [selectedChecks, setSelectedChecks] = useState<Set<string>>(new Set());
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [result, setResult] = useState<CalculatorResult | null>(null);
 
-  // Memoized check definitions
-  const selectedCheckDefs = useMemo(() => {
-    return allVettingChecks.filter(check => selectedChecks.includes(check.id));
-  }, [selectedChecks]);
-
-  // Memoized package definition
-  const selectedPackageDef = useMemo(() => {
-    return selectedPackage ? vettingPackages.find(pkg => pkg.id === selectedPackage) : null;
-  }, [selectedPackage]);
-
-  // Core calculation function
-  const performCalculation = useCallback(async (): Promise<VettingCalculation> => {
-    const calculationId = `calc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const startTime = Date.now();
-
-    try {
-      // Combine package and individual checks
-      const allRelevantChecks = [...selectedCheckDefs];
+  // Initialize checks when component mounts or entity type changes
+  useEffect(() => {
+    if (initialChecks.length === 0) {
+      const applicableChecks = defaultChecks.filter(check => 
+        check.applicableTo.includes(entityType)
+      );
+      setAvailableChecks(applicableChecks);
       
-      if (selectedPackageDef) {
-        const packageChecks = allVettingChecks.filter(check => 
-          selectedPackageDef.checkIds.includes(check.id)
-        );
-        // Merge without duplicates
-        const existingIds = new Set(allRelevantChecks.map(c => c.id));
-        packageChecks.forEach(check => {
-          if (!existingIds.has(check.id)) {
-            allRelevantChecks.push(check);
-          }
-        });
-      }
+      // Auto-select required checks
+      const requiredCheckIds = applicableChecks
+        .filter(check => check.isRequired)
+        .map(check => check.id);
+      setSelectedChecks(new Set(requiredCheckIds));
+    }
+  }, [entityType, initialChecks]);
 
-      // Basic calculations
-      const totalCost = selectedPackageDef 
-        ? (selectedPackageDef.totalEstimatedCostZAR || 0) + calculateTotalCost(
-            selectedChecks.filter(id => !selectedPackageDef.checkIds.includes(id))
-          )
-        : calculateTotalCost(selectedChecks);
+  // Calculate results when selected checks change
+  useEffect(() => {
+    if (selectedChecks.size === 0) {
+      setResult(null);
+      return;
+    }
 
-      const totalTurnaroundDays = Math.max(
-        selectedPackageDef?.totalEstimatedTurnaroundDays || 0,
-        calculateMaxTurnaround(selectedChecks)
+    setIsCalculating(true);
+
+    // Simulate calculation delay
+    const timer = setTimeout(() => {
+      const selectedCheckConfigs = availableChecks.filter(check => 
+        selectedChecks.has(check.id)
       );
 
-      const totalChecks = allRelevantChecks.length;
+      const totalCost = selectedCheckConfigs.reduce((sum, check) => sum + check.estimatedCost, 0);
+      const totalTurnaroundDays = Math.max(...selectedCheckConfigs.map(check => check.estimatedTurnaroundDays));
 
-      // Category breakdown
-      const costByCategory: Record<string, number> = {};
-      const turnaroundByCategory: Record<string, number> = {};
-      const checksByCategory: Record<string, number> = {};
-
-      allRelevantChecks.forEach(check => {
-        const category = check.category;
-        costByCategory[category] = (costByCategory[category] || 0) + (check.estimatedCostZAR || 0);
-        turnaroundByCategory[category] = Math.max(
-          turnaroundByCategory[category] || 0,
-          check.estimatedTurnaroundDays || 0
-        );
-        checksByCategory[category] = (checksByCategory[category] || 0) + 1;
-      });
-
-      // Provider breakdown
-      const providerBreakdown = Object.entries(
-        allRelevantChecks.reduce((acc, check) => {
-          const provider = check.provider || 'Unknown';
-          if (!acc[provider]) {
-            acc[provider] = {
-              provider,
-              checkCount: 0,
-              totalCost: 0,
-              turnarounds: [],
-            };
-          }
-          acc[provider].checkCount++;
-          acc[provider].totalCost += check.estimatedCostZAR || 0;
-          acc[provider].turnarounds.push(check.estimatedTurnaroundDays || 0);
-          return acc;
-        }, {} as Record<string, any>)
-      ).map(([_, data]) => {
-        const result = {
-          provider: data.provider,
-          checkCount: data.checkCount,
-          totalCost: data.totalCost,
-          averageTurnaround: data.turnarounds.reduce((sum: number, t: number) => sum + t, 0) / data.turnarounds.length,
-        };
-
-        if (includeProviderMetrics) {
-          const metrics = calculateProviderPerformance(data.provider.toLowerCase().replace(/[^a-z]/g, ''));
-          (result as any).performanceScore = metrics?.overallScore;
-        }
-
-        return result;
-      });
-
-      // Package analysis
-      let packageSavings: VettingCalculation['packageSavings'];
-      if (!selectedPackageDef && selectedChecks.length >= 3) {
-        const applicablePackages = vettingPackages.filter(pkg => 
-          pkg.applicableTo.includes(entityType)
-        );
-        
-        for (const pkg of applicablePackages) {
-          const overlap = pkg.checkIds.filter(checkId => selectedChecks.includes(checkId));
-          if (overlap.length >= 3) {
-            const individualCost = calculateTotalCost(overlap);
-            const packageCost = (pkg.totalEstimatedCostZAR || 0) * (overlap.length / pkg.checkIds.length);
-            const savings = individualCost - packageCost;
-            
-            if (savings > (packageSavings?.potentialSavings || 0)) {
-              packageSavings = {
-                potentialSavings: savings,
-                recommendedPackage: pkg,
-                applicableChecks: overlap,
-              };
-            }
-          }
-        }
-      }
-
-      // Cost optimization
-      let optimization: CostOptimization | undefined;
-      if (enableOptimizations && selectedChecks.length > 0) {
-        optimization = suggestCostOptimizations(selectedChecks, entityType);
-      }
-
-      // Performance metrics
-      const costPerCheck = totalChecks > 0 ? totalCost / totalChecks : 0;
-      const costPerDay = totalTurnaroundDays > 0 ? totalCost / totalTurnaroundDays : 0;
-      
-      // Efficiency calculation (lower cost per check and faster turnaround = higher efficiency)
-      const avgCheckCost = allVettingChecks.reduce((sum, check) => sum + (check.estimatedCostZAR || 0), 0) / allVettingChecks.length;
-      const avgTurnaround = allVettingChecks.reduce((sum, check) => sum + (check.estimatedTurnaroundDays || 0), 0) / allVettingChecks.length;
-      
-      const costEfficiency = avgCheckCost > 0 ? Math.max(0, Math.min(100, (1 - (costPerCheck - avgCheckCost) / avgCheckCost) * 100)) : 50;
-      const timeEfficiency = avgTurnaround > 0 ? Math.max(0, Math.min(100, (1 - (totalTurnaroundDays - avgTurnaround) / avgTurnaround) * 100)) : 50;
-      const efficiency = (costEfficiency + timeEfficiency) / 2;
-
-      // Risk coverage
-      const riskCoverage = {
-        high: allRelevantChecks.filter(check => check.riskLevel === 'High').length,
-        medium: allRelevantChecks.filter(check => check.riskLevel === 'Medium').length,
-        low: allRelevantChecks.filter(check => check.riskLevel === 'Low').length,
-        total: allRelevantChecks.length,
+      // Risk calculation based on selected checks
+      const riskFactors: Record<CheckCategory, number> = {
+        [CheckCategory.CRIMINAL]: 40,
+        [CheckCategory.FINANCIAL]: 30,
+        [CheckCategory.IDENTITY]: 20,
+        [CheckCategory.COMPLIANCE]: 10,
+        [CheckCategory.OPERATIONAL]: 15,
+        [CheckCategory.REPUTATIONAL]: 25,
+        [CheckCategory.MEDICAL]: 35,
+        [CheckCategory.BUSINESS_SPECIFIC]: 20
       };
 
-      // Validation
-      const errors: string[] = [];
-      const warnings: string[] = [];
+      const coverageScore = selectedCheckConfigs.reduce((score, check) => {
+        return score + (riskFactors[check.category] || 0);
+      }, 0);
 
-      if (totalChecks === 0) {
-        warnings.push('No checks selected');
-      }
+      let riskProfile: 'Low' | 'Medium' | 'High' = 'Medium';
+      if (coverageScore >= 70) riskProfile = 'Low';
+      else if (coverageScore <= 30) riskProfile = 'High';
 
-      if (totalCost > 10000) {
-        warnings.push('High cost selection - consider optimization');
-      }
+      const complianceScore = Math.min(100, (coverageScore / 100) * 100);
 
-      if (totalTurnaroundDays > 14) {
-        warnings.push('Long turnaround time - consider faster alternatives');
-      }
-
-      if (riskCoverage.high === 0 && entityType !== VettingEntityType.INDIVIDUAL) {
-        warnings.push('No high-risk checks selected for this entity type');
-      }
-
-      const calculation: VettingCalculation = {
+      setResult({
         totalCost,
         totalTurnaroundDays,
-        totalChecks,
-        costByCategory,
-        turnaroundByCategory,
-        checksByCategory,
-        providerBreakdown,
-        packageSavings,
-        optimization,
-        costPerCheck,
-        costPerDay,
-        efficiency,
-        riskCoverage,
-        errors,
-        warnings,
-        lastUpdated: new Date(),
-        calculationId,
-      };
+        selectedChecks: selectedCheckConfigs,
+        riskProfile,
+        complianceScore
+      });
 
-      return calculation;
-    } catch (error) {
-      console.error('Calculation error:', error);
-      throw error;
-    }
-  }, [
-    selectedCheckDefs,
-    selectedPackageDef,
-    selectedChecks,
-    entityType,
-    includeProviderMetrics,
-    enableOptimizations,
-  ]);
+      setIsCalculating(false);
+    }, 300);
 
-  // Debounced calculation
-  const debouncedCalculation = useDebouncedCallback(
-    async () => {
-      if (!enableRealTimeUpdates) return;
-      
-      setLoading(true);
-      try {
-        const result = await performCalculation();
-        setCalculation(result);
-      } catch (error) {
-        console.error('Failed to calculate:', error);
-      } finally {
-        setLoading(false);
+    return () => clearTimeout(timer);
+  }, [selectedChecks, availableChecks]);
+
+  const toggleCheck = (checkId: string) => {
+    const check = availableChecks.find(c => c.id === checkId);
+    if (!check || check.isRequired) return;
+
+    setSelectedChecks(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(checkId)) {
+        newSet.delete(checkId);
+      } else {
+        newSet.add(checkId);
       }
-    },
-    debounceDelay
-  );
+      return newSet;
+    });
+  };
 
-  // Track changes
-  const trackChange = useCallback((
-    changeType: CalculationChange['changeType'],
-    checkId?: string,
-    packageId?: string,
-    description?: string
-  ) => {
-    if (!trackChanges) return;
+  const selectAllChecks = () => {
+    const allCheckIds = availableChecks.map(check => check.id);
+    setSelectedChecks(new Set(allCheckIds));
+  };
 
-    const prevCalculation = calculation;
-    if (!prevCalculation) return;
+  const clearAllChecks = () => {
+    const requiredCheckIds = availableChecks
+      .filter(check => check.isRequired)
+      .map(check => check.id);
+    setSelectedChecks(new Set(requiredCheckIds));
+  };
 
-    // Calculate deltas (simplified for demo)
-    const costDelta = 0; // Would calculate based on change
-    const turnaroundDelta = 0; // Would calculate based on change
+  const generateVettingCase = (): Partial<ActiveVettingCase> => {
+    if (!result) return {};
 
-    const change: CalculationChange = {
-      timestamp: new Date(),
-      changeType,
-      checkId,
-      packageId,
-      costDelta,
-      turnaroundDelta,
-      description: description || `${changeType} ${checkId || packageId}`,
+    return {
+      entityType,
+      totalEstimatedCost: result.totalCost,
+      estimatedCompletionDate: new Date(
+        Date.now() + result.totalTurnaroundDays * 24 * 60 * 60 * 1000
+      ).toISOString(),
+      status: VettingStatus.INITIATED,
+      overallProgress: 0,
+      completedChecks: 0,
+      totalChecks: result.selectedChecks.length
     };
+  };
 
-    setChanges(prev => [change, ...prev.slice(0, 99)]); // Keep last 100 changes
-  }, [calculation, trackChanges]);
+  // Smart recommendations based on entity type and risk tolerance
+  const getRecommendations = () => {
+    const recommendations: string[] = [];
 
-  // Effect for real-time updates
-  useEffect(() => {
-    debouncedCalculation();
-  }, [debouncedCalculation]);
+    if (entityType === VettingEntityType.INDIVIDUAL) {
+      if (!selectedChecks.has('criminal_check')) {
+        recommendations.push('Consider adding Criminal Record Check for comprehensive screening');
+      }
+      if (!selectedChecks.has('credit_check')) {
+        recommendations.push('Financial verification recommended for positions involving money handling');
+      }
+    }
 
-  // Manual calculation trigger
-  const recalculate = useCallback(async () => {
-    setLoading(true);
+    if (entityType === VettingEntityType.COMPANY) {
+      if (!selectedChecks.has('sars_check')) {
+        recommendations.push('SARS Tax Compliance check recommended for all business entities');
+      }
+    }
+
+    return recommendations;
+  };
+
+  const exportConfiguration = () => {
+    return {
+      entityType,
+      selectedChecks: Array.from(selectedChecks),
+      result,
+      timestamp: new Date().toISOString()
+    };
+  };
+
+  const importConfiguration = (config: Record<string, unknown>) => {
     try {
-      const result = await performCalculation();
-      setCalculation(result);
-      return result;
-    } catch (error) {
-      console.error('Failed to recalculate:', error);
-      throw error;
-    } finally {
-      setLoading(false);
+      if (config.selectedChecks && Array.isArray(config.selectedChecks)) {
+        setSelectedChecks(new Set(config.selectedChecks as string[]));
+      }
+    } catch {
+      console.error('Failed to import configuration');
     }
-  }, [performCalculation]);
-
-  // Apply optimization
-  const applyOptimization = useCallback((optimizationId: string) => {
-    if (!calculation?.optimization) return;
-
-    const optimization = calculation.optimization.recommendations.find(r => 
-      r.type === optimizationId
-    );
-
-    if (optimization) {
-      setOptimizationsApplied(prev => [...prev, optimizationId]);
-      trackChange('replace', undefined, undefined, `Applied optimization: ${optimization.description}`);
-      // In a real implementation, this would modify the selected checks/packages
-    }
-  }, [calculation, trackChange]);
-
-  // Reset optimizations
-  const resetOptimizations = useCallback(() => {
-    setOptimizationsApplied([]);
-    trackChange('replace', undefined, undefined, 'Reset all optimizations');
-  }, [trackChange]);
-
-  // Get formatted cost
-  const getFormattedCost = useCallback((amount: number) => {
-    return new Intl.NumberFormat('en-ZA', {
-      style: 'currency',
-      currency: 'ZAR',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  }, []);
-
-  // Get cost breakdown by category
-  const getCostBreakdownData = useCallback(() => {
-    if (!calculation) return [];
-    
-    return Object.entries(calculation.costByCategory).map(([category, cost]) => ({
-      category,
-      cost,
-      percentage: calculation.totalCost > 0 ? (cost / calculation.totalCost) * 100 : 0,
-      checks: calculation.checksByCategory[category] || 0,
-    }));
-  }, [calculation]);
-
-  // Get provider performance comparison
-  const getProviderComparison = useCallback(() => {
-    if (!calculation) return [];
-    
-    return calculation.providerBreakdown.sort((a, b) => 
-      (b.performanceScore || 0) - (a.performanceScore || 0)
-    );
-  }, [calculation]);
+  };
 
   return {
-    // Core data
-    calculation,
-    loading,
-    
-    // Actions
-    recalculate,
-    applyOptimization,
-    resetOptimizations,
-    
-    // Utilities
-    getFormattedCost,
-    getCostBreakdownData,
-    getProviderComparison,
-    
-    // Change tracking
-    changes: trackChanges ? changes : [],
-    optimizationsApplied,
-    
-    // Status
-    hasErrors: calculation?.errors.length || 0 > 0,
-    hasWarnings: calculation?.warnings.length || 0 > 0,
-    isOptimized: optimizationsApplied.length > 0,
-    
-    // Performance
-    efficiency: calculation?.efficiency || 0,
-    lastUpdated: calculation?.lastUpdated,
+    availableChecks,
+    selectedChecks: Array.from(selectedChecks),
+    isCalculating,
+    result,
+    toggleCheck,
+    selectAllChecks,
+    clearAllChecks,
+    generateVettingCase,
+    getRecommendations,
+    exportConfiguration,
+    importConfiguration
   };
-}
+};

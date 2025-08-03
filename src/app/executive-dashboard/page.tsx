@@ -14,6 +14,7 @@ import {
   slideInFromLeftVariants, 
   slideInFromRightVariants,
   staggerContainerVariants,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   hoverScaleVariants,
   buttonPressVariants
 } from '@/lib/animation-utils';
@@ -356,7 +357,6 @@ export default function ExecutiveDashboardPage() {
                   <NeumorphicButton 
                     onClick={handleClearAll}
                     className="px-2 py-1 text-xs"
-                    variant="outline"
                   >
                     <X className="w-3 h-3 mr-1" />
                     Clear All

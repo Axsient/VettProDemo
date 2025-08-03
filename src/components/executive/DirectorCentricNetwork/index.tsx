@@ -85,7 +85,6 @@ interface ViewHistory {
 }
 
 const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
-  activeFilter,
   onNodeClick,
   onNodeHover,
   selectedSupplierId,
@@ -110,12 +109,6 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [lastTransform, setLastTransform] = useState({ translateX: 0, translateY: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // SVG dimensions
-  const SVG_WIDTH = 1600;
-  const SVG_HEIGHT = 1200;
-  const CENTER_X = SVG_WIDTH / 2;
-  const CENTER_Y = SVG_HEIGHT / 2;
 
   // Calculate proper risk scores using the risk scoring engine
   const riskScoringResults = useMemo(() => {
@@ -302,7 +295,7 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
       let currentRing = 0;
       let currentRingNodes = 0;
       
-      allSuppliers.forEach((supplier, index) => {
+      allSuppliers.forEach((supplier) => {
         // Calculate required space for this node (node + label + margins)
         const nodeRadius = 15 + ((supplier.contractValueZAR / Math.max(...supplierProfiles.map(s => s.contractValueZAR))) * 20);
         const labelWidth = supplier.name.length * 8; // Approximate label width
@@ -537,7 +530,7 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
     }
 
     return nodes;
-  }, [viewState, focusedDirectorId, focusedSupplierId, directorProfiles, supplierProfiles]);
+  }, [viewState, focusedDirectorId, focusedSupplierId, directorProfiles, supplierProfiles, CENTER_X, CENTER_Y]);
 
   // Zoom and Pan functionality
   const zoomIn = useCallback(() => {
@@ -971,7 +964,7 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
   // Keyboard navigation
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && viewState !== 'overview') {
+      if (e.key === 'Escape' && viewState !== 'director-overview' && viewState !== 'supplier-overview') {
         navigateBack();
       }
     };
@@ -981,6 +974,7 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
   }, [viewState, navigateBack]);
 
   // Check if two nodes are connected
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const areNodesConnected = useCallback((nodeId1: string, nodeId2: string): boolean => {
     return connections.some(conn => 
       (conn.source === nodeId1 && conn.target === nodeId2) ||
@@ -1011,7 +1005,7 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
         {/* Header with navigation */}
         <div className="flex items-center justify-between p-6 border-b border-[var(--neumorphic-border)]">
           <div>
-            <NeumorphicHeading size="lg" className="flex items-center gap-2">
+            <NeumorphicHeading className="flex items-center gap-2">
               {networkMode === 'director-centric' ? (
                 <Users className="w-6 h-6 text-[var(--neumorphic-accent)]" />
               ) : (
@@ -1154,6 +1148,7 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                 const originalSupplierId = node.type === 'supplier' && node.id.includes('-') ? 
                   node.id.split('-')[0] : node.id;
                 const isSelected = selectedSupplierId === originalSupplierId;
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const isHighlighted = highlightedEntityIds.includes(originalSupplierId);
                 
                 // Determine if this node should be dimmed when another node is hovered
@@ -1546,7 +1541,7 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                         )}
                       </>
                     )}
-                    <NeumorphicText size="xs" variant="secondary" className="flex items-center gap-1">
+                    <NeumorphicText size="sm" variant="secondary" className="flex items-center gap-1">
                       <MousePointer className="w-3 h-3" />
                       {isNodeNavigable(hoveredNode) ? 'Click to analyze network' : 'Director profile'}
                     </NeumorphicText>
@@ -1582,7 +1577,7 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                         Contract: R{(hoveredNode.contractValue / 1000000).toFixed(1)}M
                       </NeumorphicText>
                     )}
-                    <NeumorphicText size="xs" variant="secondary" className="flex items-center gap-1">
+                    <NeumorphicText size="sm" variant="secondary" className="flex items-center gap-1">
                       <MousePointer className="w-3 h-3" />
                       {isNodeNavigable(hoveredNode) ? 'Click to explore connections' : 'View details'}
                     </NeumorphicText>
@@ -1617,7 +1612,7 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
                 className="flex items-center justify-between cursor-pointer"
                 onClick={() => setIsLegendCollapsed(!isLegendCollapsed)}
               >
-                <NeumorphicText size="xs" className="font-semibold flex items-center gap-1">
+                <NeumorphicText size="sm" className="font-semibold flex items-center gap-1">
                   <Info className="w-3 h-3" />
                   Interactive Guide
                 </NeumorphicText>
@@ -1642,41 +1637,41 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
               {viewState === 'director-overview' && (
                 <>
                   <div>
-                    <NeumorphicText size="xs" className="font-medium mb-1">Director Nodes</NeumorphicText>
+                    <NeumorphicText size="sm" className="font-medium mb-1">Director Nodes</NeumorphicText>
                     <div className="space-y-1">
                       <div className="flex items-center gap-1">
                         <div className="w-3 h-3 rounded-full bg-red-500" />
-                        <NeumorphicText size="xs">Critical (4+ boards)</NeumorphicText>
+                        <NeumorphicText size="sm">Critical (4+ boards)</NeumorphicText>
                       </div>
                       <div className="flex items-center gap-1">
                         <div className="w-3 h-3 rounded-full bg-orange-500" />
-                        <NeumorphicText size="xs">High Risk (3 boards)</NeumorphicText>
+                        <NeumorphicText size="sm">High Risk (3 boards)</NeumorphicText>
                       </div>
                       <div className="flex items-center gap-1">
                         <div className="w-3 h-3 rounded-full bg-gray-500" />
-                        <NeumorphicText size="xs">Normal (1-2 boards)</NeumorphicText>
+                        <NeumorphicText size="sm">Normal (1-2 boards)</NeumorphicText>
                       </div>
                     </div>
                   </div>
                   <div className="pt-2 border-t border-[var(--neumorphic-border)]">
-                    <NeumorphicText size="xs" className="font-medium mb-1">Connection Lines</NeumorphicText>
+                    <NeumorphicText size="sm" className="font-medium mb-1">Connection Lines</NeumorphicText>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <svg width="30" height="2" className="flex-shrink-0">
                           <line x1="0" y1="1" x2="30" y2="1" stroke="var(--neumorphic-accent)" strokeWidth="2" opacity="0.6" />
                         </svg>
-                        <NeumorphicText size="xs">Shared suppliers between directors</NeumorphicText>
+                        <NeumorphicText size="sm">Shared suppliers between directors</NeumorphicText>
                       </div>
                       <div className="flex items-center gap-2">
                         <svg width="30" height="2" className="flex-shrink-0">
                           <line x1="0" y1="1" x2="30" y2="1" stroke="var(--neumorphic-text-secondary)" strokeWidth="1" opacity="0.4" />
                         </svg>
-                        <NeumorphicText size="xs">Director to supplier</NeumorphicText>
+                        <NeumorphicText size="sm">Director to supplier</NeumorphicText>
                       </div>
                     </div>
                   </div>
                   <div className="pt-2 border-t border-[var(--neumorphic-border)]">
-                    <NeumorphicText size="xs">
+                    <NeumorphicText size="sm">
                       <span className="font-medium">Click any director</span> to explore their supplier network
                     </NeumorphicText>
                   </div>
@@ -1686,45 +1681,45 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
               {viewState === 'supplier-overview' && (
                 <>
                   <div>
-                    <NeumorphicText size="xs" className="font-medium mb-1">Supplier Nodes</NeumorphicText>
+                    <NeumorphicText size="sm" className="font-medium mb-1">Supplier Nodes</NeumorphicText>
                     <div className="space-y-1">
                       <div className="flex items-center gap-1">
                         <div className="w-3 h-3 rounded-full bg-red-500" />
-                        <NeumorphicText size="xs">Critical Risk (75%+)</NeumorphicText>
+                        <NeumorphicText size="sm">Critical Risk (75%+)</NeumorphicText>
                       </div>
                       <div className="flex items-center gap-1">
                         <div className="w-3 h-3 rounded-full bg-orange-500" />
-                        <NeumorphicText size="xs">High Risk (50-74%)</NeumorphicText>
+                        <NeumorphicText size="sm">High Risk (50-74%)</NeumorphicText>
                       </div>
                       <div className="flex items-center gap-1">
                         <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                        <NeumorphicText size="xs">Medium Risk (25-49%)</NeumorphicText>
+                        <NeumorphicText size="sm">Medium Risk (25-49%)</NeumorphicText>
                       </div>
                       <div className="flex items-center gap-1">
                         <div className="w-3 h-3 rounded-full bg-green-500" />
-                        <NeumorphicText size="xs">Low Risk (&lt;25%)</NeumorphicText>
+                        <NeumorphicText size="sm">Low Risk (&lt;25%)</NeumorphicText>
                       </div>
                     </div>
                   </div>
                   <div className="pt-2 border-t border-[var(--neumorphic-border)]">
-                    <NeumorphicText size="xs" className="font-medium mb-1">Connection Lines</NeumorphicText>
+                    <NeumorphicText size="sm" className="font-medium mb-1">Connection Lines</NeumorphicText>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <svg width="30" height="2" className="flex-shrink-0">
                           <line x1="0" y1="1" x2="30" y2="1" stroke="var(--neumorphic-accent)" strokeWidth="3" opacity="0.6" />
                         </svg>
-                        <NeumorphicText size="xs">Shared directors (concentration risk)</NeumorphicText>
+                        <NeumorphicText size="sm">Shared directors (concentration risk)</NeumorphicText>
                       </div>
                       <div className="flex items-center gap-2">
                         <svg width="30" height="2" className="flex-shrink-0">
                           <line x1="0" y1="1" x2="30" y2="1" stroke="var(--neumorphic-text-secondary)" strokeWidth="1" opacity="0.4" />
                         </svg>
-                        <NeumorphicText size="xs">Supplier to director</NeumorphicText>
+                        <NeumorphicText size="sm">Supplier to director</NeumorphicText>
                       </div>
                     </div>
                   </div>
                   <div className="pt-2 border-t border-[var(--neumorphic-border)]">
-                    <NeumorphicText size="xs">
+                    <NeumorphicText size="sm">
                       <span className="font-medium">Node size</span> = contract value
                     </NeumorphicText>
                   </div>
@@ -1734,24 +1729,24 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
               {viewState === 'director-focus' && (
                 <>
                   <div>
-                    <NeumorphicText size="xs" className="font-medium mb-1">Supplier Nodes</NeumorphicText>
+                    <NeumorphicText size="sm" className="font-medium mb-1">Supplier Nodes</NeumorphicText>
                     <div className="space-y-1">
                       <div className="flex items-center gap-1">
                         <div className="w-2 h-2 rounded-full bg-red-500" />
-                        <NeumorphicText size="xs">Critical Risk (75%+)</NeumorphicText>
+                        <NeumorphicText size="sm">Critical Risk (75%+)</NeumorphicText>
                       </div>
                       <div className="flex items-center gap-1">
                         <div className="w-2 h-2 rounded-full bg-orange-500" />
-                        <NeumorphicText size="xs">High Risk (50-74%)</NeumorphicText>
+                        <NeumorphicText size="sm">High Risk (50-74%)</NeumorphicText>
                       </div>
                       <div className="flex items-center gap-1">
                         <div className="w-2 h-2 rounded-full bg-yellow-500" />
-                        <NeumorphicText size="xs">Medium Risk (25-49%)</NeumorphicText>
+                        <NeumorphicText size="sm">Medium Risk (25-49%)</NeumorphicText>
                       </div>
                     </div>
                   </div>
                   <div className="pt-2 border-t border-[var(--neumorphic-border)]">
-                    <NeumorphicText size="xs">
+                    <NeumorphicText size="sm">
                       <span className="font-medium">Press ESC</span> or use Back button to return
                     </NeumorphicText>
                   </div>
@@ -1761,24 +1756,24 @@ const DirectorCentricNetwork: React.FC<DirectorCentricNetworkProps> = ({
               {viewState === 'supplier-focus' && (
                 <>
                   <div>
-                    <NeumorphicText size="xs" className="font-medium mb-1">Network View</NeumorphicText>
+                    <NeumorphicText size="sm" className="font-medium mb-1">Network View</NeumorphicText>
                     <div className="space-y-1">
                       <div className="flex items-center gap-1">
                         <div className="w-2 h-2 rounded-full bg-red-500" />
-                        <NeumorphicText size="xs">Concentration Risk Directors</NeumorphicText>
+                        <NeumorphicText size="sm">Concentration Risk Directors</NeumorphicText>
                       </div>
                       <div className="flex items-center gap-1">
                         <div className="w-2 h-2 rounded-full bg-gray-500" />
-                        <NeumorphicText size="xs">Connected Directors</NeumorphicText>
+                        <NeumorphicText size="sm">Connected Directors</NeumorphicText>
                       </div>
                       <div className="flex items-center gap-1">
                         <div className="w-2 h-2 rounded-full bg-blue-500" />
-                        <NeumorphicText size="xs">Related Suppliers</NeumorphicText>
+                        <NeumorphicText size="sm">Related Suppliers</NeumorphicText>
                       </div>
                     </div>
                   </div>
                   <div className="pt-2 border-t border-[var(--neumorphic-border)]">
-                    <NeumorphicText size="xs">
+                    <NeumorphicText size="sm">
                       <span className="font-medium">Press ESC</span> or use Back button to return
                     </NeumorphicText>
                   </div>

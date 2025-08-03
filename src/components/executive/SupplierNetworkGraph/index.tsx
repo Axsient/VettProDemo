@@ -673,7 +673,7 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
     <div className={`space-y-4 ${className}`}>
       {/* Header */}
       <div className="text-center">
-        <NeumorphicHeading size="lg" className="flex items-center justify-center gap-2">
+        <NeumorphicHeading className="flex items-center justify-center gap-2">
           <Network className="w-6 h-6 text-[var(--neumorphic-accent)]" />
           Supplier Network Graph
         </NeumorphicHeading>
@@ -850,7 +850,7 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
                            'CONCENTRATION RISK'}
                         </NeumorphicText>
                       </div>
-                      <NeumorphicText size="xs" className={`mt-1 ${
+                      <NeumorphicText size="sm" className={`mt-1 ${
                         hoveredNode.id === 'DIR_04' ? 'text-red-700' :
                         hoveredNode.id === 'DIR_06' ? 'text-yellow-700' :
                         'text-orange-700'
@@ -904,7 +904,7 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
                   )}
                   
                   <div className="pt-2 border-t border-[var(--neumorphic-border)]">
-                    <NeumorphicText size="xs" variant="secondary" className="flex items-center gap-1">
+                    <NeumorphicText size="sm" variant="secondary" className="flex items-center gap-1">
                       {hoveredNode.type === 'supplier' ? (
                         <>
                           <MousePointer className="w-3 h-3" />
@@ -931,31 +931,31 @@ const SupplierNetworkGraph: React.FC<SupplierNetworkGraphProps> = ({
           transition={{ delay: 0.5 }}
           className="absolute top-4 right-4 p-3 rounded-lg bg-[var(--neumorphic-card)] shadow-md border border-[var(--neumorphic-border)] w-48 max-h-64 overflow-y-auto text-xs"
         >
-          <NeumorphicText size="xs" className="font-semibold mb-2 flex items-center gap-1">
+          <NeumorphicText size="sm" className="font-semibold mb-2 flex items-center gap-1">
             <Info className="w-3 h-3" />
             Legend
           </NeumorphicText>
           
           <div className="space-y-2">
             <div>
-              <NeumorphicText size="xs" className="font-medium mb-1">Risk Levels</NeumorphicText>
+              <NeumorphicText size="sm" className="font-medium mb-1">Risk Levels</NeumorphicText>
               <div className="space-y-1">
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-red-500" />
-                  <NeumorphicText size="xs">Critical (75%+)</NeumorphicText>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-orange-500" />
-                  <NeumorphicText size="xs">High (50-74%)</NeumorphicText>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-yellow-500" />
-                  <NeumorphicText size="xs">Medium (25-49%)</NeumorphicText>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 rounded-full bg-green-500" />
-                  <NeumorphicText size="xs">Low (&lt;25%)</NeumorphicText>
-                </div>
+                                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-red-500" />
+                    <NeumorphicText size="sm">Critical (75%+)</NeumorphicText>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-orange-500" />
+                    <NeumorphicText size="sm">High (50-74%)</NeumorphicText>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                    <NeumorphicText size="sm">Medium (25-49%)</NeumorphicText>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-2 h-2 rounded-full bg-green-500" />
+                    <NeumorphicText size="sm">Low (&lt;25%)</NeumorphicText>
+                  </div>
               </div>
             </div>
             

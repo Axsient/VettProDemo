@@ -267,6 +267,7 @@ export const NeumorphicMultiSelect: React.FC<NeumorphicMultiSelectProps> = ({
         onBlur={() => setIsFocused(false)}
         tabIndex={disabled ? -1 : 0}
         role="combobox"
+        aria-controls="multi-select-dropdown"
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         aria-label={label}

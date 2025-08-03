@@ -11,7 +11,8 @@ import {
 import { motion } from 'framer-motion';
 import { 
   RiskPosture, 
-  RiskCategory
+  RiskCategory,
+  ExecutiveSupplierInfo
 } from '@/lib/sample-data/executive-dashboard-data';
 import { getCssVariable } from '@/lib/executive/theme-bridge';
 import { TrendingUp, AlertTriangle, Shield, DollarSign, FileCheck, Cog, Users, Building, Wallet } from 'lucide-react';
@@ -42,6 +43,7 @@ const RiskPostureGauges: React.FC<RiskPostureGaugesProps> = ({
   totalDirectors = 0,
   totalSuppliers = 0,
   totalExposureZAR = 0,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   filteredSuppliers = [],
   className = '',
 }) => {
@@ -140,7 +142,7 @@ const RiskPostureGauges: React.FC<RiskPostureGaugesProps> = ({
                 opacity: 0.9
               }}
             >
-              {React.cloneElement(icon as React.ReactElement, { className: 'w-3 h-3' })}
+              {icon}
             </div>
             <NeumorphicText className="text-sm">
               {title}
@@ -193,7 +195,7 @@ const RiskPostureGauges: React.FC<RiskPostureGaugesProps> = ({
                 opacity: 0.9
               }}
             >
-              {React.cloneElement(config.icon as React.ReactElement, { className: 'w-3 h-3' })}
+              {config.icon}
             </div>
             <NeumorphicText className="text-sm">
               {config.title}

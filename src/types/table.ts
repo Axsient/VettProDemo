@@ -82,6 +82,8 @@ export interface TableFeatures {
   bulkActions?: boolean;
   rowActions?: boolean;
   rowExpansion?: boolean;
+  hideToolbar?: boolean;
+  customFooterControls?: boolean;
 }
 
 export interface TableDensity {

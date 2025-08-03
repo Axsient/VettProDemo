@@ -68,6 +68,7 @@ interface ActiveCasesTableProps {
   cases: ActiveVettingCase[];
   loading?: boolean;
   onViewCase?: (caseId: string) => void;
+  onViewEntity?: (caseId: string) => void;
   onEditCase?: (caseId: string) => void;
   onApproveCase?: (caseId: string) => void;
   onRejectCase?: (caseId: string) => void;
@@ -81,6 +82,7 @@ const ActiveCasesTable: React.FC<ActiveCasesTableProps> = ({
   cases,
   loading = false, // eslint-disable-line @typescript-eslint/no-unused-vars
   onViewCase,
+  onViewEntity,
   onEditCase,
   onApproveCase,
   onRejectCase,
@@ -223,7 +225,13 @@ const ActiveCasesTable: React.FC<ActiveCasesTableProps> = ({
       width: 200,
       cell: (value, row) => (
         <div>
-          <div className="font-medium">{row.entityName}</div>
+          <div 
+            className="font-medium cursor-pointer hover:text-blue-400 transition-colors"
+            onClick={() => onViewEntity?.(row.id)}
+            title="Click to view Entity 360° profile"
+          >
+            {row.entityName}
+          </div>
           <div className="flex items-center gap-2 mt-1">
             <Badge variant="outline" className="text-xs">
               {row.entityType}
@@ -378,7 +386,7 @@ const ActiveCasesTable: React.FC<ActiveCasesTableProps> = ({
     }
   ];
 
-  // Define row actions
+  // Define row actions per PRD specification (exactly 6 actions)
   const rowActions: TableAction<ActiveVettingCaseTableRow>[] = [
     {
       id: 'view',
@@ -390,7 +398,11 @@ const ActiveCasesTable: React.FC<ActiveCasesTableProps> = ({
       id: 'timeline',
       label: 'View Timeline',
       icon: Clock,
-      onClick: (row) => handleRowExpansion(row.id)
+      onClick: (row) => {
+        // Open Timeline Dialog (not row expansion) per PRD
+        // This should trigger a dialog, we'll use the existing timeline functionality
+        handleRowExpansion(row.id);
+      }
     },
     {
       id: 'dossier',
@@ -409,15 +421,17 @@ const ActiveCasesTable: React.FC<ActiveCasesTableProps> = ({
       label: 'Approve',
       icon: CheckCircle,
       onClick: (row) => onApproveCase?.(row.id),
-      // Conditionally show approve action
-      disabled: (row) => row.status !== VettingStatus.PARTIALLY_COMPLETE
+      // Only enabled if status is 'Ready for Review' per PRD
+      disabled: (row) => row.status !== VettingStatus.COMPLETE
     },
     {
       id: 'reject',
       label: 'Reject',
       icon: XCircle,
       onClick: (row) => onRejectCase?.(row.id),
-      variant: 'destructive'
+      variant: 'destructive',
+      // Only enabled if status is 'Ready for Review' per PRD
+      disabled: (row) => row.status !== VettingStatus.COMPLETE
     }
   ];
 
@@ -464,7 +478,7 @@ const ActiveCasesTable: React.FC<ActiveCasesTableProps> = ({
           rowActions={rowActions}
           bulkActions={bulkActions}
           features={{
-            search: true,
+            search: false,
             sorting: true,
             filtering: true,
             pagination: true,
@@ -476,6 +490,8 @@ const ActiveCasesTable: React.FC<ActiveCasesTableProps> = ({
             bulkActions: true,
             rowActions: true,
             rowExpansion: true,
+            hideToolbar: true,
+            customFooterControls: true,
           }}
           rowDetails={{
             component: ({ row }: { row: ActiveVettingCaseTableRow }) => (

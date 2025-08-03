@@ -166,7 +166,7 @@ export default function VettingOperationsV2() {
                     <IconComponent className={`w-8 h-8 ${feature.color}`} />
                   </div>
                   <div className="flex-1">
-                    <NeumorphicText size="xl" className="font-semibold mb-2 group-hover:text-neumorphic-accent transition-colors">
+                    <NeumorphicText size="lg" className="font-semibold mb-2 group-hover:text-neumorphic-accent transition-colors">
                       {feature.title}
                     </NeumorphicText>
                     <NeumorphicText variant="secondary" className="leading-relaxed">

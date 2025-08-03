@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -656,13 +657,12 @@ function ViewDetailsContent({ data }: { data: ConsentRequestItem }) {
         <div>
           <label className="text-sm font-medium text-neumorphic-text-secondary">Digital Signature</label>
           <div className="mt-2 p-4 bg-neumorphic-bg rounded-lg">
-            <img 
-              src={data.digitalSignatureImageLink} 
-              alt="Digital Signature" 
+            <Image
+              src={data.digitalSignatureImageLink}
+              alt="Digital Signature"
+              width={300}
+              height={200}
               className="max-w-full h-auto border border-neumorphic-border/20 rounded"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
             />
             <NeumorphicText variant="secondary" size="sm" className="mt-2">
               Submitted digital signature
