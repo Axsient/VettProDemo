@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VettPro Intelligence Dossier: Rustenburg Explosives Inc.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- jsPDF Libraries for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-print-color-adjust: exact;
+        }
+        .brand-gradient-text {
+            background: linear-gradient(90deg, #6366F1 0%, #A78BFA 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header-glass {
+            background: rgba(17, 24, 39, 0.95);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .ai-insight-card {
+            background-color: #1F2937; /* gray-800 */
+            border-left: 4px solid #6366F1; /* indigo-500 */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .risk-critical { color: #F87171; } /* red-400 */
+        .risk-high { color: #FB923C; } /* orange-400 */
+        .risk-medium { color: #FBBF24; } /* amber-400 */
+        .risk-low { color: #4ADE80; } /* green-400 */
+        
+        .icon-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            flex-shrink: 0;
+        }
+        .icon-wrapper.success { background-color: rgba(74, 222, 128, 0.1); color: #4ADE80; }
+        .icon-wrapper.warning { background-color: rgba(251, 191, 36, 0.1); color: #FBBF24; }
+        .icon-wrapper.danger { background-color: rgba(248, 113, 113, 0.1); color: #F87171; }
+        .icon-wrapper.info { background-color: rgba(99, 102, 241, 0.1); color: #818CF8; }
+
+        /* Tab Styles */
+        .tab-button {
+            transition: all 0.2s ease-in-out;
+            color: #9CA3AF; /* gray-400 */
+        }
+        .tab-button.active {
+            color: #F9FAFB; /* gray-50 */
+            border-color: #6366F1; /* indigo-500 */
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-spinner {
+            border: 4px solid #374151;
+            border-top: 4px solid #6366F1;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media print {
+            body { -webkit-print-color-adjust: exact; }
+            .no-print { display: none; }
+            .tab-button { display: none; }
+            .tab-content { display: block !important; page-break-before: always; }
+            #summary { page-break-before: auto; }
+            .print-header { display: block !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-800 text-gray-200 p-2 sm:p-8">
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="text-center">
+            <div class="loading-spinner mx-auto mb-4"></div>
+            <p class="text-white">Generating PDF...</p>
+        </div>
+    </div>
+
+    <div id="report-content" class="max-w-4xl mx-auto bg-[#111827] rounded-xl shadow-2xl overflow-hidden">
+        
+        <header id="report-header" class="header-glass text-white p-6 sm:p-8 sticky top-0 z-10">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-black tracking-tight">INTELLIGENCE DOSSIER</h1>
+                    <p class="text-sm text-gray-400">CONFIDENTIAL REPORT</p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="exportBtn" onclick="exportToPDF()" class="no-print bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                        <span>Export to PDF</span>
+                    </button>
+                    <div class="text-right">
+                        <div class="flex items-center justify-end space-x-3">
+                            <!-- Company Logo -->
+                            <img id="company-logo" src="vettpro-logo.svg" width="64" height="64" alt="VettPro Logo" class="flex-shrink-0" />
+                            <p class="font-bold text-xl brand-gradient-text">VettPro</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="p-6 sm:p-8">
+            <section class="grid grid-cols-2 sm:grid-cols-4 gap-6 border-b border-gray-700 pb-6 mb-6">
+                <div><p class="text-xs text-gray-500 uppercase font-semibold tracking-wider">Case Reference</p><p class="text-lg font-bold brand-gradient-text">VET-2024-001234</p></div>
+                <div><p class="text-xs text-gray-500 uppercase font-semibold tracking-wider">Entity</p><p class="text-lg font-medium text-gray-100">Rustenburg Explosives Inc.</p></div>
+                <div><p class="text-xs text-gray-500 uppercase font-semibold tracking-wider">Entity Type</p><p class="text-lg font-medium text-gray-100">Commercial (Pty) Ltd</p></div>
+                <div><p class="text-xs text-gray-500 uppercase font-semibold tracking-wider">Report Date</p><p class="text-lg font-medium text-gray-100">15 July 2025</p></div>
+            </section>
+
+            <div class="mb-8 no-print">
+                <div class="border-b border-gray-700"><nav class="-mb-px flex space-x-8" aria-label="Tabs"><button onclick="changeTab(event, 'summary')" class="tab-button active whitespace-nowrap py-4 px-1 border-b-2 font-semibold text-sm">Intelligence Summary</button><button onclick="changeTab(event, 'log')" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-semibold text-sm border-transparent">Full Investigation Log</button></nav></div>
+            </div>
+
+            <div id="summary" class="tab-content active">
+                <section class="mb-10" data-export-title="AI Executive Summary">
+                    <h2 class="text-2xl font-bold text-white mb-4 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400 mr-3"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path><path d="M5 3v4"></path><path d="M19 17v4"></path><path d="M3 5h4"></path><path d="M17 19h4"></path></svg>AI Executive Summary</h2>
+                    <div class="ai-insight-card p-6 rounded-lg"><p class="text-gray-300 leading-relaxed">Based on a comprehensive analysis of all vetting data, VettPro's AI has determined that **Rustenburg Explosives Inc.** presents a <span class="font-bold risk-critical">CRITICAL OVERALL RISK</span>. The primary drivers are significant <span class="font-semibold">director concentration risk</span> and a recent <span class="font-semibold">adverse financial judgment</span>. While operational checks like COID and Bank Verification are clear, the identified governance and financial issues warrant immediate executive attention before proceeding with high-value contracts.</p></div>
+                </section>
+                
+                <section class="mb-10" data-export-title="Overall Risk Score">
+                    <div class="bg-gray-800/50 rounded-lg p-6 grid grid-cols-1 md:grid-cols-3 gap-6 items-center border border-gray-700">
+                        <div class="md:col-span-1 text-center"><p class="text-sm text-gray-400 uppercase font-semibold tracking-wider">Overall Risk Score</p><p class="text-7xl font-black risk-critical">88</p><p class="text-xl font-bold risk-critical">CRITICAL RISK</p></div>
+                        <div class="md:col-span-2"><p class="text-sm text-gray-400 font-semibold mb-3">Risk Factor Breakdown:</p>
+                            <div class="space-y-3">
+                                <div class="flex items-center"><span class="w-32 text-gray-400">Financial</span><div class="w-full bg-gray-700 rounded-full h-2.5"><div class="bg-red-500 h-2.5 rounded-full" style="width: 90%;"></div></div><span class="w-12 text-right font-bold risk-critical">90</span></div>
+                                <div class="flex items-center"><span class="w-32 text-gray-400">Compliance</span><div class="w-full bg-gray-700 rounded-full h-2.5"><div class="bg-orange-500 h-2.5 rounded-full" style="width: 85%;"></div></div><span class="w-12 text-right font-bold risk-high">85</span></div>
+                                <div class="flex items-center"><span class="w-32 text-gray-400">Operational</span><div class="w-full bg-gray-700 rounded-full h-2.5"><div class="bg-amber-500 h-2.5 rounded-full" style="width: 70%;"></div></div><span class="w-12 text-right font-bold risk-medium">70</span></div>
+                                <div class="flex items-center"><span class="w-32 text-gray-400">Reputational</span><div class="w-full bg-gray-700 rounded-full h-2.5"><div class="bg-red-500 h-2.5 rounded-full" style="width: 95%;"></div></div><span class="w-12 text-right font-bold risk-critical">95</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section data-export-title="AI-Generated Critical Alerts">
+                    <h2 class="text-2xl font-bold text-white mb-4 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-400 mr-3"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>AI-Generated Critical Alerts</h2>
+                    <div class="space-y-4">
+                        <div class="ai-insight-card p-5 rounded-lg flex items-start space-x-4"><div class="icon-wrapper danger"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div><div><h3 class="font-bold text-white">Director Concentration Risk</h3><p class="text-sm text-gray-400 mt-1">Director **Sipho Ndlovu** also serves on the board of **Limpopo Logistix**, another high-risk supplier in a critical supply chain. This shared directorship represents a significant concentration of risk and a potential conflict of interest.</p></div></div>
+                        <div class="ai-insight-card p-5 rounded-lg flex items-start space-x-4"><div class="icon-wrapper danger"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"></path><path d="M7 7h.01"></path></svg></div><div><h3 class="font-bold text-white">Adverse Financial Judgment</h3><p class="text-sm text-gray-400 mt-1">The comprehensive company check revealed an adverse judgment of **R 1,250,000** filed against the company in the last 6 months, which was not self-disclosed. This indicates potential financial instability.</p></div></div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="log" class="tab-content">
+                <section data-export-title="Investigation Timeline & Evidence">
+                    <h2 class="text-2xl font-bold text-white mb-6 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400 mr-3"><path d="M12 6v6h6"></path><circle cx="12" cy="12" r="10"></circle></svg>Case Timeline & Evidence</h2>
+                    <div class="border-l-2 border-gray-700 ml-4">
+                        <div class="relative mb-10 pl-10"><div class="absolute -left-[11px] top-1 h-5 w-5 bg-indigo-500 rounded-full border-4 border-gray-900"></div><p class="font-bold text-gray-300">10 July 2025, 09:05 <span class="font-normal text-gray-500 ml-2">by System</span></p><div class="mt-2 p-4 bg-gray-800/50 rounded-lg border border-gray-700"><p class="font-semibold text-white">Case Initiated & Consent Sent</p><p class="text-sm text-gray-400">Case created by Risk Agent 'Sarah Jones'. Digital consent link sent to primary contact.</p></div></div>
+                        <div class="relative mb-10 pl-10"><div class="absolute -left-[11px] top-1 h-5 w-5 bg-indigo-500 rounded-full border-4 border-gray-900"></div><p class="font-bold text-gray-300">11 July 2025, 14:20 <span class="font-normal text-gray-500 ml-2">by System</span></p><div class="mt-2 p-4 bg-gray-800/50 rounded-lg border border-gray-700"><p class="font-semibold text-white">Consent Received & Checks Dispatched</p><p class="text-sm text-gray-400">Digital signature received. Automated checks dispatched to MIE.</p><a href="#" class="text-xs text-indigo-400 hover:underline no-print">View Consent Document</a></div></div>
+                        <div class="relative mb-10 pl-10"><div class="absolute -left-[11px] top-1 h-5 w-5 bg-green-500 rounded-full border-4 border-gray-900"></div><p class="font-bold text-gray-300">12 July 2025, 10:00 <span class="font-normal text-gray-500 ml-2">via MIE Webhook</span></p><div class="mt-2 p-4 bg-green-900/20 rounded-lg border-l-4 border-green-500"><p class="font-semibold text-white">Check Completed: Bank Account Verification</p><p class="text-sm text-gray-400">Result: <span class="font-bold text-green-400">Verified</span>. Account holder name and number confirmed.</p></div></div>
+                        <div class="relative mb-10 pl-10"><div class="absolute -left-[11px] top-1 h-5 w-5 bg-amber-500 rounded-full border-4 border-gray-900"></div><p class="font-bold text-gray-300">13 July 2025, 11:45 <span class="font-normal text-gray-500 ml-2">via MIE Webhook</span></p><div class="mt-2 p-4 bg-amber-900/20 rounded-lg border-l-4 border-amber-500"><p class="font-semibold text-white">Check Completed: BEE Certificate</p><p class="text-sm text-gray-400">Result: <span class="font-bold text-amber-400">Neutral</span>. Certificate is valid but expires on 01 September 2025 (45 days).</p></div></div>
+                        <div class="relative mb-10 pl-10"><div class="absolute -left-[11px] top-1 h-5 w-5 bg-red-500 rounded-full border-4 border-gray-900"></div><p class="font-bold text-gray-300">14 July 2025, 15:00 <span class="font-normal text-gray-500 ml-2">via MIE Webhook</span></p><div class="mt-2 p-4 bg-red-900/20 rounded-lg border-l-4 border-red-500"><p class="font-semibold text-white">Check Completed: Director Check (J. Zuma)</p><p class="text-sm text-gray-400">Result: <span class="font-bold text-red-400">Adverse</span>. 1x adverse financial judgment found. Details attached to check record.</p></div></div>
+                        <div class="relative pl-10"><div class="absolute -left-[11px] top-1 h-5 w-5 bg-indigo-500 rounded-full border-4 border-gray-900"></div><p class="font-bold text-gray-300">15 July 2025, 08:30 <span class="font-normal text-gray-500 ml-2">by System</span></p><div class="mt-2 p-4 bg-gray-800/50 rounded-lg border border-gray-700"><p class="font-semibold text-white">Report Generated</p><p class="text-sm text-gray-400">All checks completed. Final dossier compiled and ready for review.</p></div></div>
+                    </div>
+                </section>
+            </div>
+        </main>
+        
+        <footer class="bg-gray-900/50 text-center p-4 border-t border-gray-700 text-xs text-gray-500">
+            <p>Generated by VettPro on 15 July 2025 | This document is confidential and intended for the recipient only.</p>
+        </footer>
+    </div>
+
+    <script>
+        function changeTab(event, tabID) {
+            let element = event.target;
+            let tabs = element.parentNode.children;
+            for(let i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove("active");
+            }
+            element.classList.add("active");
+            
+            let tabContents = document.querySelectorAll(".tab-content");
+            tabContents.forEach(content => content.classList.remove("active"));
+            document.getElementById(tabID).classList.add("active");
+        }
+
+        async function exportToPDF() {
+            try {
+                // Show loading overlay
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                const exportBtn = document.getElementById('exportBtn');
+                
+                loadingOverlay.style.display = 'flex';
+                exportBtn.disabled = true;
+
+                // Initialize jsPDF
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+
+                // Page dimensions
+                const pageWidth = 210;
+                const pageHeight = 297;
+                const margin = 15;
+                const headerHeight = 25;
+                const footerHeight = 15;
+                const contentStartY = headerHeight + margin + 8;
+                const contentAreaHeight = pageHeight - headerHeight - footerHeight - (margin * 2) - 8;
+                const contentWidth = pageWidth - (margin * 2);
+
+                // Function to add header
+                const addHeader = () => {
+                    doc.setFillColor(17, 24, 39);
+                    doc.rect(0, 0, pageWidth, headerHeight, 'F');
+                    
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(16);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text('INTELLIGENCE DOSSIER', margin, 12);
+                    
+                    doc.setFontSize(8);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text('CONFIDENTIAL REPORT', margin, 18);
+                    
+                    // Add logo placeholder (you can replace this with actual logo later)
+                    doc.setFillColor(99, 102, 241);
+                    doc.roundedRect(pageWidth - margin - 35, 5, 12, 12, 2, 2, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(8);
+                    doc.text('L', pageWidth - margin - 29, 12.5);
+                    
+                    doc.setFontSize(14);
+                    doc.setFont('helvetica', 'bold');
+                    doc.setTextColor(99, 102, 241);
+                    doc.text('VettPro', pageWidth - margin - 20, 15);
+                };
+
+                // Function to add footer
+                const addFooter = (pageNum) => {
+                    const footerY = pageHeight - footerHeight + 5;
+                    
+                    doc.setFillColor(17, 24, 39);
+                    doc.rect(0, pageHeight - footerHeight, pageWidth, footerHeight, 'F');
+                    
+                    doc.setTextColor(156, 163, 175);
+                    doc.setFontSize(8);
+                    doc.setFont('helvetica', 'normal');
+                    doc.text('Generated by VettPro on 15 July 2025 | Confidential', 
+                             pageWidth / 2, footerY + 5, { align: 'center' });
+                    
+                    doc.text(`Page ${pageNum} of 2`, pageWidth - margin, footerY + 8, { align: 'right' });
+                };
+
+                // PAGE 1 - Intelligence Summary (Case Info + Summary Tab)
+                addHeader();
+                addFooter(1);
+
+                // Page title
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Intelligence Summary', margin, contentStartY - 3);
+
+                // Create a full-width container for the entire main content area
+                const page1Container = document.createElement('div');
+                page1Container.style.backgroundColor = '#111827';
+                page1Container.style.padding = '40px';
+                page1Container.style.width = '1200px'; // Wider for better capture
+                page1Container.style.color = '#E5E7EB';
+                page1Container.style.fontFamily = 'Inter, sans-serif';
+
+                // Get and clone the case info section
+                const caseInfo = document.querySelector('section.grid.grid-cols-2.sm\\:grid-cols-4');
+                if (caseInfo) {
+                    const caseInfoClone = caseInfo.cloneNode(true);
+                    caseInfoClone.style.marginBottom = '40px';
+                    page1Container.appendChild(caseInfoClone);
+                }
+
+                // Get and clone ALL sections from the summary tab
+                const summaryTab = document.getElementById('summary');
+                if (summaryTab) {
+                    const summaryClone = summaryTab.cloneNode(true);
+                    summaryClone.style.display = 'block';
+                    // Remove any hidden styles that might affect rendering
+                    summaryClone.style.visibility = 'visible';
+                    summaryClone.style.opacity = '1';
+                    page1Container.appendChild(summaryClone);
+                }
+
+                // Add to document temporarily (way off screen)
+                page1Container.style.position = 'fixed';
+                page1Container.style.left = '-99999px';
+                page1Container.style.top = '0';
+                page1Container.style.zIndex = '-1';
+                document.body.appendChild(page1Container);
+
+                // Wait a moment for rendering
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                // Capture page 1 with better settings
+                const page1Canvas = await html2canvas(page1Container, {
+                    scale: 1.5,
+                    backgroundColor: '#111827',
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: true,
+                    width: 1200,
+                    height: page1Container.scrollHeight
+                });
+
+                // Remove temporary container
+                document.body.removeChild(page1Container);
+
+                // Add to PDF with better scaling
+                const page1ImgData = page1Canvas.toDataURL('image/png');
+                const page1Ratio = page1Canvas.height / page1Canvas.width;
+                
+                // Use most of the available width
+                let page1Width = contentWidth;
+                let page1Height = page1Width * page1Ratio * 1.1;
+
+                // Only scale down if absolutely necessary
+                if (page1Height > contentAreaHeight * 0.95) {
+                    page1Height = contentAreaHeight * 0.95;
+                    page1Width = page1Height / page1Ratio / 1;
+                }
+
+                const page1X = margin + (contentWidth - page1Width) / 2;
+                doc.addImage(page1ImgData, 'PNG', page1X, contentStartY, page1Width, page1Height);
+
+                // PAGE 2 - Investigation Log
+                doc.addPage();
+                addHeader();
+                addFooter(2);
+
+                // Page title
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Investigation Log', margin, contentStartY - 3);
+
+                // Create container for page 2
+                const page2Container = document.createElement('div');
+                page2Container.style.backgroundColor = '#111827';
+                page2Container.style.padding = '40px';
+                page2Container.style.width = '1200px';
+                page2Container.style.color = '#E5E7EB';
+                page2Container.style.fontFamily = 'Inter, sans-serif';
+
+                // Get and clone the log tab content
+                const logTab = document.getElementById('log');
+                if (logTab) {
+                    const logClone = logTab.cloneNode(true);
+                    logClone.style.display = 'block';
+                    logClone.style.visibility = 'visible';
+                    logClone.style.opacity = '1';
+                    page2Container.appendChild(logClone);
+                }
+
+                // Add to document temporarily
+                page2Container.style.position = 'fixed';
+                page2Container.style.left = '-99999px';
+                page2Container.style.top = '0';
+                page2Container.style.zIndex = '-1';
+                document.body.appendChild(page2Container);
+
+                // Wait for rendering
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                // Capture page 2
+                const page2Canvas = await html2canvas(page2Container, {
+                    scale: 1.5,
+                    backgroundColor: '#111827',
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: true,
+                    width: 1200,
+                    height: page2Container.scrollHeight
+                });
+
+                // Remove temporary container
+                document.body.removeChild(page2Container);
+
+                // Add to PDF
+                const page2ImgData = page2Canvas.toDataURL('image/png');
+                const page2Ratio = page2Canvas.height / page2Canvas.width;
+                
+                let page2Width = contentWidth;
+                let page2Height = page2Width * page2Ratio ;
+
+                if (page2Height > contentAreaHeight * 0.95) {
+                    page2Height = contentAreaHeight * 0.95;
+                    page2Width = page2Height / page2Ratio ;
+                }
+
+                const page2X = margin + (contentWidth - page2Width) / 2;
+                doc.addImage(page2ImgData, 'PNG', page2X, contentStartY, page2Width, page2Height);
+
+                // Save the PDF
+                doc.save('VettPro-Dossier-VET-2024-001234.pdf');
+
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('There was an error generating the PDF. Please try again.');
+            } finally {
+                // Hide loading overlay and re-enable button
+                const loadingOverlay = document.getElementById('loadingOverlay');
+                const exportBtn = document.getElementById('exportBtn');
+                
+                loadingOverlay.style.display = 'none';
+                exportBtn.disabled = false;
+            }
+        }
+    </script>
+
+</body>
+</html>

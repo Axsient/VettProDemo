@@ -357,19 +357,19 @@ export default function InvoiceAnalysisPage() {
             <div className="flex flex-wrap items-center gap-6 text-sm p-3 bg-neumorphic-card/50 rounded-lg">
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-red-500/20 border-l-4 border-red-500/60 rounded"></div>
-                <span className="text-neumorphic-text-secondary">Critical Risk (≤30%) - Immediate Action Required</span>
+                <span className="text-neumorphic-text-secondary">Critical Risk (≥75) - Immediate Action Required</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-orange-500/20 border-l-4 border-orange-500/60 rounded"></div>
-                <span className="text-neumorphic-text-secondary">High Risk (31-50%) - Priority Review</span>
+                <span className="text-neumorphic-text-secondary">High Risk (50-74) - Priority Review</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-yellow-500/20 border-l-4 border-yellow-500/60 rounded"></div>
-                <span className="text-neumorphic-text-secondary">Medium Risk (51-70%) - Standard Review</span>
+                <span className="text-neumorphic-text-secondary">Medium Risk (25-49) - Standard Review</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-green-500/10 border-l-4 border-green-500/40 rounded"></div>
-                <span className="text-neumorphic-text-secondary">Low Risk (&gt;70%) - Routine Processing</span>
+                <span className="text-neumorphic-text-secondary">Low Risk (&lt;25) - Routine Processing</span>
               </div>
             </div>
 
