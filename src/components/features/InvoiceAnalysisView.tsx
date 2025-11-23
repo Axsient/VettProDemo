@@ -27,6 +27,11 @@ export const InvoiceAnalysisView: React.FC<InvoiceAnalysisViewProps> = ({
         <NeumorphicText className="text-sm text-neumorphic-text-secondary mb-4">
           Comparing: {rfpTitle}
         </NeumorphicText>
+        <div className="flex items-center justify-between text-xs font-semibold text-neumorphic-text-secondary px-1 mb-1 tracking-wide uppercase">
+          <span className="w-5/12 text-right">RFP (Quoted)</span>
+          <span className="w-2/12 text-center text-[var(--neumorphic-text-tertiary)]">vs</span>
+          <span className="w-5/12 text-left">Invoice (Billed)</span>
+        </div>
         <div className="mt-4">
           {dnaItems.map((item, index) => (
             <DNALink 

@@ -59,17 +59,25 @@ function getStatusBadgeVariant(status: string): 'default' | 'secondary' | 'destr
 // Enhanced filter types for triage buttons
 type FilterType = 'all' | 'critical' | 'high' | 'medium' | 'low' | 'pending';
 
+// Risk tier helper for consistent thresholds and colors (higher score = higher risk)
+function getRiskTier(score: number) {
+  if (score >= 75) return { label: 'Critical', textClass: 'text-red-500' };
+  if (score >= 50) return { label: 'High Risk', textClass: 'text-orange-500' };
+  if (score >= 25) return { label: 'Medium Risk', textClass: 'text-yellow-500' };
+  return { label: 'Low Risk', textClass: 'text-green-500' };
+}
+
 // Helper function to get row styling based on AI risk score
 function getRowClassName(row: InvoiceTableData): string {
   const score = row.overallConfidenceScore;
   
-  if (score <= 30) {
+  if (score >= 75) {
     // Critical: Red background with enhanced hover and neumorphic lift effect
     return 'bg-red-500/10 hover:bg-red-500/20 border-l-4 border-red-500/30 hover:shadow-[0_4px_12px_rgba(239,68,68,0.15)] hover:-translate-y-0.5 transition-all duration-200';
-  } else if (score <= 50) {
+  } else if (score >= 50) {
     // High: Orange background with enhanced hover
     return 'bg-orange-500/10 hover:bg-orange-500/20 border-l-4 border-orange-500/30 hover:shadow-[0_4px_12px_rgba(249,115,22,0.15)] hover:-translate-y-0.5 transition-all duration-200';
-  } else if (score <= 70) {
+  } else if (score >= 25) {
     // Medium: Yellow background with enhanced hover
     return 'bg-yellow-500/10 hover:bg-yellow-500/20 border-l-4 border-yellow-500/30 hover:shadow-[0_4px_12px_rgba(234,179,8,0.15)] hover:-translate-y-0.5 transition-all duration-200';
   } else {
@@ -116,13 +124,13 @@ export default function InvoiceAnalysisPage() {
   const filteredData = useMemo(() => {
     switch (activeFilter) {
       case 'critical':
-        return tableData.filter(row => row.overallConfidenceScore <= 30);
+        return tableData.filter(row => row.overallConfidenceScore >= 75);
       case 'high':
-        return tableData.filter(row => row.overallConfidenceScore > 30 && row.overallConfidenceScore <= 50);
+        return tableData.filter(row => row.overallConfidenceScore >= 50 && row.overallConfidenceScore < 75);
       case 'medium':
-        return tableData.filter(row => row.overallConfidenceScore > 50 && row.overallConfidenceScore <= 70);
+        return tableData.filter(row => row.overallConfidenceScore >= 25 && row.overallConfidenceScore < 50);
       case 'low':
-        return tableData.filter(row => row.overallConfidenceScore > 70);
+        return tableData.filter(row => row.overallConfidenceScore < 25);
       case 'pending':
         return tableData.filter(row => row.status === 'Pending Analysis');
       default:
@@ -134,10 +142,10 @@ export default function InvoiceAnalysisPage() {
   const filterCounts = useMemo(() => {
     return {
       all: tableData.length,
-      critical: tableData.filter(row => row.overallConfidenceScore <= 30).length,
-      high: tableData.filter(row => row.overallConfidenceScore > 30 && row.overallConfidenceScore <= 50).length,
-      medium: tableData.filter(row => row.overallConfidenceScore > 50 && row.overallConfidenceScore <= 70).length,
-      low: tableData.filter(row => row.overallConfidenceScore > 70).length,
+      critical: tableData.filter(row => row.overallConfidenceScore >= 75).length,
+      high: tableData.filter(row => row.overallConfidenceScore >= 50 && row.overallConfidenceScore < 75).length,
+      medium: tableData.filter(row => row.overallConfidenceScore >= 25 && row.overallConfidenceScore < 50).length,
+      low: tableData.filter(row => row.overallConfidenceScore < 25).length,
       pending: tableData.filter(row => row.status === 'Pending Analysis').length
     };
   }, [tableData]);
@@ -166,6 +174,7 @@ export default function InvoiceAnalysisPage() {
           percentage={value as number} 
           size={50} 
           strokeWidth={4}
+          colorMode="risk"
         />
       ),
       width: 120
@@ -247,7 +256,7 @@ export default function InvoiceAnalysisPage() {
         <NeumorphicCard>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <NeumorphicHeading>Invoice Triage Center</NeumorphicHeading>
+              <NeumorphicHeading>Invoice DNA</NeumorphicHeading>
               <NeumorphicText variant="secondary" className="leading-tight mt-1">
                 Your AI-powered command center for risk analysis. Click any row to open the full Invoice DNA investigation.
               </NeumorphicText>
@@ -410,19 +419,18 @@ export default function InvoiceAnalysisPage() {
                     percentage={selectedInvoice?.overallConfidenceScore || 0} 
                     size={60} 
                     strokeWidth={4}
+                    colorMode="risk"
                   />
                   <div className="mt-2">
-                    <div className={`text-sm font-semibold ${
-                      (selectedInvoice?.overallConfidenceScore || 0) <= 30 ? 'text-red-500' :
-                      (selectedInvoice?.overallConfidenceScore || 0) <= 50 ? 'text-orange-500' :
-                      (selectedInvoice?.overallConfidenceScore || 0) <= 70 ? 'text-yellow-500' :
-                      'text-green-500'
-                    }`}>
-                      {(selectedInvoice?.overallConfidenceScore || 0) <= 30 ? 'Critical' :
-                       (selectedInvoice?.overallConfidenceScore || 0) <= 50 ? 'High Risk' :
-                       (selectedInvoice?.overallConfidenceScore || 0) <= 70 ? 'Medium Risk' :
-                       'Low Risk'}
-                    </div>
+                    {(() => {
+                      const score = selectedInvoice?.overallConfidenceScore || 0;
+                      const { label, textClass } = getRiskTier(score);
+                      return (
+                        <div className={`text-sm font-semibold ${textClass}`}>
+                          {label}
+                        </div>
+                      );
+                    })()}
                     <div className="text-xs text-neumorphic-text-secondary">
                       {selectedInvoice?.overallConfidenceScore || 0}% Score
                     </div>

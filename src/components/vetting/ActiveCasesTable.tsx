@@ -94,6 +94,7 @@ const ActiveCasesTable: React.FC<ActiveCasesTableProps> = ({
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [selectedCase, setSelectedCase] = useState<ActiveVettingCase | null>(null);
   const [showPDFModal, setShowPDFModal] = useState(false);
+  const [showEstimatedCost, setShowEstimatedCost] = useState(false);
   
   // Use provided focus context or create default
   const focus = focusContext?.focus || null;
@@ -372,18 +373,20 @@ const ActiveCasesTable: React.FC<ActiveCasesTableProps> = ({
         </div>
       ),
     },
-    {
-      id: 'totalEstimatedCost',
-      accessorKey: 'totalEstimatedCost',
-      header: 'Est. Cost',
-      sortable: true,
-      width: 120,
-      cell: (value, row) => (
-        <div className="text-sm font-medium">
-          {formatCurrency(row.totalEstimatedCost)}
-        </div>
-      ),
-    }
+    ...(showEstimatedCost ? [
+      {
+        id: 'totalEstimatedCost',
+        accessorKey: 'totalEstimatedCost',
+        header: 'Est. Cost',
+        sortable: true,
+        width: 120,
+        cell: (value, row) => (
+          <div className="text-sm font-medium">
+            {formatCurrency(row.totalEstimatedCost)}
+          </div>
+        ),
+      }
+    ] : [])
   ];
 
   // Define row actions per PRD specification (exactly 6 actions)
@@ -472,6 +475,17 @@ const ActiveCasesTable: React.FC<ActiveCasesTableProps> = ({
       )}
       
       <div className={className}>
+        <div className="flex items-center justify-end mb-3">
+          <label className="flex items-center gap-2 text-sm text-[var(--neumorphic-text-primary)]">
+            <input
+              type="checkbox"
+              checked={showEstimatedCost}
+              onChange={(e) => setShowEstimatedCost(e.target.checked)}
+              className="rounded neumorphic-checkbox"
+            />
+            Show Est. Cost column
+          </label>
+        </div>
         <NeumorphicDataTable<ActiveVettingCaseTableRow>
           data={filteredData}
           columns={columns}

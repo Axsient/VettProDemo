@@ -32,7 +32,7 @@ const createInvoicesForRFP = (rfpId: string): { invoices: Invoice[], analyses: R
       submissionDate: '2024-04-10' 
     });
     analyses[invId] = { 
-      overallConfidenceScore: 99, 
+      overallConfidenceScore: 6, 
       llmSummary: 'Invoice is fully compliant with RFP terms and pricing. All line items match the original quote perfectly. No discrepancies detected.', 
       llmRecommendation: 'Approve', 
       flags: [] 
@@ -52,7 +52,7 @@ const createInvoicesForRFP = (rfpId: string): { invoices: Invoice[], analyses: R
       submissionDate: '2024-03-15' 
     });
     analyses['INV-201'] = { 
-      overallConfidenceScore: 98, 
+      overallConfidenceScore: 8, 
       llmSummary: 'Invoice compliant with all RFP requirements. Clean billing with no issues detected.', 
       llmRecommendation: 'Approve', 
       flags: [] 
@@ -69,7 +69,7 @@ const createInvoicesForRFP = (rfpId: string): { invoices: Invoice[], analyses: R
       submissionDate: '2024-04-16' 
     });
     analyses['INV-202'] = { 
-      overallConfidenceScore: 65, 
+      overallConfidenceScore: 56, 
       llmSummary: "Invoice includes an unapproved 'Fuel Surcharge' of R1,500. While minor, this is the second consecutive invoice with a small, unquoted fee. Pattern suggests gradual introduction of unauthorized charges.", 
       llmRecommendation: 'Query Supplier', 
       flags: [{ 
@@ -99,7 +99,7 @@ const createInvoicesForRFP = (rfpId: string): { invoices: Invoice[], analyses: R
       submissionDate: '2024-02-20' 
     });
     analyses['INV-301'] = { 
-      overallConfidenceScore: 25, 
+      overallConfidenceScore: 88, 
       llmSummary: "Invoice contains significant price discrepancy for 'Drill Bits' (25% over quoted price) and an unsolicited 'Admin Fee' of R5,000. The overall supplier risk profile for **'Randfontein Logistics'** is currently **High-Risk** following a failed **Director Credit Check**.", 
       llmRecommendation: 'Reject & Escalate', 
       flags: [
@@ -136,7 +136,7 @@ const createInvoicesForRFP = (rfpId: string): { invoices: Invoice[], analyses: R
       submissionDate: '2024-05-15' 
     });
     analyses['INV-302'] = { 
-      overallConfidenceScore: 5, 
+      overallConfidenceScore: 96, 
       llmSummary: "CRITICAL: Invoice submitted 45 days after project completion date for services not included in the original RFP. High probability of fraudulent billing. Includes charges for 'Emergency Transport Services' and 'Overtime Labor' that were never requested or approved.", 
       llmRecommendation: 'Reject & Escalate', 
       flags: [
@@ -176,7 +176,7 @@ const createInvoicesForRFP = (rfpId: string): { invoices: Invoice[], analyses: R
       submissionDate: '2024-05-20' 
     });
     analyses[invId] = {
-      overallConfidenceScore: 70,
+      overallConfidenceScore: 62,
       llmSummary: "This invoice is fully compliant with the RFP's line items and pricing structure. However, the total amount is 275% higher than the historical average for this supplier and service type. All technical specifications match requirements, but the significant cost increase warrants investigation.",
       llmRecommendation: 'Query Supplier',
       flags: [{ 

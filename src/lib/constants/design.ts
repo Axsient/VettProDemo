@@ -99,7 +99,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     children: [
       { id: '4.1', title: 'RFP Dashboard', icon: 'BarChart3', href: '/rfp-invoice/rfp-dashboard', type: 'link' },
       { id: '4.2', title: 'Manage RFPs', icon: 'FolderOpen', href: '/rfp-invoice/manage-rfps', type: 'link' },
-      { id: '4.3', title: 'Invoice Analysis (Fraud Detection)', icon: 'AlertTriangle', href: '/rfp-invoice/invoice-analysis', type: 'link' },
+      { id: '4.3', title: 'Invoice DNA', icon: 'AlertTriangle', href: '/rfp-invoice/invoice-analysis', type: 'link' },
     ],
   },
   {
