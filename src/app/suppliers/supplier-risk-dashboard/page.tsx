@@ -26,14 +26,14 @@ const SupplierRiskDashboardPage: React.FC = () => {
 
   // Calculate risk statistics
   const riskStats = {
-    low: suppliers.filter(s => s.overallRiskScore > 0 && s.overallRiskScore <= 3).length,
-    medium: suppliers.filter(s => s.overallRiskScore > 3 && s.overallRiskScore <= 6).length,
-    high: suppliers.filter(s => s.overallRiskScore > 6).length,
+    low: suppliers.filter(s => s.overallRiskScore > 0 && s.overallRiskScore <= 30).length,
+    medium: suppliers.filter(s => s.overallRiskScore > 30 && s.overallRiskScore <= 70).length,
+    high: suppliers.filter(s => s.overallRiskScore > 70).length,
     unassessed: suppliers.filter(s => s.overallRiskScore === 0).length,
   };
 
   // Get high-risk suppliers
-  const highRiskSuppliers = suppliers.filter(s => s.status === 'High-Risk' || s.overallRiskScore > 6);
+  const highRiskSuppliers = suppliers.filter(s => s.status === 'High-Risk' || s.overallRiskScore > 70);
 
   // Common red flags data (mock data for demonstration)
   const commonRedFlags = [
@@ -46,24 +46,24 @@ const SupplierRiskDashboardPage: React.FC = () => {
 
   // Risk by industry data
   const riskByIndustry = [
-    { industry: 'Logistics', avgRisk: 7.2, suppliers: 1 },
-    { industry: 'Catering & Hospitality', avgRisk: 4.0, suppliers: 1 },
-    { industry: 'Mining Equipment', avgRisk: 2.5, suppliers: 1 },
-    { industry: 'IT Services', avgRisk: 1.5, suppliers: 1 },
+    { industry: 'Logistics', avgRisk: 72, suppliers: 1 },
+    { industry: 'Catering & Hospitality', avgRisk: 40, suppliers: 1 },
+    { industry: 'Mining Equipment', avgRisk: 25, suppliers: 1 },
+    { industry: 'IT Services', avgRisk: 15, suppliers: 1 },
     { industry: 'Engineering', avgRisk: 0, suppliers: 1 }, // Onboarding
   ];
 
   const getRiskColor = (score: number) => {
     if (score === 0) return 'text-gray-500';
-    if (score <= 3) return 'text-green-500';
-    if (score <= 6) return 'text-yellow-500';
+    if (score <= 30) return 'text-green-500';
+    if (score <= 70) return 'text-yellow-500';
     return 'text-red-500';
   };
 
   const getRiskBadgeVariant = (score: number) => {
     if (score === 0) return 'default';
-    if (score <= 3) return 'success';
-    if (score <= 6) return 'warning';
+    if (score <= 30) return 'success';
+    if (score <= 70) return 'warning';
     return 'danger';
   };
 
@@ -234,8 +234,8 @@ const SupplierRiskDashboardPage: React.FC = () => {
                     </NeumorphicText>
                     <NeumorphicBadge variant={getRiskBadgeVariant(item.avgRisk)}>
                       {item.avgRisk === 0 ? 'Unassessed' : 
-                       item.avgRisk <= 3 ? 'Low' : 
-                       item.avgRisk <= 6 ? 'Medium' : 'High'}
+                       item.avgRisk <= 30 ? 'Low' : 
+                       item.avgRisk <= 70 ? 'Medium' : 'High'}
                     </NeumorphicBadge>
                   </div>
                 </div>

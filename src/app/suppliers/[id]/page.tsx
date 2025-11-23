@@ -11,9 +11,7 @@ import {
   NeumorphicTabs
 } from '@/components/ui/neumorphic';
 import { NeumorphicDataTable } from '@/components/ui/NeumorphicDataTable';
-import { VettingLineChartsDemo } from '@/components/charts/apex/examples/VettingLineChartsDemo';
-import LazyLoad from '@/components/ui/LazyLoad';
-import { getSuppliers, getVettingHistoryForSupplier, getDocumentsForSupplier, getRiskBreakdownData } from '@/lib/sample-data/supplierSample';
+import { getSuppliers, getVettingHistoryForSupplier, getDocumentsForSupplier, getSupplierReportData, SupplierReportData } from '@/lib/sample-data/supplierSample';
 import { VettingHistoryItem, SupplierDocument } from '@/types/supplier';
 import { TableColumn } from '@/types/table';
 import { useRouter } from 'next/navigation';
@@ -27,14 +25,8 @@ import {
   CalendarIcon,
   UploadIcon,
   DownloadIcon,
-  ExternalLinkIcon,
-  TrendingUpIcon,
-  BarChart3Icon
+  ExternalLinkIcon
 } from 'lucide-react';
-import dynamic from 'next/dynamic';
-
-// Dynamic imports for charts
-const ApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
 interface SupplierProfilePageProps {
   params: Promise<{
@@ -57,7 +49,7 @@ const SupplierProfilePage: React.FC<SupplierProfilePageProps> = ({ params }) => 
   // Get related data
   const vettingHistory = getVettingHistoryForSupplier(id);
   const documents = getDocumentsForSupplier(id);
-  const riskBreakdownData = getRiskBreakdownData();
+  const reportData: SupplierReportData = getSupplierReportData(id);
 
   // Table data with proper typing
   const tableVettingHistory: TableVettingHistoryItem[] = vettingHistory.map(item => ({ ...item }));
@@ -245,58 +237,9 @@ const SupplierProfilePage: React.FC<SupplierProfilePageProps> = ({ params }) => 
 
   const getRiskScoreColor = (score: number) => {
     if (score === 0) return 'text-gray-500';
-    if (score <= 3) return 'text-green-500';
-    if (score <= 6) return 'text-yellow-500';
+    if (score <= 30) return 'text-green-500';
+    if (score <= 70) return 'text-yellow-500';
     return 'text-red-500';
-  };
-
-  // Radar chart options for risk breakdown
-  const radarChartOptions = {
-    chart: {
-      type: 'radar' as const,
-      toolbar: { show: false },
-      background: 'transparent',
-    },
-    theme: {
-      mode: 'dark' as const,
-    },
-    colors: ['#8B5CF6'],
-    xaxis: {
-      categories: riskBreakdownData.categories,
-      labels: {
-        style: {
-          colors: Array(riskBreakdownData.categories.length).fill('#9CA3AF'),
-          fontSize: '12px',
-        },
-      },
-    },
-    yaxis: {
-      show: false,
-      min: 0,
-      max: 10,
-    },
-    plotOptions: {
-      radar: {
-        polygons: {
-          strokeColors: '#374151',
-          fill: {
-            colors: ['transparent'],
-          },
-        },
-      },
-    },
-    stroke: {
-      width: 2,
-    },
-    fill: {
-      opacity: 0.2,
-    },
-    markers: {
-      size: 4,
-    },
-    legend: {
-      show: false,
-    },
   };
 
   return (
@@ -490,36 +433,84 @@ const SupplierProfilePage: React.FC<SupplierProfilePageProps> = ({ params }) => 
 
             {/* Tab 4: Risk Analysis */}
             <NeumorphicTabs.Content value="risk-analysis">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Risk Trend Chart */}
-                <LazyLoad fallback={<NeumorphicCard className="animate-pulse h-96" />}>
-                  <NeumorphicCard className="p-4">
-                    <div className="flex items-center gap-2 mb-4">
-                      <TrendingUpIcon className="w-5 h-5 text-blue-500" />
-                      <NeumorphicText className="text-lg font-semibold">Risk Trend Over Time</NeumorphicText>
-                    </div>
-                    <VettingLineChartsDemo />
-                  </NeumorphicCard>
-                </LazyLoad>
+              <NeumorphicCard className="p-6 space-y-4">
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                  <div className="space-y-1">
+                    <NeumorphicText className="text-lg font-semibold">AI Intelligence Report</NeumorphicText>
+                    <NeumorphicText className="text-neumorphic-text-secondary">
+                      Generate VettPro Intelligence dossier with supplier-specific AI insights, evidence, and mitigations.
+                    </NeumorphicText>
+                  </div>
+                  <NeumorphicBadge variant="info">{reportData.metadata.caseReference}</NeumorphicBadge>
+                </div>
 
-                {/* Risk Breakdown Radar Chart */}
-                <LazyLoad fallback={<NeumorphicCard className="animate-pulse h-96" />}>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <NeumorphicCard className="p-4">
-                    <div className="flex items-center gap-2 mb-4">
-                      <BarChart3Icon className="w-5 h-5 text-purple-500" />
-                      <NeumorphicText className="text-lg font-semibold">Current Risk Breakdown</NeumorphicText>
-                    </div>
-                    <div className="h-80">
-                      <ApexChart
-                        options={radarChartOptions}
-                        series={riskBreakdownData.series}
-                        type="radar"
-                        height="100%"
-                      />
-                    </div>
+                    <NeumorphicText size="sm" className="text-neumorphic-text-secondary">Overall Risk</NeumorphicText>
+                    <NeumorphicText className={`text-2xl font-bold ${getRiskScoreColor(reportData.scoring.overall)}`}>
+                      {reportData.scoring.overall}/100
+                    </NeumorphicText>
+                    <NeumorphicText size="sm" className="text-neumorphic-text-secondary mt-1">
+                      Confidence: {reportData.scoring.confidence}
+                    </NeumorphicText>
                   </NeumorphicCard>
-                </LazyLoad>
-              </div>
+                  <NeumorphicCard className="p-4">
+                    <NeumorphicText size="sm" className="text-neumorphic-text-secondary">Engagement Context</NeumorphicText>
+                    <NeumorphicText className="font-semibold">{reportData.metadata.engagementContext}</NeumorphicText>
+                    <NeumorphicText size="sm" className="text-neumorphic-text-secondary mt-1">
+                      Contract: {reportData.metadata.contractValue}
+                    </NeumorphicText>
+                  </NeumorphicCard>
+                  <NeumorphicCard className="p-4">
+                    <NeumorphicText size="sm" className="text-neumorphic-text-secondary">Data Currency</NeumorphicText>
+                    <NeumorphicText className="font-semibold">{reportData.metadata.dataCurrency}</NeumorphicText>
+                    <NeumorphicText size="sm" className="text-neumorphic-text-secondary mt-1">
+                      Report date: {reportData.metadata.reportDate}
+                    </NeumorphicText>
+                  </NeumorphicCard>
+                </div>
+
+                <div>
+                  <NeumorphicText className="font-semibold mb-2">Key Alerts</NeumorphicText>
+                  <div className="space-y-2">
+                    {reportData.alerts.slice(0, 3).map((alert, idx) => (
+                      <div key={`${alert.title}-${idx}`} className="flex items-start justify-between gap-3 rounded-[var(--neumorphic-radius-md)] bg-neumorphic-button/60 p-3 border border-neumorphic-border/20">
+                        <div>
+                          <NeumorphicText className="font-semibold">{alert.title}</NeumorphicText>
+                          <NeumorphicText size="sm" className="text-neumorphic-text-secondary">{alert.description}</NeumorphicText>
+                          <NeumorphicText size="xs" className="text-neumorphic-text-secondary">Evidence: {alert.evidence}</NeumorphicText>
+                        </div>
+                        <NeumorphicBadge variant={alert.severity === 'Critical' ? 'danger' : alert.severity === 'High' ? 'warning' : 'info'}>
+                          {alert.severity}
+                        </NeumorphicBadge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <NeumorphicBadge variant="success">Positives: {reportData.positives.length}</NeumorphicBadge>
+                  <NeumorphicBadge variant="warning">Mitigations: {reportData.mitigations.length}</NeumorphicBadge>
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <NeumorphicText size="sm" className="text-neumorphic-text-secondary">
+                    Click the button generate a supplier-specific intelligence dossier.
+                  </NeumorphicText>
+                  <NeumorphicButton
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                    onClick={() => {
+                      console.log('Generating intelligence report', { supplier, reportData });
+                      toast.success(`Intelligence report prepared for ${supplier.name}`, {
+                        description: `${reportData.alerts.length} alerts, score ${reportData.scoring.overall}/100.`,
+                      });
+                    }}
+                  >
+                    <DownloadIcon className="w-4 h-4 mr-2" />
+                    Generate Intelligence Report
+                  </NeumorphicButton>
+                </div>
+              </NeumorphicCard>
             </NeumorphicTabs.Content>
           </NeumorphicTabs>
         </NeumorphicCard>

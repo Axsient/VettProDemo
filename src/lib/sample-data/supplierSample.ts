@@ -1,12 +1,47 @@
 import { Supplier, VettingHistoryItem, SupplierDocument } from '@/types/supplier';
 
+export type SupplierReportData = {
+  metadata: {
+    caseReference: string;
+    jurisdiction: string;
+    sector: string;
+    engagementContext: string;
+    contractValue: string;
+    reportDate: string;
+    decisionOwner: string;
+    dataCurrency: string;
+  };
+  scoring: {
+    overall: number;
+    labels: {
+      overall: string;
+      financial: number;
+      compliance: number;
+      operational: number;
+      reputational: number;
+    };
+    confidence: 'Low' | 'Medium' | 'High';
+    notes: string;
+  };
+  alerts: Array<{
+    title: string;
+    severity: 'Critical' | 'High' | 'Medium' | 'Low';
+    description: string;
+    evidence: string;
+    mitigation: string;
+  }>;
+  positives: string[];
+  mitigations: string[];
+  recommendation: string;
+};
+
 // --- Suppliers ---
 export const getSuppliers = (): Supplier[] => [
-  { id: 'sup-001', name: 'Westonaria Mining Supplies', registrationNumber: '2010/012345/07', contactPerson: 'John Smith', contactEmail: 'john@wms.co.za', status: 'Active', overallRiskScore: 2.5, lastVettedDate: '2024-03-15', source: 'Coupa', beeStatus: 'Level 2', industry: 'Mining Equipment' },
-  { id: 'sup-002', name: 'Carletonville Catering', registrationNumber: '2015/056789/07', contactPerson: 'Jane Doe', contactEmail: 'jane@ccatering.co.za', status: 'Active', overallRiskScore: 4.0, lastVettedDate: '2024-01-20', source: 'Coupa', beeStatus: 'Level 1', industry: 'Catering & Hospitality' },
-  { id: 'sup-003', name: 'Randfontein Logistics', registrationNumber: '2018/098765/07', contactPerson: 'Peter Jones', contactEmail: 'peter@rlogistics.co.za', status: 'High-Risk', overallRiskScore: 8.7, lastVettedDate: '2024-05-01', source: 'SAP', beeStatus: 'Non-Compliant', industry: 'Logistics' },
+  { id: 'sup-001', name: 'Westonaria Mining Supplies', registrationNumber: '2010/012345/07', contactPerson: 'John Smith', contactEmail: 'john@wms.co.za', status: 'Active', overallRiskScore: 25, lastVettedDate: '2024-03-15', source: 'Coupa', beeStatus: 'Level 2', industry: 'Mining Equipment' },
+  { id: 'sup-002', name: 'Carletonville Catering', registrationNumber: '2015/056789/07', contactPerson: 'Jane Doe', contactEmail: 'jane@ccatering.co.za', status: 'Active', overallRiskScore: 40, lastVettedDate: '2024-01-20', source: 'Coupa', beeStatus: 'Level 1', industry: 'Catering & Hospitality' },
+  { id: 'sup-003', name: 'Randfontein Logistics', registrationNumber: '2018/098765/07', contactPerson: 'Peter Jones', contactEmail: 'peter@rlogistics.co.za', status: 'High-Risk', overallRiskScore: 87, lastVettedDate: '2024-05-01', source: 'SAP', beeStatus: 'Non-Compliant', industry: 'Logistics' },
   { id: 'sup-004', name: 'Libanon Engineering', registrationNumber: '2022/112233/07', contactPerson: 'Susan Williams', contactEmail: 'susan@le.co.za', status: 'Onboarding', overallRiskScore: 0, lastVettedDate: 'N/A', source: 'VETTPRO Internal', beeStatus: 'Pending', industry: 'Engineering' },
-  { id: 'sup-005', name: 'Fochville IT Solutions', registrationNumber: '2019/445566/07', contactPerson: 'Mike Brown', contactEmail: 'mike@fit.co.za', status: 'Archived', overallRiskScore: 1.5, lastVettedDate: '2022-11-30', source: 'Coupa', beeStatus: 'Level 4', industry: 'IT Services' },
+  { id: 'sup-005', name: 'Fochville IT Solutions', registrationNumber: '2019/445566/07', contactPerson: 'Mike Brown', contactEmail: 'mike@fit.co.za', status: 'Archived', overallRiskScore: 15, lastVettedDate: '2022-11-30', source: 'Coupa', beeStatus: 'Level 4', industry: 'IT Services' },
 ];
 
 // --- Vetting History (Example for one supplier) ---
@@ -46,10 +81,154 @@ export const getDocumentsForSupplier = (supplierId: string): SupplierDocument[] 
 
 // --- Risk Data for Charts ---
 export const getRiskTrendData = () => ({
-  series: [{ name: 'Overall Risk Score', data: [8.5, 8.8, 8.7, 8.6, 8.9, 8.7] }],
+  series: [{ name: 'Overall Risk Score', data: [85, 88, 87, 86, 89, 87] }],
   categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
 });
 export const getRiskBreakdownData = () => ({
-  series: [{ name: 'Risk Breakdown', data: [9, 5, 8, 4, 7] }],
+  series: [{ name: 'Risk Breakdown', data: [90, 50, 80, 40, 70] }],
   categories: ['Financial', 'Compliance', 'Reputational', 'Operational', 'Location'],
 }); 
+
+// --- Intelligence report data (sample AI insights per supplier) ---
+export const getSupplierReportData = (supplierId: string): SupplierReportData => {
+  const baseDate = '15 July 2025';
+  const common = {
+    recommendation: 'Conditional proceed with mitigations; escalate to Supply Risk Committee for approval.',
+  };
+
+  if (supplierId === 'sup-003') {
+    return {
+      metadata: {
+        caseReference: 'VET-2024-009003',
+        jurisdiction: 'ZA',
+        sector: 'Logistics',
+        engagementContext: 'Critical route contractor renewal',
+        contractValue: 'R120m / 12 months',
+        reportDate: baseDate,
+        decisionOwner: 'Supply Risk Committee',
+        dataCurrency: 'Checks completed 10–15 July 2025',
+      },
+      scoring: {
+        overall: 87,
+        labels: {
+          overall: 87,
+          financial: 92,
+          compliance: 84,
+          operational: 35,
+          reputational: 90,
+        },
+        confidence: 'Medium',
+        notes: 'Limited private financials; one recent third-party judgment.',
+      },
+      alerts: [
+        {
+          title: 'Director conflict across strategic suppliers',
+          severity: 'Critical',
+          description: 'Shared directorship with Limpopo Logistix (flagged High risk) creates concentration and conflict risk.',
+          evidence: 'CIPC directorships (13 Jul 2025), Ref: CIPC-13213A.',
+          mitigation: 'Director recusal + activate contingency supplier.',
+        },
+        {
+          title: 'Adverse financial judgment (undisclosed)',
+          severity: 'Critical',
+          description: 'Judgment of R1,250,000 filed 02 Jun 2025; not self-disclosed.',
+          evidence: 'Docket 14589/2025, Gauteng High Court (14 Jul 2025).',
+          mitigation: 'Escrow first 3 months; require audited FS and settlement letter.',
+        },
+        {
+          title: 'BEE certificate near expiry',
+          severity: 'High',
+          description: 'Certificate expires 01 Sep 2025; no renewal in flight.',
+          evidence: 'Certificate BEE-22888 (MIE check 13 Jul 2025).',
+          mitigation: 'Renewal proof before PO release.',
+        },
+      ],
+      positives: [
+        'Bank account verified (12 Jul)',
+        'COID compliant (11 Jul)',
+        'CIPC active/good standing (13 Jul)',
+      ],
+      mitigations: [
+        'Escrow first 3 months of spend',
+        'Director recusal letter',
+        'BEE renewal proof',
+        'Audited FY2024 FS + YTD management accounts',
+        'Secondary supplier stand-up within 30 days',
+      ],
+      recommendation: common.recommendation,
+    };
+  }
+
+  if (supplierId === 'sup-002') {
+    return {
+      metadata: {
+        caseReference: 'VET-2024-002002',
+        jurisdiction: 'ZA',
+        sector: 'Catering & Hospitality',
+        engagementContext: 'Catering for shafts 5–8',
+        contractValue: 'R18m / 12 months',
+        reportDate: baseDate,
+        decisionOwner: 'Supply Risk Committee',
+        dataCurrency: 'Checks completed 10–15 July 2025',
+      },
+      scoring: {
+        overall: 40,
+        labels: { overall: 40, financial: 42, compliance: 38, operational: 30, reputational: 35 },
+        confidence: 'High',
+        notes: 'Recent financials and certifications available; no adverse findings.',
+      },
+      alerts: [
+        {
+          title: 'Expiring food safety audit',
+          severity: 'Medium',
+          description: 'External food safety audit expires in 30 days; renewal not booked.',
+          evidence: 'Audit FS-9921 (valid to 15 Aug 2025).',
+          mitigation: 'Schedule and provide renewal booking confirmation within 7 days.',
+        },
+      ],
+      positives: [
+        'BEE Level 1; certificates current',
+        'No adverse director findings',
+        'On-time delivery metrics > 95% last 6 months',
+      ],
+      mitigations: ['Confirm audit renewal', 'Maintain temperature-control logs weekly'],
+      recommendation: 'Proceed with standard monitoring; ensure audit renewal proof is provided.',
+    };
+  }
+
+  // Default / low-risk template (sup-001, sup-004, sup-005)
+  return {
+    metadata: {
+      caseReference: `VET-2024-${supplierId.toUpperCase()}`,
+      jurisdiction: 'ZA',
+      sector: 'Mining Supply',
+      engagementContext: 'Standard annual renewal',
+      contractValue: 'R10m / 12 months',
+      reportDate: baseDate,
+      decisionOwner: 'Supply Risk Committee',
+      dataCurrency: 'Checks completed 10–15 July 2025',
+    },
+    scoring: {
+      overall: 25,
+      labels: { overall: 25, financial: 20, compliance: 22, operational: 18, reputational: 16 },
+      confidence: 'High',
+      notes: 'Recent financials and compliance checks available; no adverse findings.',
+    },
+    alerts: [
+      {
+        title: 'Insurance renewal pending',
+        severity: 'Low',
+        description: 'COID renewal due in 45 days.',
+        evidence: 'COID status check (11 Jul 2025).',
+        mitigation: 'Provide renewal confirmation before expiry.',
+      },
+    ],
+    positives: [
+      'Bank account verified',
+      'COID compliant',
+      'No adverse director findings',
+    ],
+    mitigations: ['Confirm COID renewal', 'Maintain quarterly compliance attestations'],
+    recommendation: 'Proceed; routine monitoring only.',
+  };
+};
